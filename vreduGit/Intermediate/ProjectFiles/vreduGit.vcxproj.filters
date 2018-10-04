@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<None Include="..\..\vreduGit.uproject" />
+		<Filter Include="Source">
+			<UniqueIdentifier>{56607C11-FEC1-44C1-9FB4-EFB0AB9367BB}</UniqueIdentifier>
+		</Filter>
+		<None Include="..\..\Source\vreduGit.Target.cs">
+			<Filter>Source</Filter>
+		</None >
+		<None Include="..\..\Source\vreduGitEditor.Target.cs">
+			<Filter>Source</Filter>
+		</None >
+		<Filter Include="Config">
+			<UniqueIdentifier>{E382DC1F-704C-402B-BC22-C7CE9A70538C}</UniqueIdentifier>
+		</Filter>
+		<None Include="..\..\Config\DefaultEditor.ini">
+			<Filter>Config</Filter>
+		</None >
+		<None Include="..\..\Config\DefaultEngine.ini">
+			<Filter>Config</Filter>
+		</None >
+		<None Include="..\..\Config\DefaultGame.ini">
+			<Filter>Config</Filter>
+		</None >
+		<Filter Include="Source\vreduGit">
+			<UniqueIdentifier>{04251AB8-CE74-4D76-86CD-DCBF41C2F77F}</UniqueIdentifier>
+		</Filter>
+		<ClCompile Include="..\..\Source\vreduGit\MyActor.cpp">
+			<Filter>Source\vreduGit</Filter>
+		</ClCompile >
+		<ClInclude Include="..\..\Source\vreduGit\MyActor.h">
+			<Filter>Source\vreduGit</Filter>
+		</ClInclude >
+		<None Include="..\..\Source\vreduGit\vreduGit.Build.cs">
+			<Filter>Source\vreduGit</Filter>
+		</None >
+		<ClCompile Include="..\..\Source\vreduGit\vreduGit.cpp">
+			<Filter>Source\vreduGit</Filter>
+		</ClCompile >
+		<ClInclude Include="..\..\Source\vreduGit\vreduGit.h">
+			<Filter>Source\vreduGit</Filter>
+		</ClInclude >
+	</ItemGroup>
+</Project>

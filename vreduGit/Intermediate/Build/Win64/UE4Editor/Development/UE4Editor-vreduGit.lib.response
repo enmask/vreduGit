@@ -1,0 +1,16 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-vreduGit.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Program Files\Epic Games\UE_4.17\Engine\Intermediate\Build\Win64\UE4Editor\Development\Engine\SharedPCH.Engine.h.obj"
+"C:\Users\Magnus\Documents\Unreal Projects\vreduGit\vreduGit\vreduGit\Intermediate\Build\Win64\UE4Editor\Development\vreduGit\MyActor.cpp.obj"
+"C:\Users\Magnus\Documents\Unreal Projects\vreduGit\vreduGit\vreduGit\Intermediate\Build\Win64\UE4Editor\Development\vreduGit\vreduGit.cpp.obj"
+"C:\Users\Magnus\Documents\Unreal Projects\vreduGit\vreduGit\vreduGit\Intermediate\Build\Win64\UE4Editor\Development\vreduGit\MyActor.gen.cpp.obj"
+"C:\Users\Magnus\Documents\Unreal Projects\vreduGit\vreduGit\vreduGit\Intermediate\Build\Win64\UE4Editor\Development\vreduGit\vreduGit.init.gen.cpp.obj"
+"C:\Program Files\Epic Games\UE_4.17\Engine\Intermediate\Build\Win64\UE4Editor\Development\vreduGit\PCLaunch.rc.res"
+"C:\Program Files\Epic Games\UE_4.17\Engine\Intermediate\Build\Win64\UE4Editor\Development\ModuleVersionResource.rc.inl.res"
+/OUT:"C:\Users\Magnus\Documents\Unreal Projects\vreduGit\vreduGit\vreduGit\Intermediate\Build\Win64\UE4Editor\Development\UE4Editor-vreduGit.lib"
