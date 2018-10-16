@@ -23,7 +23,7 @@ void AMyActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Code before change and re-commit to GitHub. Code version 3.
+	// Code before change and re-commit to GitHub. Code version 4 (Oskars laptop).
 
 }
 
