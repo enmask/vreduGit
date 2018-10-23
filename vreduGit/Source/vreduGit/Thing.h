@@ -8,6 +8,7 @@
 #include "RuntimeMeshComponent.h"
 #include "Thing.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogVreduThing, Log, All);
 
 // Basic constants
 #define CUBE_SIZE 60
@@ -17,7 +18,8 @@ USTRUCT()
 struct FVertexArray
 {
 	GENERATED_USTRUCT_BODY()
-		UPROPERTY()
+
+	UPROPERTY()
 		TArray<FVector> Verts;
 
 	FVertexArray()
@@ -64,13 +66,6 @@ public:
 
 	void init(FString theName);
 
-
-	// Add a group of transform instances to this Thing. Combine the new group with any existing group!
-	//void Add(TArray<FTransform> trafos);
-
-	// Add a group of things to this thing
-	//Add(TArray<AThing> thingsToAdd));
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -108,71 +103,15 @@ public:
 	FString name;
 
 	// Add a sub-thing
-	void Add(AThing* subThing, FTransform subThingRelTrafo);
+	void Add(AThing* subThing, FTransform subThingRelTrafo, FString subThingRole);
 
 	TArray<AThing*> subThings;
 	TArray<FTransform> subThingRelTrafos;
+	TArray<FString> subThingRoles;
 
 	void Log2DimVertsArray(TArray<FVertexArray> verts2Dim);
 	void Log2DimIntsArray(TArray<FInt32Array> ints2Dim);
 
-
-	/*
-	USTRUCT()
-		struct FFlowerField
-	{
-		GENERATED_USTRUCT_BODY()
-
-			UPROPERTY()
-			TArray<FFlowerStruct> Flowers;
-
-		FFlowerField()
-		{
-		}
-	};
-	*/
-
-
-
-	/*
-	//All Flower Fields on The Island
-	TArray<FFlowerField> FlowerFields;
-	*/
+	FString ToString();
 
 };
-
-
-
-
-
-
-#if 0 /* The auto-generated h file */
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
-
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "Thing.generated.h"
-
-UCLASS()
-class VREDUGIT_API AThing : public AActor
-{
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AThing();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	
-	
-};
-#endif

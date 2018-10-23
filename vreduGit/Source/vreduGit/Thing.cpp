@@ -2,7 +2,11 @@
 
 #include "Thing.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
+#include "Runtime/Core/Public/Misc/Parse.h"
 
+
+
+DEFINE_LOG_CATEGORY(LogVreduThing);
 
 // Sets default values
 AThing::AThing()
@@ -24,9 +28,41 @@ void AThing::init(FString theName) {
 
 // Called when the game starts or when spawned
 void AThing::BeginPlay() {
-	UE_LOG(LogTemp, Warning, TEXT("AThing::BeginPlay called"));
+	UE_LOG(LogVreduThing, Warning, TEXT("AThing::BeginPlay called"));
 
 	Super::BeginPlay();
+
+#if 0 /* Test command line args */
+	FString fileName;
+	uint32 startPose;
+
+	//string
+	if (FParse::Value(FCommandLine::Get(), TEXT("scb"), fileName)) {
+		//fileName = fileName.Replace(TEXT("="), TEXT("")).Replace(TEXT("\""), TEXT("")); // replace quotes
+		//_SCBFile = fileName;
+		
+	}
+
+	//integer
+	if (FParse::Value(FCommandLine::Get(), TEXT("startPose"), startPose)) {
+		_startPose = startPose;
+	}
+
+	//boolean
+	if (FParse::Param(FCommandLine::Get(), TEXT("skinByClass"))) {
+		_skinByClass = true;
+	}
+#else
+	/* Try 2 */
+
+	if (FParse::Param(FCommandLine::Get(), TEXT("MyFlagPresent")))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AThing::BeginPlay: Found MyFlagPresent in the command line"));
+	}
+
+#endif
+
+
 }
 
 // Called every frame
@@ -34,16 +70,26 @@ void AThing::Tick(float DeltaTime) {
 	UE_LOG(LogTemp, Warning, TEXT("AThing::Tick called"));
 
 	Super::Tick(DeltaTime);
+
+#if 0
+	if (FParse::Param(FCommandLine::Get(), TEXT("MyFlagPresent")))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AThing::Tick: Found MyFlagPresent in the command line"));
+	}
+#endif
+
 }
 
-void AThing::Add(AThing* subThing, FTransform subThingRelTrafo) {
+void AThing::Add(AThing* subThing, FTransform subThingRelTrafo, FString subThingRole) {
 
 	UE_LOG(LogTemp, Warning, TEXT("AThing::Add() called"));
 
 	int32 thingIx = subThings.Add(subThing);
 	int32 trafoIx = subThingRelTrafos.Add(subThingRelTrafo);
+	int32 roleIx = subThingRoles.Add(subThingRole);
 
 	verify(thingIx == trafoIx);
+	verify(thingIx == roleIx);
 }
 
 
@@ -72,6 +118,20 @@ void AThing::Log2DimIntsArray(TArray<FInt32Array> ints2Dim) {
 	}
 
 }
+
+
+
+FString AThing::ToString() {
+
+	UE_LOG(LogVreduThing, Warning, TEXT("Id: %d\n  Verts: (0,0,0) (0,0,1) ..."), 12345);
+
+	FString str = FString::Printf(TEXT("Id: %d\n  Verts: (0,0,0) (0,0,1) ..."), 12345);
+
+	return str;
+
+}
+
+
 
 void AThing::ComputeMeshData(TArray<FVertexArray>& verts2Dim, TArray<FInt32Array>& tris2Dim,
 	TArray<FVector>& vertices, TArray<int32>& Triangles,
