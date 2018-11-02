@@ -3,10 +3,10 @@
 #include "Thing.h"
 #include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "Runtime/Core/Public/Misc/Parse.h"
+#include "Util.h"
 
 
-
-DEFINE_LOG_CATEGORY(LogVreduThing);
+//DEFINE_LOG_CATEGORY(LogVredu);
 
 // Sets default values
 AThing::AThing()
@@ -28,7 +28,7 @@ void AThing::init(FString theName) {
 
 // Called when the game starts or when spawned
 void AThing::BeginPlay() {
-	UE_LOG(LogVreduThing, Warning, TEXT("AThing::BeginPlay called"));
+	UE_LOG(LogTemp, Warning, TEXT("AThing::BeginPlay called"));
 
 	Super::BeginPlay();
 
@@ -93,6 +93,24 @@ void AThing::Add(AThing* subThing, FTransform subThingRelTrafo, FString subThing
 }
 
 
+int AThing::CountAtoms() {
+
+	if (subThings.Num() == 0) {
+		return 1;
+	}
+
+	int sum = 0;
+
+	for (AThing* t : subThings)
+	{
+		sum += t->CountAtoms();
+	}
+
+	return sum;
+}
+
+
+
 void AThing::Log2DimVertsArray(TArray<FVertexArray> verts2Dim) {
 
 	UE_LOG(LogTemp, Warning, TEXT("AThing::Log2DimVertsArray() called"));
@@ -123,12 +141,9 @@ void AThing::Log2DimIntsArray(TArray<FInt32Array> ints2Dim) {
 
 FString AThing::ToString() {
 
-	UE_LOG(LogVreduThing, Warning, TEXT("Id: %d\n  Verts: (0,0,0) (0,0,1) ..."), 12345);
-
-	FString str = FString::Printf(TEXT("Id: %d\n  Verts: (0,0,0) (0,0,1) ..."), 12345);
+	FString str = FString::Printf(TEXT("Id: %s\n  No. of atoms: %d"), *name, CountAtoms());
 
 	return str;
-
 }
 
 
@@ -164,7 +179,7 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 	UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() called, baseTrafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
 
 	if (subThings.Num() == 0) {
-		UE_LOG(LogTemp, Warning, TEXT("AThingComp::ComputeMeshDataAux() found an ATOM, trafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
+		UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an ATOM, trafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
 
 		// Add mesh data for this atom
 		AddMeshDataForOneAtom(treeLevel, subtreeNo, verts2Dim, tris2Dim, baseTrafo, vertices, Triangles, normals, UV0, vertexColors, tangents);

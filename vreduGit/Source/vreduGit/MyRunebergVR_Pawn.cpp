@@ -3,15 +3,17 @@
 #include "MyRunebergVR_Pawn.h"
 #include "Components/InputComponent.h"
 #include "Thing.h"    // Probably just temporary, Thing should be handled in ThingManager instead
+#include "RunebergVR_Movement.h"
 
 /*
 AMyRunebergVR_Pawn::AMyRunebergVR_Pawn(const class FObjectInitializer& PCIP)
 {
 	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn CONSTRUCTOR called"));
 
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
 
-	PrimaryActorTick.bCanEverTick = true;
+	//PrimaryActorTick.bCanEverTick = true;
+
 }
 */
 
@@ -25,8 +27,19 @@ void AMyRunebergVR_Pawn::BeginPlay()
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	PrimaryActorTick.bCanEverTick = true;
 
+	//vrMovement = CreateDefaultSubobject<URunebergVR_Movement>(TEXT("vrMovement"));
+	vrMovement = NewObject<URunebergVR_Movement>(this, TEXT("vrMovement"));
 
 
+	if (vrMovement) {
+		UE_LOG(LogTemp, Warning, TEXT("vrMovement is NOT null"));
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("vrMovement IS null"));
+	}
+
+
+#if 0 /* Obsolete. Instead, GameplayManager should tell ThingManager to spawn a Thing  */
 	// TEST: Spawn some Things
 
 	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::BeginPlay: Will spawn Thing"));
@@ -46,11 +59,7 @@ void AMyRunebergVR_Pawn::BeginPlay()
 	newThing->FinishSpawning(trafo);
 
 	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::BeginPlay: Finished spawning Thing"));
-
-
-	//	return newThing;
-
-
+#endif
 
 
 }
@@ -58,7 +67,8 @@ void AMyRunebergVR_Pawn::BeginPlay()
 
 void AMyRunebergVR_Pawn::Tick(float DeltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::Tick called"));
+	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::Tick called, currentVelocity = (%f %f %f)"),
+		   CurrentVelocity.X, CurrentVelocity.Y, CurrentVelocity.Z);
 
 	Super::Tick(DeltaTime);
 
@@ -74,7 +84,7 @@ void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* Player
 
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	InputComponent->BindAxis("MoveForward", this, &AMyRunebergVR_Pawn::MoveForwardBackward);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMyRunebergVR_Pawn::MoveForwardBackward);
 }
 
 void AMyRunebergVR_Pawn::MoveForwardBackward(float AxisValue) {
@@ -82,6 +92,14 @@ void AMyRunebergVR_Pawn::MoveForwardBackward(float AxisValue) {
 	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::MoveForwardBackward called, AxisValue=%f"), AxisValue);
 
 	CurrentVelocity.X = FMath::Clamp(AxisValue, -1.0f, 1.0f) * 100.0f;
+
+	// TEST
+	//vrMovement->EnableVRMovement();
+
+	/*
+	void EnableVRMovement(float MovementSpeed = 3.f, USceneComponent* MovementDirectionReference = nullptr, bool ObeyNavMesh = false,
+		bool LockPitch = false, bool LockYaw = false, bool LockRoll = false, FRotator CustomDirection = FRotator::ZeroRotator);
+	*/
 }
 
 

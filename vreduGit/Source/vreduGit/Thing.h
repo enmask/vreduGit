@@ -8,7 +8,7 @@
 #include "RuntimeMeshComponent.h"
 #include "Thing.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogVreduThing, Log, All);
+//DECLARE_LOG_CATEGORY_EXTERN(LogVredu, Log, All);
 
 // Basic constants
 #define CUBE_SIZE 60
@@ -81,6 +81,9 @@ public:
 		TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents,
 		TArray<FTransform>& collisionCubePositions);
 private:
+
+	int CountAtoms();
+
 	void ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 		TArray<FVertexArray>& verts2DimArray, TArray<FInt32Array>& int2DimArray,
 		FTransform baseTrafo,

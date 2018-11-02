@@ -9,7 +9,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine"
+				"Engine",
+				"RunebergVRPlugin"
 			]
 		}
 	],
@@ -18,6 +19,10 @@
 			"Name": "RunebergVRPlugin",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/4dfd0c5b4c97427c860bd2cf7c207136"
+		},
+		{
+			"Name": "NUTUnrealEngine4",
+			"Enabled": true
 		}
 	]
 }

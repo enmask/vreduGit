@@ -1,3 +1,0 @@
-C:\Users\Magnus\Documents\Unreal Projects\vreduGit\vreduGit\vreduGit\Source\vreduGit\vreduGit.Build.cs
-C:\Users\Magnus\Documents\Unreal Projects\vreduGit\vreduGit\vreduGit\Source\vreduGit.Target.cs
-C:\Users\Magnus\Documents\Unreal Projects\vreduGit\vreduGit\vreduGit\Source\vreduGitEditor.Target.cs

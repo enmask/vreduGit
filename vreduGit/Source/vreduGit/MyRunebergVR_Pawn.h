@@ -6,6 +6,8 @@
 #include "RunebergVR_Pawn.h"
 #include "MyRunebergVR_Pawn.generated.h"
 
+class URunebergVR_Movement;
+
 /**
  * 
  */
@@ -24,6 +26,9 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		URunebergVR_Movement* vrMovement;
 
 	void MoveForwardBackward(float AxisValue);
 	//void StartGrowing();
