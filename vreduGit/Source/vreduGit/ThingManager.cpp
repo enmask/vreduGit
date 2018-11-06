@@ -16,9 +16,7 @@ void AThingManager::BeginPlay()
 {
 	UE_LOG(LogTemp, Warning, TEXT("AThingManager::BeginPlay called"));
 
-
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -27,13 +25,11 @@ void AThingManager::Tick(float DeltaTime)
 	UE_LOG(LogTemp, Warning, TEXT("AThingManager::Tick called"));
 
 	Super::Tick(DeltaTime);
-
 }
 
 AThing* AThingManager::SpawnThingAtom(FString name) {
 
 	UE_LOG(LogTemp, Warning, TEXT("AThingManager::SpawnThingAtom called"));
-
 
 	// Dummy transform data
 	FVector Location(0.0f, 0.0f, 0.0f);

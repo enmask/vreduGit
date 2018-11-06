@@ -84,6 +84,7 @@ private:
 
 	int CountAtoms();
 
+
 	void ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 		TArray<FVertexArray>& verts2DimArray, TArray<FInt32Array>& int2DimArray,
 		FTransform baseTrafo,

@@ -41,8 +41,14 @@ public:
 	UFUNCTION()
 		void TestLog(FString logText);
 
+	UFUNCTION()
+		void TestLogWrite();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		bool calledTestCase;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		FString inEditorTestLogText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		bool doRunATestCase;

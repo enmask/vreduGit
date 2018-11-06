@@ -102,6 +102,8 @@ void AvreduGameMode::StartPlay() {
 		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::StartPlay: theThingManager IS null"));
 	}
 
+	thePopManager = world->SpawnActor< APopManager >();
+
 	UWorld* const World = GetWorld();
 	if (World)
 	{
