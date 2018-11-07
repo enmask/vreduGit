@@ -23,8 +23,6 @@ void APop::init2() {
 	mesh = CreateDefaultSubobject<URuntimeMeshComponent>(TEXT("Pop mesh test"));
 	RootComponent = mesh;
 
-	BuildMesh();
-
 	//const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObjCube(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 	//meshCube = MeshObjCube.Object;
 
@@ -36,6 +34,8 @@ void APop::init(AThing* thing, FTransform trafo) {
 	UE_LOG(LogTemp, Warning, TEXT("APop::init called, this=%p"), this);
 
 	thingRef = thing;
+
+	BuildMesh();
 
 	//RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
 	//RootComponent = NewObject<USceneComponent>(this, TEXT("RootSceneComponent"));
@@ -189,6 +189,9 @@ FString APop::ToString() {
 
 
 
+
+
+#if 0 /* Try 1 181106 (just one cube, no thing trees */
 void APop::BuildMesh()
 {
 
@@ -318,9 +321,20 @@ void APop::BuildMesh()
 							tangents, true, EUpdateFrequency::Frequent);
 
 }
+#endif
 
 
-#if 0 /* RMC code from old vred */
+#if 0 /* Try 2 181106 (thing trees) */
+void APop::BuildMesh()
+{
+
+
+
+}
+#endif
+
+
+#if 1 /* RMC code from old vred */
 
 //
 // Build mesh section and also add collision grab boxes
@@ -353,7 +367,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 		collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num());
 
 	// The mesh may already have data. Remove it
-	Mesh->ClearAllMeshSections();
+	mesh->ClearAllMeshSections();
 
 	/* Removing 180919 when trying to get house parts to work again
 	Mesh->ClearCollisionConvexMeshes();
@@ -374,7 +388,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 #if 1
 		//Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
 
-		Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
+		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
 #else /* TEST: UV mapping. TODO: Don't use the same UV array for all mesh sections! .......................................................................................... */
 		Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
 
@@ -391,7 +405,10 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 
 #endif
-		Mesh->SetMaterial(i, MaterialInstance);
+
+		/* Removed 181106
+		mesh->SetMaterial(i, MaterialInstance);
+		*/
 
 		/* Removing 180919 when trying to get house parts to work again
 		Mesh->AddCollisionConvexMesh(verts2Dim[i].Verts);
@@ -418,7 +435,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 	//Mesh->BodyInstance.SetResponseToAllChannels(ECR_Block);
 
-	AddGrabBoxes(collisionCubePositions);
+	//AddGrabBoxes(collisionCubePositions);
 
 
 }
@@ -429,6 +446,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 
 
+#endif
 
 
 
@@ -436,8 +454,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 
 
-
-
+#if 0
 
 
 

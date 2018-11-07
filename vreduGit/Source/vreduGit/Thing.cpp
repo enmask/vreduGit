@@ -359,7 +359,7 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, FVector(CUBE_SIZE / 2, CUBE_SIZE / 2, CUBE_SIZE / 2), vertices, newIndices);
 #else
 
-	/* Cube from Blender
+	/* Cube from Blender */
 	FVector vertx0(1.000000, -1.000000, -1.000000);
 	FVector vertx1(1.000000, -1.000000, 1.000000);
 	FVector vertx2(-1.000000, -1.000000, 1.000000);
@@ -379,10 +379,10 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx5, vertices, newIndices);
 	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx6, vertices, newIndices);
 	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx7, vertices, newIndices);
-	 **/
+	 /**/
 
 	 // Curling stone from Blender
-	 /* */
+	 /*
 	FVector vert0(0.000000, 0.000000, -0.932369);
 	FVector vert1(-0.181896, 0.000000, -0.914454);
 	FVector vert2(-0.356802, 0.000000, -0.861396);
@@ -1375,8 +1375,8 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	FVector vert989(1.733366, 5.263683, -0.159688);
 	FVector vert990(1.734392, 5.249803, -0.163910);
 	FVector vert991(1.735460, 5.235368, -0.165336);
-	/* */
-
+	 */
+/*
 	TArray<FVector> vertArrayFromBlender = { vert0, vert1, vert2, vert3, vert4, vert5, vert6, vert7, vert8, vert9, vert10,
 		vert11, vert12, vert13, vert14, vert15, vert16, vert17, vert18, vert19, vert20,
 		vert21, vert22, vert23, vert24, vert25, vert26, vert27, vert28, vert29, vert30,
@@ -1477,9 +1477,9 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 		vert971, vert972, vert973, vert974, vert975, vert976, vert977, vert978, vert979, vert980,
 		vert981, vert982, vert983, vert984, vert985, vert986, vert987, vert988, vert989, vert990,
 		vert991 };
-
+		*/
 	/* Tris. Initiallize an array with this data. When I feed it into tri structures,
-		design the loop as 0 2 1 3 5 4 ... */
+		design the loop as 0 2 1 3 5 4 ... *
 	TArray<int32> triArrayFromBlender = { 27, 19, 11, 54, 85, 53, 26, 59, 58, 14, 45, 13, 27, 60, 59, 15, 46, 14, 1,
 	34, 33, 28, 61, 60, 16, 47, 15, 3, 34, 2,
 	30, 61, 29, 16, 49, 48, 4, 35, 3, 30, 63, 62, 18, 49, 17, 5, 36, 4, 31, 64, 63, 18, 51, 50, 6, 37, 5, 1, 64, 32,
@@ -1706,12 +1706,14 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	987, 933, 932, 964, 932, 931, 963, 940, 972, 973, 931, 930, 962, 954, 953, 985, 946, 978, 979, 950, 949, 981, 935, 967, 968, 959,
 	958, 990, 953, 952, 984, 942, 974, 975, 948, 980, 981, 933, 965, 966, 955, 954, 986, 952, 951, 983, 941, 973, 974, 943, 975, 976,
 	947, 979, 980, 929, 960, 992 };
+	*/
 
 	/*
 	UE_LOG(LogTemp, Error,
 		TEXT("TEST: vertArrayFromBlender.Num() = %d (expected 1950)"), vertArrayFromBlender.Num());
 	*/
 
+	/*
 	for (int32 vertIx = 0; vertIx < vertArrayFromBlender.Num(); ++vertIx) {
 		//UE_LOG(LogTemp, Error, TEXT("TEST: vertIx = %d"), vertIx);
 
@@ -1720,7 +1722,7 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 
 		AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 5.0f * unrealVert, vertices, newIndices);
 	}
-
+	*/
 
 	// Curling tris are added below
 
@@ -1817,7 +1819,7 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	tris2Dim[subtreeNo].Ints.Add(newIndices[6]);
 #else
 
-	/*
+	/* */
 	// Seems to be left (or right) side bot-triangle
 	tris2Dim[subtreeNo].Ints.Add(newIndices[1]); // Was 1 3 0, try 1 0 3
 	tris2Dim[subtreeNo].Ints.Add(newIndices[0]);
@@ -1867,7 +1869,7 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	tris2Dim[subtreeNo].Ints.Add(newIndices[0]);
 	tris2Dim[subtreeNo].Ints.Add(newIndices[7]);
 	tris2Dim[subtreeNo].Ints.Add(newIndices[3]);
-	**/
+	/**/
 
 
 
@@ -1878,6 +1880,7 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	*/
 
 	//for (int32 triIx = 0; triIx < triArrayFromBlender.Num(); ((triIx % 3 == 2) ? --triIx : triIx += 2)) {
+#if 0
 	for (int32 triIx = 0; triIx < triArrayFromBlender.Num(); ++triIx) {
 		//for (int32 triIx = 0; triIx < triArrayFromBlender.Num() / 3; ++triIx) {
 
@@ -1893,7 +1896,7 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 		*/
 
 	}
-
+#endif
 
 
 
@@ -1934,7 +1937,7 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	*/
 
 
-#if 0 /* Cube UV */
+#if 1 /* Cube UV */
 	/* Horizontal texture
 		UV0.Add(FVector2D(0.0f, 0.0f));
 		UV0.Add(FVector2D(0.0f, 1.0f));
