@@ -51,11 +51,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	FString ToString();
-
-private:
-
 	
 	void BuildMesh();
-
 
 };

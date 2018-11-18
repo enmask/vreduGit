@@ -26,6 +26,9 @@ public:
 
 	APop* Spawn(AThing* thing, FTransform transform);
 	
-	// NYI
-	//APop* Clone(APop* origPop, FString cloneName);
+	void AddChild(APop* parent, APop* toBeChild);
+	APop* Clone(APop* origPop, FString cloneName);
+
+	void RotateAroundLocalY(APop* p, float degrees);
+
 };

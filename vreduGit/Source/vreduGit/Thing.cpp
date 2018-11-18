@@ -84,6 +84,8 @@ void AThing::Add(AThing* subThing, FTransform subThingRelTrafo, FString subThing
 
 	UE_LOG(LogTemp, Warning, TEXT("AThing::Add() called"));
 
+	verify(subThing != this);
+
 	int32 thingIx = subThings.Add(subThing);
 	int32 trafoIx = subThingRelTrafos.Add(subThingRelTrafo);
 	int32 roleIx = subThingRoles.Add(subThingRole);
@@ -176,7 +178,8 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 	TArray<FTransform>& collisionCubePositions) {
 
 	FVector loc = baseTrafo.GetLocation();
-	UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() called, baseTrafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
+	UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() called, treeLevel=%d, subtreeNo=%d, baseTrafo location is  %f  %f  %f"),
+		   treeLevel, subtreeNo, loc.X, loc.Y, loc.Z);
 
 	if (subThings.Num() == 0) {
 		UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an ATOM, trafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
@@ -196,6 +199,9 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 		for (int32 thingIx = 0; thingIx < subThings.Num(); ++thingIx) {
 
 			AThing* subThing = subThings[thingIx];
+
+			UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux(): subThing=%p with name=%s"), subThing, *subThing->name);
+
 			int32 trafoIx = thingIx;
 			FTransform subThingTrafo = subThingRelTrafos[trafoIx];
 

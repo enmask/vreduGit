@@ -157,7 +157,6 @@ void APop::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay called, this=%p"), this);
 
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -167,7 +166,6 @@ void APop::Tick(float DeltaTime)
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::Tick called, this=%p, loc: X=%f, Y=%f, Z=%f"),
 		   this, loc.X, loc.Y, loc.Z);
-
 
 	Super::Tick(DeltaTime);
 
@@ -387,6 +385,8 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 		//                  ix      vert    tri     norm  UV  colors   tangents    createColl    freq
 #if 1
 		//Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
+
+
 
 		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
 #else /* TEST: UV mapping. TODO: Don't use the same UV array for all mesh sections! .......................................................................................... */

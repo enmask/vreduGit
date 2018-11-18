@@ -66,4 +66,27 @@ AThing* AThingManager::SpawnThingAtom(FString name) {
 }
 
 
+AThing* AThingManager::Clone(AThing* t, FString cloneName) {
+	//
+	//		cloneThing = new AThing
+	//		cloneThing->name = cloneName
+	//		
+	//		for (child in t->subThings,  childRelTrafo in t->subThingRelTrafos,  childRole in t->subThingRoles) {
+	//			cloneThing->subThings.Add(Clone(child))
+	//			cloneThing->subThingRelTrafos.Add(FTransform(childRelTrafo))
+	//			cloneThing->subThingRoles.Add(childRole)
 
+	AThing* cloneThing = SpawnThingAtom(cloneName);
+	
+	for (int i = 0; i < t->subThings.Num(); i++) {
+		AThing* child = t->subThings[i];
+		FTransform childRelTrafo = t->subThingRelTrafos[i];
+		FString childRole = t->subThingRoles[i];
+
+		cloneThing->subThings.Add(Clone(child));
+		cloneThing->subThingRelTrafos.Add(childRelTrafo);
+		cloneThing->subThingRoles.Add(childRole);
+	}
+
+	return cloneThing;
+}

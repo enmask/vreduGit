@@ -25,7 +25,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	AThing* SpawnThingAtom(FString name);
-	
+	AThing* Clone(AThing* t, FString cloneName = "");
+
 };
 
 
