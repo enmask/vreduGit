@@ -75,24 +75,3 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
-
-#Starter Content
-Content/StarterContent/*
-
-# Plugins
-#Plugins/*
-
-# Old plugins
-oldPlugins/*
-
-# WindowsNoEditor
-WindowsNoEditor/*
-
-# .gitignore~
-.gitignore~
-
-# Config. I might want to remove this from .gitignore later bc I might want to track it
-Config/*
-
-# Saved
-Saved/*
