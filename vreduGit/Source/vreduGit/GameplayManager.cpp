@@ -56,7 +56,7 @@ void AGameplayManager::BeginPlay()
 // Called every frame
 void AGameplayManager::Tick(float DeltaTime)
 {
-	UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick called, this=%p"), this);
+	//UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick called, this=%p"), this);
 	Super::Tick(DeltaTime);
 	numTicks++;
 
@@ -193,6 +193,7 @@ void AGameplayManager::Tick(float DeltaTime)
 	void* ptr4 = testPop4;
 	void* ptr5 = testPop5;
 
+	/*
 	UE_LOG(LogVredu, Warning,
 		TEXT("AGameplayManager::Tick, log every tick, numTicks=%d: testPop1=%p, testPop2=%p, testPop3=%p, testPop4=%p, testPop5=%p, ptr1=%p, ptr2=%p, ptr3=%p, ptr4=%p, ptr5=%p"),
 		numTicks, testPop1, testPop2, testPop3, testPop4, testPop5, ptr1, ptr2, ptr3, ptr4, ptr5);
@@ -204,7 +205,7 @@ void AGameplayManager::Tick(float DeltaTime)
 	UE_LOG(LogVredu, Warning,
 		TEXT("AGameplayManager::Tick, log every tick (THREE): testPop1=%p, testPop2=%p, testPop3=%p, testPop4=%p, testPop5=%p, ptr1=%p, ptr2=%p, ptr3=%p, ptr4=%p, ptr5=%p"),
 		testPop1, testPop2, testPop3, testPop4, testPop5, ptr1, ptr2, ptr3, ptr4, ptr5);
-
+		*/
 
 	if (numTicks == 50) {
 

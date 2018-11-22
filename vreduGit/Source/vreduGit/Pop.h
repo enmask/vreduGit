@@ -41,11 +41,14 @@ public:
 #endif
 
 	// Tried this for collision. Probably remove soon!
-	UPROPERTY(EditAnywhere)
-		UBoxComponent* box;
+	//UPROPERTY(EditAnywhere)
+	//	UBoxComponent* box;
 
 	UPROPERTY(EditAnywhere)
 		UStaticMesh* meshCube;
+
+	UPROPERTY(VisibleAnywhere)
+		TArray<UBoxComponent*> grabBoxes;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -53,5 +56,21 @@ public:
 	FString ToString();
 	
 	void BuildMesh();
+
+	void TestSetupCollisionBox();
+	void TestSetupPhysics();
+
+	//Functions to handle the interaction
+	UFUNCTION()
+		void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
+
+	//Functions to handle the interaction
+	UFUNCTION()
+		void CustomOnClicked(UPrimitiveComponent* clickedComponent, FKey inKey);
+
+
+private:
+	void AddGrabBoxes(TArray<FTransform>& grabBoxLocations);
+
 
 };

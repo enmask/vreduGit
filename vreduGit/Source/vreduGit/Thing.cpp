@@ -11,7 +11,7 @@
 // Sets default values
 AThing::AThing()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AThing::AThing called"));
+	//UE_LOG(LogTemp, Warning, TEXT("AThing::AThing called"));
 
 	//int a = 2;
 
@@ -21,14 +21,14 @@ AThing::AThing()
 }
 
 void AThing::init(FString theName) {
-	UE_LOG(LogTemp, Warning, TEXT("AThing::init called"));
+	//UE_LOG(LogTemp, Warning, TEXT("AThing::init called"));
 
 	name = theName;
 }
 
 // Called when the game starts or when spawned
 void AThing::BeginPlay() {
-	UE_LOG(LogTemp, Warning, TEXT("AThing::BeginPlay called"));
+	//UE_LOG(LogTemp, Warning, TEXT("AThing::BeginPlay called"));
 
 	Super::BeginPlay();
 
@@ -67,7 +67,7 @@ void AThing::BeginPlay() {
 
 // Called every frame
 void AThing::Tick(float DeltaTime) {
-	UE_LOG(LogTemp, Warning, TEXT("AThing::Tick called"));
+	//UE_LOG(LogTemp, Warning, TEXT("AThing::Tick called"));
 
 	Super::Tick(DeltaTime);
 
@@ -178,11 +178,11 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 	TArray<FTransform>& collisionCubePositions) {
 
 	FVector loc = baseTrafo.GetLocation();
-	UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() called, treeLevel=%d, subtreeNo=%d, baseTrafo location is  %f  %f  %f"),
-		   treeLevel, subtreeNo, loc.X, loc.Y, loc.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() called, treeLevel=%d, subtreeNo=%d, baseTrafo location is  %f  %f  %f"),
+	//	   treeLevel, subtreeNo, loc.X, loc.Y, loc.Z);
 
 	if (subThings.Num() == 0) {
-		UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an ATOM, trafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
+		//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an ATOM, trafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
 
 		// Add mesh data for this atom
 		AddMeshDataForOneAtom(treeLevel, subtreeNo, verts2Dim, tris2Dim, baseTrafo, vertices, Triangles, normals, UV0, vertexColors, tangents);
@@ -193,27 +193,29 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 	}
 	else {
 
-		UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an non-ATOM with %d children, check them recursively"), subThings.Num());
+		//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an non-ATOM with %d children, check them recursively"), subThings.Num());
 
 		// Build meshes for each sub-tree recursively
 		for (int32 thingIx = 0; thingIx < subThings.Num(); ++thingIx) {
 
 			AThing* subThing = subThings[thingIx];
 
-			UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux(): subThing=%p with name=%s"), subThing, *subThing->name);
+			//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux(): subThing=%p with name=%s"), subThing, *subThing->name);
 
 			int32 trafoIx = thingIx;
 			FTransform subThingTrafo = subThingRelTrafos[trafoIx];
 
 			FTransform accumulatedTrafo = subThingTrafo * baseTrafo;
 
+			/*
 			UE_LOG(LogTemp, Warning,
 				TEXT("AThing::ComputeMeshDataAux() composed the baseTrafo  %f  %f  %f  with subThingTrafo  %f  %f  %f  to get accumulatedTrafo  %f  %f  %f"),
 				baseTrafo.GetLocation().X, baseTrafo.GetLocation().Y, baseTrafo.GetLocation().Z,
 				subThingTrafo.GetLocation().X, subThingTrafo.GetLocation().Y, subThingTrafo.GetLocation().Z,
 				accumulatedTrafo.GetLocation().X, accumulatedTrafo.GetLocation().Y, accumulatedTrafo.GetLocation().Z);
+			*/
 
-
+			/*
 			// START LOGGING
 			FVector baseLoc = baseTrafo.GetLocation();
 			FQuat baseRotQ(baseTrafo.GetRotation());
@@ -241,7 +243,7 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 				accumLoc.X, accumLoc.Y, accumLoc.Z, accumRotQ.W, accumRotQ.X, accumRotQ.Y, accumRotQ.Z, accumRotEul.X, accumRotEul.Y, accumRotEul.Z);
 
 			// END LOGGING
-
+			*/
 
 
 			// What baseTrafo should we pass here?

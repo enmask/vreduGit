@@ -6,7 +6,7 @@
 // Sets default values
 APop::APop()
 {
-	UE_LOG(LogTemp, Warning, TEXT("APop constructor called"));
+	//UE_LOG(LogTemp, Warning, TEXT("APop constructor called"));
 	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,17 +21,82 @@ void APop::init2() {
 
 	//mesh = NewObject<USceneComponent>(this, TEXT("RootSceneComponent"));
 	mesh = CreateDefaultSubobject<URuntimeMeshComponent>(TEXT("Pop mesh test"));
-	RootComponent = mesh;
+	//RootComponent = mesh;
+	mesh->AttachTo(RootComponent);
+
+	TestSetupCollisionBox();
+	TestSetupPhysics();
 
 	//const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObjCube(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 	//meshCube = MeshObjCube.Object;
 
 	//mesh->SetStaticMesh(meshCube);
 
+	////box->OnBeginCursorOver.AddDynamic(this, &APop::CustomOnBeginMouseOver);
+
+
+}
+
+void APop::TestSetupCollisionBox() {
+
+	////box = CreateDefaultSubobject<UBoxComponent>(TEXT("Pop collision box"));
+	//RootComponent = mesh;
+
+	//box->AttachTo(mesh);
+	RootComponent = mesh;
+	////box->SetupAttachment(mesh);
+
+	////box->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+	////box->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	//box->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	
+	//box->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);
+	mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	////box->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+
+	/*
+	box->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Ignore);
+	box->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	box->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	box->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	box->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	*/
+
+	// To be able to get mouse events
+	////box->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
+
+	/*CollisionMesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	CollisionMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+	CollisionMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	CollisionMesh->SetNotifyRigidBodyCollision(true);
+	CollisionMesh->SetSimulatePhysics(true);*/
+
+}
+
+void APop::TestSetupPhysics() {
+	mesh->SetSimulatePhysics(true);
+	////box->SetSimulatePhysics(false);    // WAS true!!!    !!!
+
+	mesh->SetEnableGravity(false);
+	//this->GetRootPrimitiveComponent()->SetEnableGravity(true);
+	////box->SetEnableGravity(false);
+
+	// Hide collision box (or not)
+	//box->ToggleVisibility(true);
+	////box->SetVisibility(true);
+
+	//bUseComplexAsSimpleCollision = false;
+	//mesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseSimpleAsComplex;
+
+	//this->SphereCollider->SetWorldScale3D(Scale * 1.5f);
+	////box->SetWorldScale3D(FVector(20.0, 20.0, 20.0));
+	//box->SetWorldLocation(
 }
 
 void APop::init(AThing* thing, FTransform trafo) {
-	UE_LOG(LogTemp, Warning, TEXT("APop::init called, this=%p"), this);
+	//UE_LOG(LogTemp, Warning, TEXT("APop::init called, this=%p"), this);
 
 	thingRef = thing;
 
@@ -154,7 +219,7 @@ void APop::init(AThing* thing, FTransform trafo) {
 // Called when the game starts or when spawned
 void APop::BeginPlay()
 {
-	UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay called, this=%p"), this);
+	//UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay called, this=%p"), this);
 
 	Super::BeginPlay();
 }
@@ -162,10 +227,22 @@ void APop::BeginPlay()
 // Called every frame
 void APop::Tick(float DeltaTime)
 {
+#if 0 /* Just TEST */
+	RootComponent = mesh;
+	box->SetupAttachment(mesh);
+#endif
+
 	FVector loc = GetActorTransform().GetLocation();
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::Tick called, this=%p, loc: X=%f, Y=%f, Z=%f"),
 		   this, loc.X, loc.Y, loc.Z);
+	/*
+	FVector boxLoc = box->GetComponentLocation();
+	FVector boxLoc2 = box->GetComponentToWorld().GetLocation();
+	FVector boxRelLoc = box->GetRelativeTransform().GetLocation();
+	UE_LOG(LogTemp, Warning, TEXT("APop::Tick called, box=%p, boxLoc: X=%f, Y=%f, Z=%f,  boxLoc: X=%f, Y=%f, Z=%f,  rel box: X=%f, Y=%f, Z=%f"),
+		box, boxLoc.X, boxLoc.Y, boxLoc.Z, boxLoc2.X, boxLoc2.Y, boxLoc2.Z, boxRelLoc.X, boxRelLoc.Y, boxRelLoc.Z);
+	*/
 
 	Super::Tick(DeltaTime);
 
@@ -346,7 +423,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	TArray<FRuntimeMeshTangent> tangents;
 	TArray<FColor> vertexColors;
 
-	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh called, thingRef has the name: %s"), *thingRef->name);
+	//UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh called, thingRef has the name: %s"), *thingRef->name);
 
 
 	// Build combined mesh data for the full tree of the Thing that this Pop instantiates
@@ -435,13 +512,92 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 	//Mesh->BodyInstance.SetResponseToAllChannels(ECR_Block);
 
-	//AddGrabBoxes(collisionCubePositions);
+	AddGrabBoxes(collisionCubePositions);
 
 
 }
 
 
 
+
+
+//
+// Setup the the collision boxes for grabbing. Make them children of the root mesh.
+//
+void APop::AddGrabBoxes(TArray<FTransform>& grabBoxLocations) {
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes called, address %p, grabBoxLocations.Num()==%d"), this, grabBoxLocations.Num());
+
+	UBoxComponent* collisionBoxN;
+
+	for (int32 grabBoxNo = 0; grabBoxNo < grabBoxLocations.Num(); ++grabBoxNo) {
+
+		FTransform trafo = grabBoxLocations[grabBoxNo];
+		FVector loc = trafo.GetLocation();
+		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, grabBoxNo==%d,  loc: X=%f  Y=%f  Z=%f"), grabBoxNo, loc.X, loc.Y, loc.Z);
+
+		//collisionBoxN = CreateDefaultSubobject<UBoxComponent>(TEXT("Pop collision box %d"), grabBoxNo);
+		///collisionBoxN = CreateDefaultSubobject<UBoxComponent>(TEXT("Pop collision box N"));
+
+		// ...   to dynamiclly create component use NewObject() and MyComponent->RegisterComponent()
+
+		//T* NewObject(UObject* Outer, UClass* Class, FName Name = NAME_None, EObjectFlags Flags = RF_NoFlags, UObject* Template = nullptr, bool bCopyTransientsFromClassDefaults = false, FObjectInstancingGraph* InInstanceGraph = nullptr)
+
+		//FString boxNameStr = "Pop collision box " + grabBoxNo;
+		FString boxNameStr = "Pop collision box " + FString::FromInt(grabBoxNo);
+		FName boxName = FName(*boxNameStr);
+
+		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, baxNameStr: %s    boxName: %s"), *boxNameStr, *boxName.ToString());
+
+
+		//FName boxName = TEXT("Pop collision box N");
+
+		collisionBoxN = NewObject<UBoxComponent>(this, boxName);
+
+		collisionBoxN->SetupAttachment(mesh);
+		collisionBoxN->InitBoxExtent(FVector(CUBE_SIZE / 2, CUBE_SIZE / 2, CUBE_SIZE / 2));
+		// Align box with mesh
+		//collisionBoxN->SetRelativeLocation(FVector(50.0f, 50.0f, 50.0f) + loc);
+
+		// TEST
+		//trafo.AddToTranslation(FVector(50, 50, 50));
+
+		/**/
+		FVector locAfter = trafo.GetLocation();
+		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, grabBoxNo==%d,  locAfter: X=%f  Y=%f  Z=%f"), grabBoxNo, locAfter.X, locAfter.Y, locAfter.Z);
+		/**/
+
+
+		collisionBoxN->SetRelativeTransform(trafo);  // TODO: Add (50 50 50) to the location part
+
+
+		collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);		// Grabbable
+		collisionBoxN->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// Try also QueryOnly
+		collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Overlap);  // Maybe overlap just for the grab sphere is faster?
+		collisionBoxN->SetSimulatePhysics(false);
+		collisionBoxN->SetEnableGravity(false);
+
+		// TEST: Make each collisionBox a "Physics body" and set it to block the ECC_Visibility channel
+		collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+		collisionBoxN->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
+
+		// TEST TO REGISTER OVERLAP CALLBACK FOR EACH COLLISION BOX
+		//collisionBoxN->OnComponentBeginOverlap.AddDynamic(this, &APop::OnBeginOverlap);
+
+		collisionBoxN->OnBeginCursorOver.AddDynamic(this, &APop::CustomOnBeginMouseOver);
+
+		collisionBoxN->OnClicked.AddDynamic(this, &APop::CustomOnClicked);
+
+
+		collisionBoxN->RegisterComponent();
+
+		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, registered new UBoxComponent %p, name: %s"), collisionBoxN, *collisionBoxN->GetName());
+
+
+		grabBoxes.Add(collisionBoxN);
+	}
+}
 
 
 
@@ -639,3 +795,22 @@ void APop::CreateTriangle()
 
 #endif
 
+
+void APop::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Pop Mouse Over"));
+		UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnBeginMouseOver: Pop Mouse Over"));
+	}
+}
+
+
+void APop::CustomOnClicked(UPrimitiveComponent* clickedComponent, FKey inKey)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Pop Mouse Click"));
+		UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnClicked: Pop Mouse Click"));
+	}
+}
