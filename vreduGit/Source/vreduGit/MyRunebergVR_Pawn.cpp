@@ -67,8 +67,8 @@ void AMyRunebergVR_Pawn::BeginPlay()
 
 void AMyRunebergVR_Pawn::Tick(float DeltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::Tick called, currentVelocity = (%f %f %f)"),
-		   CurrentVelocity.X, CurrentVelocity.Y, CurrentVelocity.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::Tick called, currentVelocity = (%f %f %f)"),
+	//	   CurrentVelocity.X, CurrentVelocity.Y, CurrentVelocity.Z);
 
 	Super::Tick(DeltaTime);
 
@@ -80,26 +80,62 @@ void AMyRunebergVR_Pawn::Tick(float DeltaTime)
 }
 
 void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) {
-	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::SetupPlayerInputComponent called"));
+	//UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::SetupPlayerInputComponent called"));
 
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	//UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::SetupPlayerInputComponent: will bind action"));
+
+	// Works
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMyRunebergVR_Pawn::MoveForwardBackward);
+
+	PlayerInputComponent->BindAxis("Turn", this, &AMyRunebergVR_Pawn::TurnAtRate);
+
+
+	PlayerInputComponent->BindAction("MoveForward", IE_Pressed, this, &AMyRunebergVR_Pawn::MoveForwardKeyb);
+	PlayerInputComponent->BindAction("MoveBackward", IE_Pressed, this, &AMyRunebergVR_Pawn::MoveBackwardKeyb);
+
 }
+
+void AMyRunebergVR_Pawn::MoveForwardKeyb()
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("MoveForwardKeyb called")));
+	//AddMovementInput(GetActorForwardVector(), 10.0);
+
+}
+
+
+void AMyRunebergVR_Pawn::MoveBackwardKeyb()
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("MoveBackwardKeyb called")));
+}
+
 
 void AMyRunebergVR_Pawn::MoveForwardBackward(float AxisValue) {
 
-	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::MoveForwardBackward called, AxisValue=%f"), AxisValue);
+	//UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::MoveForwardBackward called, AxisValue=%f"), AxisValue);
 
-	CurrentVelocity.X = FMath::Clamp(AxisValue, -1.0f, 1.0f) * 100.0f;
+	//CurrentVelocity.X = FMath::Clamp(AxisValue, -1.0f, 1.0f) * 100.0f;
 
-	// TEST
-	//vrMovement->EnableVRMovement();
+	//FVector actorForw = GetActorForwardVector();
+	FVector pawnMeshForw = PawnRootMesh->GetForwardVector();
 
-	/*
-	void EnableVRMovement(float MovementSpeed = 3.f, USceneComponent* MovementDirectionReference = nullptr, bool ObeyNavMesh = false,
-		bool LockPitch = false, bool LockYaw = false, bool LockRoll = false, FRotator CustomDirection = FRotator::ZeroRotator);
-	*/
+	CurrentVelocity.X = pawnMeshForw.X * FMath::Clamp(AxisValue, -1.0f, 1.0f) * 100.0f;
+	CurrentVelocity.Y = pawnMeshForw.Y * FMath::Clamp(AxisValue, -1.0f, 1.0f) * 100.0f;
 }
 
+void AMyRunebergVR_Pawn::TurnAtRate(float Rate)
+{
+	const float BaseTurnRate = 10.0f;
+
+	UWorld* const World = GetWorld();
+	FRotator viewRot = this->GetViewRotation();
+
+	// This seems to only set view rotation, not pawn rotation
+	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+
+	// HACK: Set pawn rotation to the same as view rotation
+	SetActorRotation(viewRot);
+
+}
 

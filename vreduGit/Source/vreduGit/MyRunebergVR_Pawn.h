@@ -30,7 +30,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		URunebergVR_Movement* vrMovement;
 
+	void TurnAtRate(float Rate);
+
 	void MoveForwardBackward(float AxisValue);
+	void MoveForwardKeyb();
+	void MoveBackwardKeyb();
+
 	//void StartGrowing();
 	//void StopGrowing();
 

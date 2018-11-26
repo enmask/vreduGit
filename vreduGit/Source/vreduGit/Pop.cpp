@@ -438,8 +438,8 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	TArray<FTransform> collisionCubePositions;
 	thingRef->ComputeMeshData(verts2Dim, tris2Dim, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
 
-	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: ComputeMeshData gave back collisionCubePositions.Num()==%d,  verts2Dim.Num()=%d,  tris2Dim.Num()=%d"),
-		collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num());
+	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: ComputeMeshData gave back collisionCubePositions.Num()==%d,  verts2Dim.Num()=%d,  tris2Dim.Num()=%d,  vertexColors.Num()=%d"),
+		collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num(), vertexColors.Num());
 
 	// The mesh may already have data. Remove it
 	mesh->ClearAllMeshSections();

@@ -2048,6 +2048,10 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
 	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
 	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
+#endif
+
+#if 1 /* Trying colors again */
+	UE_LOG(LogTemp, Warning, TEXT("AThing: Adding color!"))
 
 	vertexColors.Add(FColor::Blue);
 	vertexColors.Add(FColor::Blue);
