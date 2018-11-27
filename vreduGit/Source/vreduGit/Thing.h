@@ -55,6 +55,29 @@ struct FInt32Array
 	}
 };
 
+USTRUCT()
+struct FColorArray
+{
+	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY()
+		TArray<FColor> Colors;
+
+	FColorArray()
+	{
+	}
+
+	void Log() {
+
+		for (int i = 0; i < Colors.Num(); ++i) {
+			FColor color = Colors[i];
+			UE_LOG(LogTemp, Warning, TEXT("FColorArray::Log(), i=%d   color=%s"), i, *color.ToString());
+		}
+	}
+
+};
+
+
 UCLASS()
 class VREDUGIT_API AThing : public AActor
 {
@@ -76,10 +99,11 @@ public:
 
 	// Compute data for the triangles making up the whole mesh of a Thing tree
 	void ComputeMeshData(TArray<FVertexArray>& verts2Dim, TArray<FInt32Array>& tris2Dim,
-		TArray<FVector>& vertices, TArray<int32>& Triangles,
-		TArray<FVector>& normals, TArray<FVector2D>& UV0,
-		TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents,
-		TArray<FTransform>& collisionCubePositions);
+						 TArray<FColorArray>& colors2Dim,
+						 TArray<FVector>& vertices, TArray<int32>& Triangles,
+						 TArray<FVector>& normals, TArray<FVector2D>& UV0,
+						 TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents,
+						 TArray<FTransform>& collisionCubePositions);
 private:
 
 	int CountAtoms();
@@ -87,6 +111,7 @@ private:
 
 	void ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 		TArray<FVertexArray>& verts2DimArray, TArray<FInt32Array>& int2DimArray,
+		TArray<FColorArray>& colors2Dim,
 		FTransform baseTrafo,
 		TArray<FVector>& vertices, TArray<int32>& Triangles,
 		TArray<FVector>& normals, TArray<FVector2D>& UV0,
@@ -94,12 +119,14 @@ private:
 		TArray<FTransform>& collisionCubePositions);
 	void AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 		TArray<FVertexArray>& verts2DimArray, TArray<FInt32Array>& int2DimArray,
+		TArray<FColorArray>& colors2DimArray,
 		FTransform baseTrafo,
 		TArray<FVector>& vertices, TArray<int32>& Triangles,
 		TArray<FVector>& normals, TArray<FVector2D>& UV0,
 		TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents);
 	void AddVertex(int32 treeLevel, int32 subtreeNo, TArray<FVertexArray>& verts2DimArray,
-		FTransform baseTrafo, FVector origLocation, TArray<FVector>& vertices, TArray<int32>& newIndices);
+				   TArray<FColorArray>& colors2Dim,	FTransform baseTrafo, FVector origLocation,
+				   TArray<FVector>& vertices, TArray<int32>& newIndices);
 
 public:
 
@@ -115,6 +142,7 @@ public:
 
 	void Log2DimVertsArray(TArray<FVertexArray> verts2Dim);
 	void Log2DimIntsArray(TArray<FInt32Array> ints2Dim);
+	void Log2DimColorArray(TArray<FColorArray> colors2Dim);
 
 	FString ToString();
 

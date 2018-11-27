@@ -19,6 +19,37 @@ AActorMouse::AActorMouse()
 
 	mesh->OnBeginCursorOver.AddDynamic(this, &AActorMouse::CustomOnBeginMouseOver);
 
+
+
+
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material1(TEXT("Material'/Game/Materials/M_Atom'"));
+	if (Material1.Succeeded()) {
+		UE_LOG(LogTemp, Warning, TEXT("ActorMouse constructor: Material1 succeeded"));
+		//auto* MaterialInstance1 = UMaterialInstanceDynamic::Create(Material1.Object, Material1.Object);
+		MaterialInstance = UMaterialInstanceDynamic::Create(Material1.Object, Material1.Object);
+
+		//MaterialInstance1->SetVectorParameterValue(FName(TEXT("BaseColor")), FLinearColor(0.9f, 0.1f, 0.1f));
+
+		/* TEST, comment out everything that can destroy the red-gray...
+		MaterialInstance->SetVectorParameterValue(FName(TEXT("BaseColor")), FLinearColor(0.1f, 0.1f, 0.9f));
+		MaterialInstance->SetVectorParameterValue(FName("MyColor"), FLinearColor(0.0f, 0.6f, 0.0f));
+		*/
+
+		mesh->SetMaterial(0, MaterialInstance);
+
+		/*
+		// Try to get all parameter names that exist on this material
+		TArray<FName> parNames;
+		TArray<FGuid> parIds;
+		MaterialInstance1->GetAllParameterNames(parNames, parIds);
+		UE_LOG(LogTemp, Warning, TEXT("APop::APop:  parNames.Num()=%d  parIds.Num()=%d  "), parNames.Num(), parIds.Num());
+		*/
+
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("ActorMouse: Material1 failed"));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -160,15 +191,15 @@ void AActorMouse::BuildCube()
 
 	TArray<FColor> vertexColors;
 
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
+	vertexColors.Add(FColor::Green);
+	vertexColors.Add(FColor::Green);
+	vertexColors.Add(FColor::Green);
+	vertexColors.Add(FColor::Green);
 
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
+	vertexColors.Add(FColor::Green);
+	vertexColors.Add(FColor::Green);
+	vertexColors.Add(FColor::Green);
+	vertexColors.Add(FColor::Green);
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh, will call CreateMeshSection"));
 

@@ -26,6 +26,7 @@ void APop::init2() {
 
 	TestSetupCollisionBox();
 	TestSetupPhysics();
+	TestSetupMaterial();
 
 	//const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObjCube(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube"));
 	//meshCube = MeshObjCube.Object;
@@ -94,6 +95,28 @@ void APop::TestSetupPhysics() {
 	////box->SetWorldScale3D(FVector(20.0, 20.0, 20.0));
 	//box->SetWorldLocation(
 }
+
+
+void APop::TestSetupMaterial() {
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material1(TEXT("Material'/Game/Materials/M_Atom'"));
+	if (Material1.Succeeded()) {
+		MaterialInstance = UMaterialInstanceDynamic::Create(Material1.Object, Material1.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material1 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material2(TEXT("Material'/Game/Materials/M_Atom2'"));
+	if (Material2.Succeeded()) {
+		MaterialInstance2 = UMaterialInstanceDynamic::Create(Material2.Object, Material2.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material2 failed"));
+	}
+}
+
+
 
 void APop::init(AThing* thing, FTransform trafo) {
 	//UE_LOG(LogTemp, Warning, TEXT("APop::init called, this=%p"), this);
@@ -232,10 +255,8 @@ void APop::Tick(float DeltaTime)
 	box->SetupAttachment(mesh);
 #endif
 
-	FVector loc = GetActorTransform().GetLocation();
+	//FVector loc = GetActorTransform().GetLocation();
 
-	UE_LOG(LogTemp, Warning, TEXT("APop::Tick called, this=%p, loc: X=%f, Y=%f, Z=%f"),
-		   this, loc.X, loc.Y, loc.Z);
 	/*
 	FVector boxLoc = box->GetComponentLocation();
 	FVector boxLoc2 = box->GetComponentToWorld().GetLocation();
@@ -435,11 +456,14 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	//	  If the root thing is a PARENT, it has sub-trafo:s of each of its children
 	TArray<FVertexArray> verts2Dim;
 	TArray<FInt32Array> tris2Dim;
+	TArray<FColorArray> colors2Dim;
 	TArray<FTransform> collisionCubePositions;
-	thingRef->ComputeMeshData(verts2Dim, tris2Dim, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
+	thingRef->ComputeMeshData(verts2Dim, tris2Dim, colors2Dim, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: ComputeMeshData gave back collisionCubePositions.Num()==%d,  verts2Dim.Num()=%d,  tris2Dim.Num()=%d,  vertexColors.Num()=%d"),
-		collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num(), vertexColors.Num());
+		collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num(), colors2Dim.Num());
+	thingRef->Log2DimColorArray(colors2Dim);
+
 
 	// The mesh may already have data. Remove it
 	mesh->ClearAllMeshSections();
@@ -465,7 +489,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 
 
-		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
+		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, colors2Dim[i].Colors, TArray<FRuntimeMeshTangent>(), false);
 #else /* TEST: UV mapping. TODO: Don't use the same UV array for all mesh sections! .......................................................................................... */
 		Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
 
@@ -486,6 +510,13 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 		/* Removed 181106
 		mesh->SetMaterial(i, MaterialInstance);
 		*/
+
+		// Set a material on just this mesh section
+		if (i % 2 == 0)
+			mesh->SetSectionMaterial(i, MaterialInstance);
+		else
+			mesh->SetSectionMaterial(i, MaterialInstance2);
+
 
 		/* Removing 180919 when trying to get house parts to work again
 		Mesh->AddCollisionConvexMesh(verts2Dim[i].Verts);
@@ -547,7 +578,7 @@ void APop::AddGrabBoxes(TArray<FTransform>& grabBoxLocations) {
 		FString boxNameStr = "Pop collision box " + FString::FromInt(grabBoxNo);
 		FName boxName = FName(*boxNameStr);
 
-		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, baxNameStr: %s    boxName: %s"), *boxNameStr, *boxName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, boxNameStr: %s    boxName: %s"), *boxNameStr, *boxName.ToString());
 
 
 		//FName boxName = TEXT("Pop collision box N");
@@ -801,8 +832,17 @@ void APop::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Pop Mouse Over"));
-		UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnBeginMouseOver: Pop Mouse Over"));
 	}
+
+	UBoxComponent* grabBox = Cast<UBoxComponent>(TouchedComponent);
+	if (grabBox == nullptr)
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnBeginMouseOver: Pop Mouse Over,  TouchedComponent=%p or %p, with name=%s"),
+		   TouchedComponent, grabBox, *grabBox->GetName());
+
 }
 
 

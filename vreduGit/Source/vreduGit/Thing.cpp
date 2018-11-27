@@ -140,6 +140,18 @@ void AThing::Log2DimIntsArray(TArray<FInt32Array> ints2Dim) {
 }
 
 
+void AThing::Log2DimColorArray(TArray<FColorArray> colors2Dim) {
+
+	UE_LOG(LogTemp, Warning, TEXT("AThing::Log2DimColorArray() called"));
+
+
+	for (int i = 0; i < colors2Dim.Num(); ++i) {
+		UE_LOG(LogTemp, Warning, TEXT("AThing::Log2DimColorArray(), here comes colorArray with ix %d"), i);
+		colors2Dim[i].Log();
+	}
+
+}
+
 
 FString AThing::ToString() {
 
@@ -151,6 +163,7 @@ FString AThing::ToString() {
 
 
 void AThing::ComputeMeshData(TArray<FVertexArray>& verts2Dim, TArray<FInt32Array>& tris2Dim,
+	TArray<FColorArray>& colors2Dim,
 	TArray<FVector>& vertices, TArray<int32>& Triangles,
 	TArray<FVector>& normals, TArray<FVector2D>& UV0,
 	TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents,
@@ -160,10 +173,11 @@ void AThing::ComputeMeshData(TArray<FVertexArray>& verts2Dim, TArray<FInt32Array
 
 
 
-	ComputeMeshDataAux(0, 0, verts2Dim, tris2Dim, trafoZero, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
+	ComputeMeshDataAux(0, 0, verts2Dim, tris2Dim, colors2Dim, trafoZero, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
 
-	//Log2DimVertsArray(verts2Dim);
-	//Log2DimIntsArray(tris2Dim);
+	Log2DimVertsArray(verts2Dim);
+	Log2DimIntsArray(tris2Dim);
+	Log2DimColorArray(colors2Dim);
 
 	UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshData() end, vertices.Num()=%d"), vertices.Num());
 }
@@ -171,7 +185,7 @@ void AThing::ComputeMeshData(TArray<FVertexArray>& verts2Dim, TArray<FInt32Array
 
 void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 	TArray<FVertexArray>& verts2Dim, TArray<FInt32Array>& tris2Dim,
-	FTransform baseTrafo,
+	TArray<FColorArray>& colors2Dim, FTransform baseTrafo,
 	TArray<FVector>& vertices, TArray<int32>& Triangles,
 	TArray<FVector>& normals, TArray<FVector2D>& UV0,
 	TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents,
@@ -185,7 +199,7 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 		//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an ATOM, trafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
 
 		// Add mesh data for this atom
-		AddMeshDataForOneAtom(treeLevel, subtreeNo, verts2Dim, tris2Dim, baseTrafo, vertices, Triangles, normals, UV0, vertexColors, tangents);
+		AddMeshDataForOneAtom(treeLevel, subtreeNo, verts2Dim, tris2Dim, colors2Dim, baseTrafo, vertices, Triangles, normals, UV0, vertexColors, tangents);
 
 		// Note where the called needs to place a grab cube for this atom
 		collisionCubePositions.Add(baseTrafo);
@@ -251,13 +265,13 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 			// (yes, that's right, because I cram all atoms into one mesh section, all relative to one base point).
 			// The baseTrafo for this child should say how the child shall be placed relative to the ROOT.
 			// So I should use composition, baseTrafo * 
-			subThing->ComputeMeshDataAux(treeLevel + 1, (treeLevel == 0) ? thingIx : subtreeNo, verts2Dim, tris2Dim, accumulatedTrafo, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
+			subThing->ComputeMeshDataAux(treeLevel + 1, (treeLevel == 0) ? thingIx : subtreeNo, verts2Dim, tris2Dim, colors2Dim, accumulatedTrafo, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
 		}
 	}
 }
 
-// Add vertex to vertices and remember the nex vertex index i an array so that the tris can refer to it correctly
-void AThing::AddVertex(int32 treeLevel, int32 subtreeNo, TArray<FVertexArray>& verts2Dim,
+// Add vertex to vertices and remember the nex vertex index in an array so that the tris can refer to it correctly
+void AThing::AddVertex(int32 treeLevel, int32 subtreeNo, TArray<FVertexArray>& verts2Dim, TArray<FColorArray>& colors2Dim,
 	FTransform baseTrafo, FVector origLocation, TArray<FVector>& vertices, TArray<int32>& newIndices) {
 
 	//UE_LOG(LogTemp, Warning, TEXT("AThing::AddVertex called, treeLevel=%d, subtreeNo=%d"), treeLevel, subtreeNo);
@@ -322,30 +336,35 @@ void AThing::AddVertex(int32 treeLevel, int32 subtreeNo, TArray<FVertexArray>& v
 	// 
 	if (verts2Dim.Num() <= subtreeNo) {
 
-		if (verts2Dim.Num() < subtreeNo) {
-			UE_LOG(LogTemp, Error,
-				TEXT("ERROR: verts2Dim.Num()=%d and subtreeNo=%d. It should never happen that verts2Dim.Num() < subtreeNo!!! < (By the way, treeLevel=%d)"),
-				verts2Dim.Num(), subtreeNo, treeLevel);
-			return;
-		}
+		// It should never happen that verts2Dim.Num() < subtreeNo
+		verify(verts2Dim.Num() == subtreeNo);
 
 		// There is no verts array for this tree level, so we need to create a new empty one
 		FVertexArray emptyVertArray;
 		verts2Dim.Add(emptyVertArray);
+
+		// We need a color for each vert, so create a new empty color array too
+		FColorArray emptyColorArray;
+		int32 newColorArrayIndex = colors2Dim.Add(emptyColorArray);
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("AThing::AddVertex: Adding new color ARRAY, newColorArrayIndex = %d"), newColorArrayIndex);
+
 	}
 
 	int32 newIndex2 = verts2Dim[subtreeNo].Verts.Add(relTrafo.GetLocation());
 
-
 	newIndices.Add(newIndex2);
-	//UE_LOG(LogTemp, Warning, TEXT("AThing::AddVertex end, newIndex = %d, newIndex2 = %d"), newIndex, newIndex2);
-
+	
+	int32 newColorIndex = colors2Dim[subtreeNo].Colors.Add(FColor::Blue);
+	UE_LOG(LogTemp, Warning,
+		   TEXT("AThing::AddVertex: Adding new color, newColorIndex = %d, newIndex2 = %d. subtreeNo=%d"), newColorIndex, newIndex2, subtreeNo);
 
 }
 
 void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	TArray<FVertexArray>& verts2Dim, TArray<FInt32Array>& tris2Dim,
-	FTransform baseTrafo,
+	TArray<FColorArray>& colors2Dim, FTransform baseTrafo,
 	TArray<FVector>& vertices, TArray<int32>& Triangles,
 	TArray<FVector>& normals, TArray<FVector2D>& UV0,
 	TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents) {
@@ -378,15 +397,15 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	FVector vertx7(-1.000000, 1.000000, -1.000000);
 
 
-	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx0, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx1, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx2, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx3, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, baseTrafo, 30.0f * vertx0, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, baseTrafo, 30.0f * vertx1, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, baseTrafo, 30.0f * vertx2, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, baseTrafo, 30.0f * vertx3, vertices, newIndices);
 
-	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx4, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx5, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx6, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, baseTrafo, 30.0f * vertx7, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, baseTrafo, 30.0f * vertx4, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, baseTrafo, 30.0f * vertx5, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, baseTrafo, 30.0f * vertx6, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, baseTrafo, 30.0f * vertx7, vertices, newIndices);
 	 /**/
 
 	 // Curling stone from Blender
@@ -1751,7 +1770,7 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 
 
 	//
-	// Now add to the 2-dim verts array
+	// Now add to the 2-dim tris array
 	// 
 	if (tris2Dim.Num() <= subtreeNo) {
 
@@ -2050,18 +2069,6 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
 #endif
 
-#if 1 /* Trying colors again */
-	UE_LOG(LogTemp, Warning, TEXT("AThing: Adding color!"))
-
-	vertexColors.Add(FColor::Blue);
-	vertexColors.Add(FColor::Blue);
-	vertexColors.Add(FColor::Blue);
-	vertexColors.Add(FColor::Blue);
-	vertexColors.Add(FColor::Blue);
-	vertexColors.Add(FColor::Blue);
-	vertexColors.Add(FColor::Blue);
-	vertexColors.Add(FColor::Blue);
-#endif
 }
 
 

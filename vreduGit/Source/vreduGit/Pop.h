@@ -40,6 +40,9 @@ public:
 		UStaticMeshComponent* mesh;
 #endif
 
+	UMaterialInstanceDynamic* MaterialInstance;
+	UMaterialInstanceDynamic* MaterialInstance2;
+
 	// Tried this for collision. Probably remove soon!
 	//UPROPERTY(EditAnywhere)
 	//	UBoxComponent* box;
@@ -59,6 +62,7 @@ public:
 
 	void TestSetupCollisionBox();
 	void TestSetupPhysics();
+	void TestSetupMaterial();
 
 	//Functions to handle the interaction
 	UFUNCTION()

@@ -26,7 +26,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		URuntimeMeshComponent* mesh;
-	
+
+	UMaterialInstanceDynamic* MaterialInstance;
 
 /* //Static Mesh Component to interact with
 	UPROPERTY(VisibleAnywhere)
