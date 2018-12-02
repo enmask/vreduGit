@@ -1440,6 +1440,8 @@ void AGameplayManager::Tick(float DeltaTime)
 
 	}
 
+
+#if 0 /* Comment out to let spokes stay separate from the rim */
 	//
 	// Make the spokes children of a single spokesPop
 	//
@@ -1507,18 +1509,14 @@ void AGameplayManager::Tick(float DeltaTime)
 	//
 	if (numTicks > 420 && numTicks < 600) {
 		FVector bikeLoc = bikePop->GetActorLocation();
-		UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick:  Current bikeLoc.X %f  .Y %f  .Z %f"),
-			   bikeLoc.X, bikeLoc.Y, bikeLoc.Z);
 		bikeLoc.X = bikeLoc.X + 2.0f;
 		bikePop->SetActorLocation(bikeLoc);
 
-		// SetActorScale3D 
-
 	}
-	/* */
 #endif
 
 
+#endif
 
 }
 

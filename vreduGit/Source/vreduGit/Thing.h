@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Runtime/Core/Public/Math/Transform.h"
 #include "GameFramework/Actor.h"
 #include "Runtime/Engine/Classes/PhysicsEngine/BodySetup.h"
 #include "RuntimeMeshComponent.h"
@@ -78,6 +79,29 @@ struct FColorArray
 };
 
 
+USTRUCT()
+struct FTrafoArray
+{
+	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY()
+		TArray<FTransform> Trafos;
+
+	FTrafoArray()
+	{
+	}
+
+	void Log() {
+
+		for (int i = 0; i < Trafos.Num(); ++i) {
+			FTransform trafo = Trafos[i];
+			UE_LOG(LogTemp, Warning, TEXT("FTrafoArray::Log(), i=%d   trafo=%s"), i, *trafo.ToString());
+		}
+	}
+
+};
+
+
 UCLASS()
 class VREDUGIT_API AThing : public AActor
 {
@@ -99,7 +123,7 @@ public:
 
 	// Compute data for the triangles making up the whole mesh of a Thing tree
 	void ComputeMeshData(TArray<FVertexArray>& verts2Dim, TArray<FInt32Array>& tris2Dim,
-						 TArray<FColorArray>& colors2Dim,
+						 TArray<FColorArray>& colors2Dim, TArray<FTrafoArray>& collisions2Dim,
 						 TArray<FVector>& vertices, TArray<int32>& Triangles,
 						 TArray<FVector>& normals, TArray<FVector2D>& UV0,
 						 TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents,
@@ -110,22 +134,23 @@ private:
 
 
 	void ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
-		TArray<FVertexArray>& verts2DimArray, TArray<FInt32Array>& int2DimArray,
-		TArray<FColorArray>& colors2Dim,
+		TArray<FVertexArray>& verts2Dim, TArray<FInt32Array>& int2Dim,
+		TArray<FColorArray>& colors2Dim, TArray<FTrafoArray>& collisions2Dim,
 		FTransform baseTrafo,
 		TArray<FVector>& vertices, TArray<int32>& Triangles,
 		TArray<FVector>& normals, TArray<FVector2D>& UV0,
 		TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents,
 		TArray<FTransform>& collisionCubePositions);
 	void AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
-		TArray<FVertexArray>& verts2DimArray, TArray<FInt32Array>& int2DimArray,
-		TArray<FColorArray>& colors2DimArray,
+		TArray<FVertexArray>& verts2Dim, TArray<FInt32Array>& int2Dim,
+		TArray<FColorArray>& colors2Dim, TArray<FTrafoArray>& collisions2Dim,
 		FTransform baseTrafo,
 		TArray<FVector>& vertices, TArray<int32>& Triangles,
 		TArray<FVector>& normals, TArray<FVector2D>& UV0,
 		TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents);
-	void AddVertex(int32 treeLevel, int32 subtreeNo, TArray<FVertexArray>& verts2DimArray,
-				   TArray<FColorArray>& colors2Dim,	FTransform baseTrafo, FVector origLocation,
+	void AddVertex(int32 treeLevel, int32 subtreeNo, TArray<FVertexArray>& verts2Dim,
+				   TArray<FColorArray>& colors2Dim, TArray<FTrafoArray>& collisions2Dim,
+				   FTransform baseTrafo, FVector origLocation,
 				   TArray<FVector>& vertices, TArray<int32>& newIndices);
 
 public:

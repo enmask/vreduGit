@@ -120,3 +120,16 @@ void AvreduGameMode::StartPlay() {
 	// crashes
 	//theGameplayManager->CallBeginPlay();
 }
+
+
+TSet< APop* > AvreduGameMode::GetWantsPicking() {
+	return wantsPicking;
+}
+
+void AvreduGameMode::AddWantsPicking(APop* pop) {
+	wantsPicking.Add(pop);
+}
+
+void AvreduGameMode::RemoveWantsPicking(APop* pop) {
+	wantsPicking.Remove(pop);
+}

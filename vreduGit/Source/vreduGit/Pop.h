@@ -8,6 +8,7 @@
 #include "Pop.generated.h"
 
 class AThing;
+struct FTrafoArray;
 
 UCLASS()
 class VREDUGIT_API APop : public AActor
@@ -19,9 +20,7 @@ public:
 	APop();
 
 	void init(AThing* thing, FTransform trafo);
-
 	void init2();
-
 
 protected:
 	// Called when the game starts or when spawned
@@ -32,26 +31,38 @@ public:
 	UPROPERTY(EditAnyWhere)
 		AThing* thingRef;
 
-#if 1
 	UPROPERTY(VisibleAnywhere)
 		URuntimeMeshComponent* mesh;
-#else
-	UPROPERTY(EditAnywhere)
-		UStaticMeshComponent* mesh;
-#endif
 
-	UMaterialInstanceDynamic* MaterialInstance;
+	UMaterialInstanceDynamic* MaterialInstance1;
 	UMaterialInstanceDynamic* MaterialInstance2;
-
-	// Tried this for collision. Probably remove soon!
-	//UPROPERTY(EditAnywhere)
-	//	UBoxComponent* box;
+	UMaterialInstanceDynamic* MaterialInstance3;
+	UMaterialInstanceDynamic* MaterialInstance4;
+	UMaterialInstanceDynamic* MaterialInstance5;
+	UMaterialInstanceDynamic* MaterialInstance6;
+	UMaterialInstanceDynamic* MaterialInstance7;
+	UMaterialInstanceDynamic* MaterialInstance8;
 
 	UPROPERTY(EditAnywhere)
 		UStaticMesh* meshCube;
 
 	UPROPERTY(VisibleAnywhere)
 		TArray<UBoxComponent*> grabBoxes;
+
+	UPROPERTY(VisibleAnywhere)
+		bool picked;
+
+	//
+	// API methods
+	//
+
+#if 0 /* Moved to PopManager */
+	// Make the right motion controller pick up this Pop
+	void Pickup();
+
+	// Make the right motion controller drop this Pop
+	void Drop();
+#endif
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -68,13 +79,17 @@ public:
 	UFUNCTION()
 		void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
 
-	//Functions to handle the interaction
+	UFUNCTION()
+		void CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent);
+
 	UFUNCTION()
 		void CustomOnClicked(UPrimitiveComponent* clickedComponent, FKey inKey);
 
-
 private:
 	void AddGrabBoxes(TArray<FTransform>& grabBoxLocations);
+	void AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim);
 
+	void LogComponentHierarchy(USceneComponent* rootComp);
+	UActorComponent* GetRightMotionController();
 
 };

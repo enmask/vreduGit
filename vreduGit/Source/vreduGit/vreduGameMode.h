@@ -7,7 +7,10 @@
 #include "ThingManager.h"
 #include "PopManager.h"
 #include "GameplayManager.h"
+#include "MyRunebergVR_Pawn.h"
 #include "vreduGameMode.generated.h"
+
+class APop;
 
 /**
  *  The game mode of vredu. Holds the following managers accessible anywhere:
@@ -34,6 +37,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		APopManager* thePopManager;
 
+	// A VR pawn accessible from anywhere
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		AMyRunebergVR_Pawn* thePawn;
+
 	// Set to true in editor to activate the light-weight in-editor testing
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		bool autotestInEditor;
@@ -45,6 +52,19 @@ public:
 	// How many Tick:s of GameplayManager to run before exiting, provided autotestInEditor is set to true
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		int autotestNumTicks;
+
+	// TODO: Maybe move wantsPicking and its 2 access functions to a new separate class PopSignals
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")
+		TSet< APop* > wantsPicking;
+
+	UFUNCTION()
+		TSet< APop* > GetWantsPicking();
+
+	UFUNCTION()
+		void AddWantsPicking(APop* pop);
+
+	UFUNCTION()
+		void RemoveWantsPicking(APop* pop);
 
 	virtual void StartPlay() override;
 

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyRunebergVR_Pawn.h"
+#include "vreduGameMode.h"
 #include "Components/InputComponent.h"
 #include "Thing.h"    // Probably just temporary, Thing should be handled in ThingManager instead
 #include "RunebergVR_Movement.h"
@@ -38,6 +39,15 @@ void AMyRunebergVR_Pawn::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("vrMovement IS null"));
 	}
 
+	// Place the right motion controller (for grabbed Pop:s)
+	//MotionController_Right->SetRelativeLocation(FVector(0.f, 0.f, 110.f));
+	MotionController_Right->SetRelativeLocation(FVector(200.f, 200.f, -50.f));   // (Far, Right, High)
+
+
+	// Set global pawn
+	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::BeginPlay: Setting global thePawn to %p"), this);
+	((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn = this;
+
 
 #if 0 /* Obsolete. Instead, GameplayManager should tell ThingManager to spawn a Thing  */
 	// TEST: Spawn some Things
@@ -67,8 +77,7 @@ void AMyRunebergVR_Pawn::BeginPlay()
 
 void AMyRunebergVR_Pawn::Tick(float DeltaTime)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::Tick called, currentVelocity = (%f %f %f)"),
-	//	   CurrentVelocity.X, CurrentVelocity.Y, CurrentVelocity.Z);
+	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::Tick called, this=%p"), this);
 
 	Super::Tick(DeltaTime);
 
@@ -120,13 +129,15 @@ void AMyRunebergVR_Pawn::MoveForwardBackward(float AxisValue) {
 	//FVector actorForw = GetActorForwardVector();
 	FVector pawnMeshForw = PawnRootMesh->GetForwardVector();
 
-	CurrentVelocity.X = pawnMeshForw.X * FMath::Clamp(AxisValue, -1.0f, 1.0f) * 100.0f;
-	CurrentVelocity.Y = pawnMeshForw.Y * FMath::Clamp(AxisValue, -1.0f, 1.0f) * 100.0f;
+	float pawnSpeed = 300.0f;
+
+	CurrentVelocity.X = pawnMeshForw.X * FMath::Clamp(AxisValue, -1.0f, 1.0f) * pawnSpeed;
+	CurrentVelocity.Y = pawnMeshForw.Y * FMath::Clamp(AxisValue, -1.0f, 1.0f) * pawnSpeed;
 }
 
 void AMyRunebergVR_Pawn::TurnAtRate(float Rate)
 {
-	const float BaseTurnRate = 10.0f;
+	const float BaseTurnRate = 30.0f;
 
 	UWorld* const World = GetWorld();
 	FRotator viewRot = this->GetViewRotation();

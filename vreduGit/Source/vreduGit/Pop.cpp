@@ -1,7 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Pop.h"
+#include "vreduGameMode.h"
 #include "Thing.h"
+#include "Runtime/HeadMountedDisplay/Public/MotionControllerComponent.h"
+#include "MyRunebergVR_Pawn.h"
 
 // Sets default values
 APop::APop()
@@ -101,7 +104,7 @@ void APop::TestSetupMaterial() {
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> Material1(TEXT("Material'/Game/Materials/M_Atom'"));
 	if (Material1.Succeeded()) {
-		MaterialInstance = UMaterialInstanceDynamic::Create(Material1.Object, Material1.Object);
+		MaterialInstance1 = UMaterialInstanceDynamic::Create(Material1.Object, Material1.Object);
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Pop: Material1 failed"));
@@ -114,21 +117,65 @@ void APop::TestSetupMaterial() {
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Pop: Material2 failed"));
 	}
-}
 
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material3(TEXT("Material'/Game/Materials/M_Atom3'"));
+	if (Material3.Succeeded()) {
+		MaterialInstance3 = UMaterialInstanceDynamic::Create(Material3.Object, Material3.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material3 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material4(TEXT("Material'/Game/Materials/M_Atom4'"));
+	if (Material4.Succeeded()) {
+		MaterialInstance4 = UMaterialInstanceDynamic::Create(Material4.Object, Material4.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material4 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material5(TEXT("Material'/Game/Materials/M_Atom5'"));
+	if (Material5.Succeeded()) {
+		MaterialInstance5 = UMaterialInstanceDynamic::Create(Material5.Object, Material5.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material5 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material6(TEXT("Material'/Game/Materials/M_Atom6'"));
+	if (Material6.Succeeded()) {
+		MaterialInstance6 = UMaterialInstanceDynamic::Create(Material6.Object, Material6.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material6 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material7(TEXT("Material'/Game/Materials/M_Atom7'"));
+	if (Material7.Succeeded()) {
+		MaterialInstance7 = UMaterialInstanceDynamic::Create(Material7.Object, Material7.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material7 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material8(TEXT("Material'/Game/Materials/M_Atom8'"));
+	if (Material8.Succeeded()) {
+		MaterialInstance8 = UMaterialInstanceDynamic::Create(Material8.Object, Material8.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material8 failed"));
+	}
+}
 
 
 void APop::init(AThing* thing, FTransform trafo) {
 	//UE_LOG(LogTemp, Warning, TEXT("APop::init called, this=%p"), this);
 
 	thingRef = thing;
+	picked = false;
 
 	BuildMesh();
-
-	//RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
-	//RootComponent = NewObject<USceneComponent>(this, TEXT("RootSceneComponent"));
-	//mesh = NewObject<USceneComponent>(this, TEXT("RootSceneComponent"));
-
+	mesh->RegisterComponent();
 
 #if 1 /* Got code from old implementation */
 	//
@@ -148,11 +195,8 @@ void APop::init(AThing* thing, FTransform trafo) {
 	mesh->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);  // Try also PhysicsOnly
 	mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);
 
-#if 1 /* TEST, reinsert physics! */
 	mesh->SetSimulatePhysics(true);
-#else
-	mesh->SetSimulatePhysics(false);
-#endif
+
 
 	/*
 	mesh->SetLinearDamping(0.15);  // Not active, because Tick overwrites this value anyway with a speed-dependant value
@@ -173,101 +217,23 @@ void APop::init(AThing* thing, FTransform trafo) {
 
 	mesh->SetMobility(EComponentMobility::Movable);
 
-
-
 	// Location setting experiment
 	FVector loc = GetActorTransform().GetLocation();
-	UE_LOG(LogTemp, Warning, TEXT("APop::init (BEFORE setting location, loc X=%f Y=%f Z=%f"), loc.X, loc.Y, loc.Z);
 
 	this->SetActorLocation(trafo.GetLocation());
-
 	loc = GetActorTransform().GetLocation();
-	UE_LOG(LogTemp, Warning, TEXT("APop::init (AFTER setting location, loc X=%f Y=%f Z=%f"), loc.X, loc.Y, loc.Z);
-
-#if 0
-	// Box collision experiment
-	box = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass());
-	box->SetRelativeTransform(trafo);
-	box->SetBoxExtent(FVector(100.0, 100.0, 100.0));
-	box->RegisterComponent();
-	//BoxComponent->SetupAttachment(GetRootComponent());
-
-#if 1
-	box->SetupAttachment(GetRootComponent());
-#endif
-#if 0
-	RootComponent = BoxComponent;
-	mesh->SetupAttachment(GetRootComponent());
-#endif
-
-	// More on box coll.
-	//CollisionMesh = CreateDefaultSubobject<UBoxComponent>(TEXT("TestCollision"));
-	//CollisionMesh->SetBoxExtent(FVector(200.f, 200.f, 96.f));
-	box->bDynamicObstacle = true;
-	//CollisionMesh->SetupAttachment(GetRootComponent());
-	// bGenerateOverlapEvents
-	box->bGenerateOverlapEvents = true;
-
-	// SetCollisionResponseToAllChannels   ECR_Overlap。
-	box->SetCollisionResponseToAllChannels(ECR_Overlap);
-	/*CollisionMesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
-	CollisionMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
-	CollisionMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-	CollisionMesh->SetNotifyRigidBodyCollision(true);
-	CollisionMesh->SetSimulatePhysics(true);*/
-
-	// Generate Overlap Events
-	FScriptDelegate DelegateBegin;
-	DelegateBegin.BindUFunction(this, "OnTestOverlapBegin");
-	box->OnComponentBeginOverlap.Add(DelegateBegin);
-	FScriptDelegate DelegateEnd;
-	DelegateEnd.BindUFunction(this, "OnTestOverlapEnd");
-	box->OnComponentEndOverlap.Add(DelegateEnd);
-
-
-	// More...
-	//BoxComponent->bUseComplexAsSimpleCollision = false;
-	//BoxComponent->
-
-	//Mesh->bGenerateHitEvents = true;
-	mesh->SetNotifyRigidBodyCollision(true);
-	box->SetNotifyRigidBodyCollision(true);
-
-	// And more...
-	//mesh->WakeRigidBody();
-#endif
-
 }
 
 // Called when the game starts or when spawned
 void APop::BeginPlay()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay called, this=%p"), this);
-
 	Super::BeginPlay();
 }
 
 // Called every frame
 void APop::Tick(float DeltaTime)
 {
-#if 0 /* Just TEST */
-	RootComponent = mesh;
-	box->SetupAttachment(mesh);
-#endif
-
-	//FVector loc = GetActorTransform().GetLocation();
-
-	/*
-	FVector boxLoc = box->GetComponentLocation();
-	FVector boxLoc2 = box->GetComponentToWorld().GetLocation();
-	FVector boxRelLoc = box->GetRelativeTransform().GetLocation();
-	UE_LOG(LogTemp, Warning, TEXT("APop::Tick called, box=%p, boxLoc: X=%f, Y=%f, Z=%f,  boxLoc: X=%f, Y=%f, Z=%f,  rel box: X=%f, Y=%f, Z=%f"),
-		box, boxLoc.X, boxLoc.Y, boxLoc.Z, boxLoc2.X, boxLoc2.Y, boxLoc2.Z, boxRelLoc.X, boxRelLoc.Y, boxRelLoc.Z);
-	*/
-
 	Super::Tick(DeltaTime);
-
-	//SetActorLocation(FVector(loc.X, loc.Y + 1.0, loc.Z));
 }
 
 FString APop::ToString() {
@@ -282,155 +248,6 @@ FString APop::ToString() {
 	return str;
 }
 
-
-
-
-
-
-#if 0 /* Try 1 181106 (just one cube, no thing trees */
-void APop::BuildMesh()
-{
-
-	/* To build... */
-
-	TArray<FVector> vertices;
-	vertices.Add(FVector(0, 0, 0));
-	vertices.Add(FVector(0, 100, 0));
-	vertices.Add(FVector(0, 0, 100));
-	vertices.Add(FVector(0, 100, 100));
-
-	vertices.Add(FVector(100, 0, 0));
-	vertices.Add(FVector(100, 100, 0));
-	vertices.Add(FVector(100, 0, 100));
-	vertices.Add(FVector(100, 100, 100));
-
-
-
-	TArray<int32> Triangles;
-	// Side 1 (front)
-	Triangles.Add(0);
-	Triangles.Add(1);
-	Triangles.Add(2);
-
-	Triangles.Add(3);
-	Triangles.Add(2);
-	Triangles.Add(1);
-
-	// Side 2 (bottom)
-	Triangles.Add(0);
-	Triangles.Add(5);
-	Triangles.Add(1);
-
-	Triangles.Add(5);
-	Triangles.Add(0);
-	Triangles.Add(4);
-
-	// Side 3 (left)
-	Triangles.Add(2);
-	Triangles.Add(4);
-	Triangles.Add(0);
-
-	Triangles.Add(4);
-	Triangles.Add(2);
-	Triangles.Add(6);
-
-	// Side 4 (top)
-	Triangles.Add(3);
-	Triangles.Add(6);
-	Triangles.Add(2);
-
-	Triangles.Add(6);
-	Triangles.Add(3);
-	Triangles.Add(7);
-
-	// Side 5 (right)
-	Triangles.Add(1);
-	Triangles.Add(7);
-	Triangles.Add(3);
-
-	Triangles.Add(7);
-	Triangles.Add(1);
-	Triangles.Add(5);
-
-	// Side 6 (back)
-	Triangles.Add(6);
-	Triangles.Add(5);
-	Triangles.Add(4);
-
-	Triangles.Add(5);
-	Triangles.Add(6);
-	Triangles.Add(7);
-
-
-	TArray<FVector> normals;
-	normals.Add(FVector(1, 0, 0));
-	normals.Add(FVector(1, 0, 0));
-	normals.Add(FVector(1, 0, 0));
-	normals.Add(FVector(1, 0, 0));
-	//normals.Add(FVector(1, 0, 0));
-	//normals.Add(FVector(1, 0, 0));
-	//normals.Add(FVector(1, 0, 0));
-	//normals.Add(FVector(1, 0, 0));
-
-	TArray<FVector2D> UV0;
-	UV0.Add(FVector2D(0, 0));
-	UV0.Add(FVector2D(10, 0));
-	UV0.Add(FVector2D(0, 10));
-	UV0.Add(FVector2D(10, 10));
-
-	//UV0.Add(FVector2D(0, 0));
-	//UV0.Add(FVector2D(10, 0));
-	//UV0.Add(FVector2D(0, 10));
-	//UV0.Add(FVector2D(10, 10));
-
-	TArray<FRuntimeMeshTangent> tangents;
-
-	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
-	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
-	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
-	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
-
-
-	//tangents.Add(FProcMeshTangent(0, 1, 0));
-	//tangents.Add(FProcMeshTangent(0, 1, 0));
-	//tangents.Add(FProcMeshTangent(0, 1, 0));
-	//tangents.Add(FProcMeshTangent(0, 1, 0));
-
-	TArray<FColor> vertexColors;
-
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-
-	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh, will call CreateMeshSection"));
-
-
-	// For a moment, just pass verts and tris
-	mesh->CreateMeshSection(0, vertices, Triangles,
-							normals, UV0, vertexColors,
-							tangents, true, EUpdateFrequency::Frequent);
-
-}
-#endif
-
-
-#if 0 /* Try 2 181106 (thing trees) */
-void APop::BuildMesh()
-{
-
-
-
-}
-#endif
-
-
-#if 1 /* RMC code from old vred */
 
 //
 // Build mesh section and also add collision grab boxes
@@ -457,13 +274,12 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	TArray<FVertexArray> verts2Dim;
 	TArray<FInt32Array> tris2Dim;
 	TArray<FColorArray> colors2Dim;
+	TArray<FTrafoArray> collisions2Dim;
 	TArray<FTransform> collisionCubePositions;
-	thingRef->ComputeMeshData(verts2Dim, tris2Dim, colors2Dim, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
+	thingRef->ComputeMeshData(verts2Dim, tris2Dim, colors2Dim, collisions2Dim, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
 
-	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: ComputeMeshData gave back collisionCubePositions.Num()==%d,  verts2Dim.Num()=%d,  tris2Dim.Num()=%d,  vertexColors.Num()=%d"),
-		collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num(), colors2Dim.Num());
-	thingRef->Log2DimColorArray(colors2Dim);
-
+	//UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: ComputeMeshData gave back collisionCubePositions.Num()==%d,  verts2Dim.Num()=%d,  tris2Dim.Num()=%d,  colors2Dim.Num()=%d,  collisions2Dim.Num()=%d"),
+	//	collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num(), colors2Dim.Num(), collisions2Dim.Num());
 
 	// The mesh may already have data. Remove it
 	mesh->ClearAllMeshSections();
@@ -476,51 +292,54 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	//Mesh->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, false, EUpdateFrequency::Frequent);
 	for (int i = 0; i < verts2Dim.Num(); ++i) {
 
-
-		/*
-		RuntimeMeshComp->CreateMeshSection(SectionIndex, *Vertices.GetVertices(), *Triangles.GetIndices(),
-		bShouldCreateCollision, EUpdateFrequency::Infrequent, ESectionUpdateFlags::MoveArrays);
-		*/
-		//					ix      vert    tri     createColl  freq   MoveArrays
-
-		//                  ix      vert    tri     norm  UV  colors   tangents    createColl    freq
-#if 1
-		//Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
-
-
-
 		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, colors2Dim[i].Colors, TArray<FRuntimeMeshTangent>(), false);
-#else /* TEST: UV mapping. TODO: Don't use the same UV array for all mesh sections! .......................................................................................... */
-		Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, TArray<FColor>(), TArray<FRuntimeMeshTangent>(), false);
-
-		// Another try, WITHOUT UV and everything!
-		//Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints,
-		//	false, EUpdateFrequency::Infrequent, ESectionUpdateFlags::MoveArrays);
-		/*
-		RuntimeMeshComp->CreateMeshSection(i, *Vertices.GetVertices(), *Triangles.GetIndices(),
-							bShouldCreateCollision, EUpdateFrequency::Infrequent, ESectionUpdateFlags::MoveArrays);
-		*/
-
-		// Try with everything, including UV. WORKS!!
-		//Mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, normals, UV0, vertexColors, tangents, false);
-
-
-#endif
-
-		/* Removed 181106
-		mesh->SetMaterial(i, MaterialInstance);
-		*/
 
 		// Set a material on just this mesh section
+#if 0
 		if (i % 2 == 0)
 			mesh->SetSectionMaterial(i, MaterialInstance);
 		else
 			mesh->SetSectionMaterial(i, MaterialInstance2);
+#endif
 
 
-		/* Removing 180919 when trying to get house parts to work again
-		Mesh->AddCollisionConvexMesh(verts2Dim[i].Verts);
-		*/
+
+		switch (i % 8) {
+
+			case 0:
+				mesh->SetSectionMaterial(i, MaterialInstance1);
+				break;
+			case 1:
+
+#if 0 /* TEST: Let red shine! */
+				MaterialInstance2->SetVectorParameterValue(FName(TEXT("EmissiveColor")), FLinearColor(0.97f, 0.32f, 0.30f));
+
+#endif
+
+				mesh->SetSectionMaterial(i, MaterialInstance2);
+				break;
+			case 2:
+				mesh->SetSectionMaterial(i, MaterialInstance3);
+				break;
+			case 3:
+				mesh->SetSectionMaterial(i, MaterialInstance4);
+				break;
+			case 4:
+				mesh->SetSectionMaterial(i, MaterialInstance5);
+				break;
+			case 5:
+				mesh->SetSectionMaterial(i, MaterialInstance6);
+				break;
+			case 6:
+				mesh->SetSectionMaterial(i, MaterialInstance7);
+				break;
+			case 7:
+				mesh->SetSectionMaterial(i, MaterialInstance8);
+				break;
+			default:
+				mesh->SetSectionMaterial(i, MaterialInstance1);
+		}
+
 	}
 
 	//Mesh->CreateMeshSection(0, vertices, Triangles /*, TArray<FVector> */);
@@ -543,17 +362,18 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 	//Mesh->BodyInstance.SetResponseToAllChannels(ECR_Block);
 
-	AddGrabBoxes(collisionCubePositions);
+	//AddGrabBoxes(collisionCubePositions);
 
+	AddGrabBoxes2Dim(collisions2Dim);
 
 }
 
 
 
 
-
+#if 0
 //
-// Setup the the collision boxes for grabbing. Make them children of the root mesh.
+// Setup the collision boxes for grabbing. Make them children of the root mesh.
 //
 void APop::AddGrabBoxes(TArray<FTransform>& grabBoxLocations) {
 
@@ -565,282 +385,178 @@ void APop::AddGrabBoxes(TArray<FTransform>& grabBoxLocations) {
 
 		FTransform trafo = grabBoxLocations[grabBoxNo];
 		FVector loc = trafo.GetLocation();
-		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, grabBoxNo==%d,  loc: X=%f  Y=%f  Z=%f"), grabBoxNo, loc.X, loc.Y, loc.Z);
 
-		//collisionBoxN = CreateDefaultSubobject<UBoxComponent>(TEXT("Pop collision box %d"), grabBoxNo);
-		///collisionBoxN = CreateDefaultSubobject<UBoxComponent>(TEXT("Pop collision box N"));
-
-		// ...   to dynamiclly create component use NewObject() and MyComponent->RegisterComponent()
-
-		//T* NewObject(UObject* Outer, UClass* Class, FName Name = NAME_None, EObjectFlags Flags = RF_NoFlags, UObject* Template = nullptr, bool bCopyTransientsFromClassDefaults = false, FObjectInstancingGraph* InInstanceGraph = nullptr)
-
-		//FString boxNameStr = "Pop collision box " + grabBoxNo;
 		FString boxNameStr = "Pop collision box " + FString::FromInt(grabBoxNo);
 		FName boxName = FName(*boxNameStr);
-
-		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, boxNameStr: %s    boxName: %s"), *boxNameStr, *boxName.ToString());
-
-
-		//FName boxName = TEXT("Pop collision box N");
 
 		collisionBoxN = NewObject<UBoxComponent>(this, boxName);
 
 		collisionBoxN->SetupAttachment(mesh);
 		collisionBoxN->InitBoxExtent(FVector(CUBE_SIZE / 2, CUBE_SIZE / 2, CUBE_SIZE / 2));
-		// Align box with mesh
-		//collisionBoxN->SetRelativeLocation(FVector(50.0f, 50.0f, 50.0f) + loc);
 
-		// TEST
-		//trafo.AddToTranslation(FVector(50, 50, 50));
-
-		/**/
-		FVector locAfter = trafo.GetLocation();
-		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, grabBoxNo==%d,  locAfter: X=%f  Y=%f  Z=%f"), grabBoxNo, locAfter.X, locAfter.Y, locAfter.Z);
-		/**/
-
+		FVector locAfter = trafo.GetLocation();	
 
 		collisionBoxN->SetRelativeTransform(trafo);  // TODO: Add (50 50 50) to the location part
-
-
 		collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);		// Grabbable
 		collisionBoxN->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// Try also QueryOnly
 		collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Overlap);  // Maybe overlap just for the grab sphere is faster?
 		collisionBoxN->SetSimulatePhysics(false);
 		collisionBoxN->SetEnableGravity(false);
-
-		// TEST: Make each collisionBox a "Physics body" and set it to block the ECC_Visibility channel
 		collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
 		collisionBoxN->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-
-
-		// TEST TO REGISTER OVERLAP CALLBACK FOR EACH COLLISION BOX
-		//collisionBoxN->OnComponentBeginOverlap.AddDynamic(this, &APop::OnBeginOverlap);
-
 		collisionBoxN->OnBeginCursorOver.AddDynamic(this, &APop::CustomOnBeginMouseOver);
-
+		collisionBoxN->OnEndCursorOver.AddDynamic(this, &APop::CustomOnEndMouseOver);
 		collisionBoxN->OnClicked.AddDynamic(this, &APop::CustomOnClicked);
-
-
 		collisionBoxN->RegisterComponent();
-
-		UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes, registered new UBoxComponent %p, name: %s"), collisionBoxN, *collisionBoxN->GetName());
-
 
 		grabBoxes.Add(collisionBoxN);
 	}
 }
-
-
-
-
 #endif
 
+//
+// Setup the collision boxes for grabbing. Make them children of the root mesh.
+//
+void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 
+	UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes2Dim called, address %p, collisions2Dim.Num()==%d"), this, collisions2Dim.Num());
 
+	UBoxComponent* collisionBoxN;
 
+	for (int32 subtreeNo = 0; subtreeNo < collisions2Dim.Num(); ++subtreeNo) {
 
+		TArray<FTransform> grabBoxLocations = collisions2Dim[subtreeNo].Trafos;
 
+		for (int32 grabBoxNo = 0; grabBoxNo < grabBoxLocations.Num(); ++grabBoxNo) {
 
-#if 0
+			FTransform trafo = grabBoxLocations[grabBoxNo];
+			FVector loc = trafo.GetLocation();
 
+			FString boxNameStr = "Pop box " + FString::FromInt(grabBoxNo) + " of subtree " + FString::FromInt(subtreeNo);
+			FName boxName = FName(*boxNameStr);
 
+			collisionBoxN = NewObject<UBoxComponent>(this, boxName);
 
-void APop::CreateTriangle()
-{
+			collisionBoxN->SetupAttachment(mesh);
+			collisionBoxN->InitBoxExtent(FVector(CUBE_SIZE / 2, CUBE_SIZE / 2, CUBE_SIZE / 2));
 
-	/* To build... */
+			FVector locAfter = trafo.GetLocation();
 
-	TArray<FVector> vertices;
-	vertices.Add(FVector(0, 0, 0));
-	vertices.Add(FVector(0, 100, 0));
-	vertices.Add(FVector(0, 0, 100));
-	vertices.Add(FVector(0, 100, 100));
+			collisionBoxN->SetRelativeTransform(trafo);  // TODO: Add (50 50 50) to the location part
+			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);		// Grabbable
+			collisionBoxN->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// Try also QueryOnly
+			collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Overlap);  // Maybe overlap just for the grab sphere is faster?
+			collisionBoxN->SetSimulatePhysics(false);
+			collisionBoxN->SetEnableGravity(false);
+			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+			collisionBoxN->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+			collisionBoxN->OnBeginCursorOver.AddDynamic(this, &APop::CustomOnBeginMouseOver);
+			collisionBoxN->OnEndCursorOver.AddDynamic(this, &APop::CustomOnEndMouseOver);
+			collisionBoxN->OnClicked.AddDynamic(this, &APop::CustomOnClicked);
+			collisionBoxN->RegisterComponent();
 
-	vertices.Add(FVector(100, 0, 0));
-	vertices.Add(FVector(100, 100, 0));
-	vertices.Add(FVector(100, 0, 100));
-	vertices.Add(FVector(100, 100, 100));
-
-
-
-	TArray<int32> Triangles;
-	// Side 1 (front)
-	Triangles.Add(0);
-	Triangles.Add(1);
-	Triangles.Add(2);
-
-	Triangles.Add(3);
-	Triangles.Add(2);
-	Triangles.Add(1);
-
-	// Side 2 (bottom)
-	Triangles.Add(0);
-	Triangles.Add(5);
-	Triangles.Add(1);
-
-	Triangles.Add(5);
-	Triangles.Add(0);
-	Triangles.Add(4);
-
-	// Side 3 (left)
-	Triangles.Add(2);
-	Triangles.Add(4);
-	Triangles.Add(0);
-
-	Triangles.Add(4);
-	Triangles.Add(2);
-	Triangles.Add(6);
-
-	// Side 4 (top)
-	Triangles.Add(3);
-	Triangles.Add(6);
-	Triangles.Add(2);
-
-	Triangles.Add(6);
-	Triangles.Add(3);
-	Triangles.Add(7);
-
-	// Side 5 (right)
-	Triangles.Add(1);
-	Triangles.Add(7);
-	Triangles.Add(3);
-
-	Triangles.Add(7);
-	Triangles.Add(1);
-	Triangles.Add(5);
-
-	// Side 6 (back)
-	Triangles.Add(6);
-	Triangles.Add(5);
-	Triangles.Add(4);
-
-	Triangles.Add(5);
-	Triangles.Add(6);
-	Triangles.Add(7);
-
-
-	TArray<FVector> normals;
-	normals.Add(FVector(1, 0, 0));
-	normals.Add(FVector(1, 0, 0));
-	normals.Add(FVector(1, 0, 0));
-	normals.Add(FVector(1, 0, 0));
-	//normals.Add(FVector(1, 0, 0));
-	//normals.Add(FVector(1, 0, 0));
-	//normals.Add(FVector(1, 0, 0));
-	//normals.Add(FVector(1, 0, 0));
-
-	TArray<FVector2D> UV0;
-	UV0.Add(FVector2D(0, 0));
-	UV0.Add(FVector2D(10, 0));
-	UV0.Add(FVector2D(0, 10));
-	UV0.Add(FVector2D(10, 10));
-
-	//UV0.Add(FVector2D(0, 0));
-	//UV0.Add(FVector2D(10, 0));
-	//UV0.Add(FVector2D(0, 10));
-	//UV0.Add(FVector2D(10, 10));
-
-	TArray<FRuntimeMeshTangent> tangents;
-
-	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
-	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
-	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
-	tangents.Add(FRuntimeMeshTangent(0, 1, 0));
-
-
-	//tangents.Add(FProcMeshTangent(0, 1, 0));
-	//tangents.Add(FProcMeshTangent(0, 1, 0));
-	//tangents.Add(FProcMeshTangent(0, 1, 0));
-	//tangents.Add(FProcMeshTangent(0, 1, 0));
-
-	TArray<FColor> vertexColors;
-
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-	vertexColors.Add(FColor::White);
-
-
-	////Mesh->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true, EUpdateFrequency::Frequent);
-	// For a moment, just pass verts and tris
-	//Mesh->CreateMeshSection(0, vertices, Triangles, TArray<FVector>);
-
-
-
-	///Mesh->CreateMeshSection_LinearColor(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
-
-	// TEST false, TEMPORARY FOR AddCollisionConvexMesh
-	//mesh->CreateMeshSection_LinearColor(0, vertices, Triangles, normals, UV0, vertexColors, tangents, false);
-
-	// Enable collision data
-	//  Seems to be private in RuntimeMeshComponent...
-	//Mesh->ContainsPhysicsTriMeshData(true);
-
-
-	//Mesh->AddCollisionConvexMesh(vertices);
-
-
-	// TEST override mass
-	//mesh->GetBodyInstance()->bOverrideMass = true;
-
-	/*
-	// Change Mass
-	float Mass = Mesh->GetMass();
-	///UE_LOG(LogTemp, Warning, TEXT(">>>> Starting Mass = %s"), *FString::SanitizeFloat(Mass));
-	Mesh->GetBodyInstance()->bOverrideMass = true;
-	//mesh->SetMassOverrideInKg(NAME_None, this->NewScale);
-	Mesh->SetMassOverrideInKg(NAME_None, 100.0f, true);
-	Mesh->GetBodyInstance()->UpdateMassProperties();
-	Mass = Mesh->GetMass();
-	///UE_LOG(LogTemp, Warning, TEXT(">>>> New Mass = %s"), *FString::SanitizeFloat(Mass));
-	*/
-
-
-
-	// TEST
-	Mesh->RegisterComponent();
-	//mesh->FinishAndRegisterComponent();
-	// TEST (nope, made mesh invisible)
-	//FinishAndRegisterComponent(mesh);
-
-
-	// Try (dupl code)
-
-	Mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-
-	//mesh->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	//Block All!
-	//////Mesh->BodyInstance.SetResponseToAllChannels(ECR_Block);
-
-	// TRY THIS
-	//mesh->SetCollisionProfileName(TEXT("OverlapAll"));
-	/**/
+			grabBoxes.Add(collisionBoxN);
+		}
+	}
 }
-
-
-
-#endif
-
 
 void APop::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Pop Mouse Over"));
-	}
 
 	UBoxComponent* grabBox = Cast<UBoxComponent>(TouchedComponent);
 	if (grabBox == nullptr)
-	{
 		return;
+
+	FString dummyLeft, subtreeStr;
+	grabBox->GetName().Split(TEXT("subtree "), &dummyLeft, &subtreeStr);
+	int subtree = FCString::Atoi(*subtreeStr);
+
+	//
+	// Highlight the Pop that the mouse pointer is over
+	//
+	UMaterialInstanceDynamic* mi = nullptr;
+	switch (subtree % 8) {
+
+		case 0:
+			mi = MaterialInstance1;
+			break;
+		case 1:
+			mi = MaterialInstance2;
+			break;
+		case 2:
+			mi = MaterialInstance3;
+			break;
+		case 3:
+			mi = MaterialInstance4;
+			break;
+		case 4:
+			mi = MaterialInstance5;
+			break;
+		case 5:
+			mi = MaterialInstance6;
+			break;
+		case 6:
+			mi = MaterialInstance7;
+			break;
+		case 7:
+			mi = MaterialInstance8;
+			break;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnBeginMouseOver: Pop Mouse Over,  TouchedComponent=%p or %p, with name=%s"),
+	verify(mi != nullptr);
+
+	mi->SetVectorParameterValue(FName(TEXT("EmissiveColor")), FLinearColor(0.97f, 0.32f, 0.30f));
+
+}
+
+void APop::CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent)
+{
+
+	UBoxComponent* grabBox = Cast<UBoxComponent>(TouchedComponent);
+	if (grabBox == nullptr)
+		return;
+
+	FString dummyLeft, subtreeStr;
+	grabBox->GetName().Split(TEXT("subtree "), &dummyLeft, &subtreeStr);
+	int subtree = FCString::Atoi(*subtreeStr);
+
+	//
+	// De-highlight the Pop that the mouse pointer was over
+	//
+	UMaterialInstanceDynamic* mi = nullptr;
+	switch (subtree % 8) {
+
+	case 0:
+		mi = MaterialInstance1;
+		break;
+	case 1:
+		mi = MaterialInstance2;
+		break;
+	case 2:
+		mi = MaterialInstance3;
+		break;
+	case 3:
+		mi = MaterialInstance4;
+		break;
+	case 4:
+		mi = MaterialInstance5;
+		break;
+	case 5:
+		mi = MaterialInstance6;
+		break;
+	case 6:
+		mi = MaterialInstance7;
+		break;
+	case 7:
+		mi = MaterialInstance8;
+		break;
+	}
+
+	verify(mi != nullptr);
+
+	mi->SetVectorParameterValue(FName(TEXT("EmissiveColor")), FLinearColor(0.0916f, 0.271f, 0.0705f));
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnEndMouseOver: Pop Mouse End,  TouchedComponent=%p or %p, with name=%s"),
 		   TouchedComponent, grabBox, *grabBox->GetName());
 
 }
@@ -851,6 +567,100 @@ void APop::CustomOnClicked(UPrimitiveComponent* clickedComponent, FKey inKey)
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Pop Mouse Click"));
-		UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnClicked: Pop Mouse Click"));
+		UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnClicked: Pop Mouse Click on component with name=<%s>"),
+			   *clickedComponent->GetName());
 	}
+
+	AMyRunebergVR_Pawn* thePawn = Cast< AMyRunebergVR_Pawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+
+	thePawn = ((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn;
+
+#if 0 /* Drop or Pickup */
+	//
+	// Attach clickedComponent to PawnRootMesh->Scene->MotionController_Right
+	//
+	if (picked)
+		Drop();
+	else
+		Pickup();
+#endif
+
+#if 1 /* Signal that Pop wants to be dropped or picked */
+	((AvreduGameMode*)GetWorld()->GetAuthGameMode())->AddWantsPicking(this);
+#endif
+
+}
+
+#if 0
+void APop::Pickup() {
+	UActorComponent* motCon = GetRightMotionController();
+	DisableComponentsSimulatePhysics();
+	AttachToComponent(Cast<USceneComponent>(motCon),
+					  FAttachmentTransformRules::SnapToTargetIncludingScale,
+					  NAME_None);
+	picked = true;
+}
+#endif
+
+
+
+
+#if 0 /* Moved to PopManager */
+UActorComponent* APop::GetRightMotionController() {
+
+	AMyRunebergVR_Pawn*	thePawn = ((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn;
+	USceneComponent* theRoot = thePawn->PawnRootMesh;
+	TArray < USceneComponent* > children;
+
+	theRoot->GetChildrenComponents(true, children);
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: children.Num()=%d"), children.Num());
+
+	for (int ix = 0; ix < children.Num(); ++ix) {
+
+		USceneComponent* child = children[ix];
+
+		UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: child=%p, name=%s"),
+			child, *child->GetName());
+
+		if (child->GetName() == "MotionController_Right") {
+			UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: Returning %p"), child);
+			//UMotionControllerComponent* motCon = Cast<UMotionControllerComponent>(child);
+			return child;
+		}
+
+	}
+
+	return nullptr;
+}
+#endif
+
+void APop::LogComponentHierarchy(USceneComponent* rootComp) {
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::LogComponentHierarchy: Called, rootComp=%p"), rootComp);
+
+/*
+	void GetChildrenComponents
+	(
+		bool bIncludeAllDescendants,
+		TArray < USceneComponent * > & Children
+	)
+*/
+
+	USceneComponent* theRoot = rootComp;
+
+	TArray < USceneComponent* > children;
+		
+	theRoot->GetChildrenComponents(true, children);
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::LogComponentHierarchy: children.Num()=%d"), children.Num());
+
+	for (int ix = 0; ix < children.Num(); ++ix) {
+
+		USceneComponent* child = children[ix];
+
+		UE_LOG(LogTemp, Warning, TEXT("APop::LogComponentHierarchy: child=%p, name=%s"),
+			   child, *child->GetName());
+	}
+
 }

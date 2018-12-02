@@ -28,7 +28,13 @@ public:
 	
 	void AddChild(APop* parent, APop* toBeChild);
 	APop* Clone(APop* origPop, FString cloneName);
+	void Pickup(APop* pop);
+	void Drop(APop* pop);
 
 	void RotateAroundLocalY(APop* p, float degrees);
+
+private:
+	UActorComponent* GetRightMotionController();
+
 
 };

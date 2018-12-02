@@ -7,6 +7,7 @@
 #include "Thing.h"
 #include "Pop.h"
 
+
 // Sets default values
 APopManager::APopManager()
 {
@@ -29,12 +30,84 @@ void APopManager::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
+	UWorld* const World = GetWorld();
+	AvreduGameMode* theGameMode = (AvreduGameMode*)World->GetAuthGameMode();
+	TSet< APop* > wantsPicking = theGameMode->GetWantsPicking();
+
+	for (APop* pop : wantsPicking) {
+
+		UE_LOG(LogTemp, Warning, TEXT("APopManager::Tick: pop %p wants picking"), pop);
+
+		pop->picked ? Drop(pop) : Pickup(pop);
+		theGameMode->RemoveWantsPicking(pop);
+	}
+
+}
+
+void APopManager::Pickup(APop* pop) {
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup called, pop=%p"), pop);
+
+	UActorComponent* motCon = GetRightMotionController();
+	pop->DisableComponentsSimulatePhysics();
+	pop->AttachToComponent(Cast<USceneComponent>(motCon),
+						   FAttachmentTransformRules::SnapToTargetIncludingScale,
+						   NAME_None);
+	pop->picked = true;
+
+}
+
+#if 1 /* Just drop, don't join */
+void APopManager::Drop(APop* pop) {
+	pop->GetRootComponent()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	pop->mesh->SetSimulatePhysics(true);
+	pop->picked = false;
+}
+#endif
+
+#if 0 /* Drop and insert as child to Pop */
+void APop::Drop() {
+	GetRootComponent()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	mesh->SetSimulatePhysics(true);
+	picked = false;
+
+	// thePopManager->AddChild(...);
+}
+#endif
+
+
+UActorComponent* APopManager::GetRightMotionController() {
+
+	AMyRunebergVR_Pawn*	thePawn = ((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn;
+	USceneComponent* theRoot = thePawn->PawnRootMesh;
+	TArray < USceneComponent* > children;
+
+	theRoot->GetChildrenComponents(true, children);
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: children.Num()=%d"), children.Num());
+
+	for (int ix = 0; ix < children.Num(); ++ix) {
+
+		USceneComponent* child = children[ix];
+
+		UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: child=%p, name=%s"),
+			child, *child->GetName());
+
+		if (child->GetName() == "MotionController_Right") {
+			UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: Returning %p"), child);
+			//UMotionControllerComponent* motCon = Cast<UMotionControllerComponent>(child);
+			return child;
+		}
+
+	}
+
+	return nullptr;
 }
 
 
 APop* APopManager::Spawn(AThing* thing, FTransform transform) {
 
-	UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn called"));
+	//UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn called"));
 
 	/*
 	// Dummy transform data
@@ -95,15 +168,11 @@ void APopManager::AddChild(APop* parent, APop* toBeChild) {
 	//parent->thingRef->subThingRelTrafos.Add(...trafo of toBeChild seen relative to parent...);
 
 	// FOR NOW: Only the location part of the trafo. I.e. the distance between parent and toBeChild Pop:s
-
+#if 0
 	FVector locParent = parent->GetActorLocation();
 	FVector locChild = toBeChild->GetActorLocation();
 	FVector locDifference = locChild-locParent;
-
-	UE_LOG(LogTemp,
-		   Warning,
-		   TEXT("APopManager::AddChild: locParent: X=%f Y=%f Z=%f,  locChild: X=%f Y=%f Z=%f,  locDiff: X=%f Y=%f Z=%f,"),
-		   locParent.X, locParent.Y, locParent.Z, locChild.X, locChild.Y, locChild.Z, locDifference.X, locDifference.Y, locDifference.Z);
+#endif
 
 #if 0 /* Only location considered */
 	parent->thingRef->subThingRelTrafos.Add(FTransform(toBeChild->GetActorLocation() - parent->GetActorLocation()));
@@ -111,8 +180,6 @@ void APopManager::AddChild(APop* parent, APop* toBeChild) {
 	FTransform subThingRelTrafo = UKismetMathLibrary::ConvertTransformToRelative(parent->GetTransform(), toBeChild->GetTransform());
 	parent->thingRef->subThingRelTrafos.Add(subThingRelTrafo);
 #endif
-
-
 
 	parent->thingRef->subThingRoles.Add("undefined");
 
