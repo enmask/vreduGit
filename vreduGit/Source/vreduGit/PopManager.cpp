@@ -21,6 +21,7 @@ void APopManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	numPops = 0;
 }
 
 // Called every frame
@@ -53,6 +54,9 @@ void APopManager::Pickup(APop* pop) {
 	pop->AttachToComponent(Cast<USceneComponent>(motCon),
 						   FAttachmentTransformRules::SnapToTargetIncludingScale,
 						   NAME_None);
+
+	HighlightCloseTopChildren(pop);
+
 	pop->picked = true;
 
 }
@@ -107,28 +111,11 @@ UActorComponent* APopManager::GetRightMotionController() {
 
 APop* APopManager::Spawn(AThing* thing, FTransform transform) {
 
-	//UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn called"));
-
-	/*
-	// Dummy transform data
-	FVector Location(0.0f, 0.0f, 0.0f);
-	FRotator Rotation(0.0f, 0.0f, 0.0f);
-	FActorSpawnParameters SpawnInfo;
-	FTransform trafo(Location);
-	*/
-
 	//
 	// Start spawning
 	//
 
 	UWorld* const World = GetWorld();
-	if (World)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn: World exists"));
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn: World does NOT exist"));
-	}
 
 	APop* newPop = World->SpawnActorDeferred<APop>(APop::StaticClass(), transform);
 
@@ -142,9 +129,30 @@ APop* APopManager::Spawn(AThing* thing, FTransform transform) {
 	//
 	newPop->FinishSpawning(transform);
 
-	UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn: Will return newPop=%p"), newPop);
+	numPops++;
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn: Will return newPop=%p with name=<%s>, numPops=%d"),
+		   newPop, *newPop->GetName(), numPops);
 	return newPop;
 }
+
+//
+// Destroy a Pop
+//
+void APopManager::DestroyPop(APop* pop) {
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::DestroyPop: Will return newPop=%p with name=<%s> ..."),
+		   pop, *pop->GetName());
+
+	pop->Destroy();
+	numPops--;
+
+	UE_LOG(LogTemp, Warning, TEXT("...  After DestroyPop, numPops=%d"), numPops);
+
+}
+
+
+
 
 void APopManager::AddChild(APop* parent, APop* toBeChild) {
 
@@ -184,7 +192,7 @@ void APopManager::AddChild(APop* parent, APop* toBeChild) {
 	parent->thingRef->subThingRoles.Add("undefined");
 
 	// Destroy toBeChild Pop
-	toBeChild->Destroy();
+	DestroyPop(toBeChild);
 
 	// Rebuild mesh to get the combined mesh
 	parent->BuildMesh();
@@ -266,5 +274,67 @@ void APopManager::RotateAroundLocalY(APop* p, float degrees) {
 #endif
 
 	p->AddActorWorldRotation(theRotator);
+
+}
+
+//
+// TODO: Maybe implement FindCloseTopChildren instead
+//
+void APopManager::HighlightCloseTopChildren(APop* pop) {
+
+	/* Sweep solution, will probably not use that...
+	FCollisionShape MySphere = FCollisionShape::MakeSphere(500.0f); // 5M Radius
+	TArray<FHitResults> OutResults;
+	GetWorld()->SweepMultiByChannel(OutResults, SweepStart, SweepEnd, FQuat::Identity, TraceChannel, MySphere);
+	*/
+
+	TArray<AActor*> thePops;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APop::StaticClass(), thePops);
+
+	// All Pop:s found in the level should equal the number of Pop:s that the PopManager keeps track of
+	verify(thePops.Num() == numPops);
+
+	for (auto& currentAct : thePops) {    //For example lets set the actors location to (0,0,0)
+		//currentPop->SetActorLocation(FVector(0, 0, 0), false, 0, ETeleportType::None);
+		
+		APop* currentPop = Cast<APop>(currentAct);
+		UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentPop=%p, name=%s, thing name=%s"),
+			   currentPop, *currentPop->GetName(), *currentPop->thingRef->name);
+
+		if (currentPop == pop)
+			continue;
+
+		if (IsClose(currentPop, pop)) {
+			UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentPop <%s> *IS* close to pop <%s>"),
+				   *currentPop->thingRef->name, *pop->thingRef->name);
+
+			// Hightlight all sections of this Pop
+			currentPop->Highlight(-1, 1);
+
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentPop <%s> is NOT close to pop <%s>"),
+				*currentPop->thingRef->name, *pop->thingRef->name);
+		}
+	}
+
+}
+
+
+bool APopManager::IsClose(APop* pop1, APop* pop2) {
+	UWorld* const World = GetWorld();
+	AvreduGameMode* theGameMode = (AvreduGameMode*)World->GetAuthGameMode();
+	FVector loc1 = pop1->GetActorLocation();
+	FVector loc2 = pop2->GetActorLocation();
+	float distSquared = (loc2 - loc1).SizeSquared();
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::IsClose: pop1 loc: X=%f  Y=%f  Z=%f,   pop2 loc: X=%f  Y=%f  Z=%f"),
+		   loc1.X, loc1.Y, loc1.Z, loc2.X, loc2.Y, loc2.Z);
+
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::IsClose: distSquared=%f, theGameMode->closeDistanceSquared=%f"),
+		   distSquared, theGameMode->closeDistanceSquared);
+
+	return (distSquared <= theGameMode->closeDistanceSquared);
 
 }

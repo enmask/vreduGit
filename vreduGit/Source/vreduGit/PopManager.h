@@ -25,7 +25,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	APop* Spawn(AThing* thing, FTransform transform);
-	
+	void DestroyPop(APop* pop);
+
 	void AddChild(APop* parent, APop* toBeChild);
 	APop* Clone(APop* origPop, FString cloneName);
 	void Pickup(APop* pop);
@@ -33,8 +34,12 @@ public:
 
 	void RotateAroundLocalY(APop* p, float degrees);
 
+	void HighlightCloseTopChildren(APop* pop);
+	bool IsClose(APop* pop1, APop* pop2);
+
 private:
 	UActorComponent* GetRightMotionController();
 
-
+	UPROPERTY(VisibleAnywhere)
+		int numPops;
 };

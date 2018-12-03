@@ -56,13 +56,8 @@ public:
 	// API methods
 	//
 
-#if 0 /* Moved to PopManager */
-	// Make the right motion controller pick up this Pop
-	void Pickup();
-
-	// Make the right motion controller drop this Pop
-	void Drop();
-#endif
+	// Highlight (or de-highlight) the Pop, or a part of it, in a color to make it stand out to the user
+	void Highlight(int sectionIx, int lightLevel);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

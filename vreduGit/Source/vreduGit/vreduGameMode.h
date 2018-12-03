@@ -53,6 +53,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		int autotestNumTicks;
 
+	// Define "close" in e.g. IsClose(pop1, pop2)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float closeDistanceSquared = 500000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		FLinearColor deHighlightColor = FLinearColor(0.0916f, 0.271f, 0.0705f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		FLinearColor highlightColor = FLinearColor(0.97f, 0.32f, 0.30f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		FLinearColor brightHighlightColor = FLinearColor(1.0f, 1.0f, 1.0f);
+
 	// TODO: Maybe move wantsPicking and its 2 access functions to a new separate class PopSignals
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")
 		TSet< APop* > wantsPicking;

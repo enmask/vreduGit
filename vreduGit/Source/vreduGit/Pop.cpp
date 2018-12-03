@@ -249,6 +249,7 @@ FString APop::ToString() {
 }
 
 
+
 //
 // Build mesh section and also add collision grab boxes
 //
@@ -474,6 +475,9 @@ void APop::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
 	//
 	// Highlight the Pop that the mouse pointer is over
 	//
+#if 1
+	Highlight(subtree, 1);
+#else
 	UMaterialInstanceDynamic* mi = nullptr;
 	switch (subtree % 8) {
 
@@ -506,7 +510,7 @@ void APop::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
 	verify(mi != nullptr);
 
 	mi->SetVectorParameterValue(FName(TEXT("EmissiveColor")), FLinearColor(0.97f, 0.32f, 0.30f));
-
+#endif
 }
 
 void APop::CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent)
@@ -523,6 +527,9 @@ void APop::CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent)
 	//
 	// De-highlight the Pop that the mouse pointer was over
 	//
+#if 1
+	Highlight(subtree, 0);
+#else
 	UMaterialInstanceDynamic* mi = nullptr;
 	switch (subtree % 8) {
 
@@ -555,6 +562,7 @@ void APop::CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent)
 	verify(mi != nullptr);
 
 	mi->SetVectorParameterValue(FName(TEXT("EmissiveColor")), FLinearColor(0.0916f, 0.271f, 0.0705f));
+#endif
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnEndMouseOver: Pop Mouse End,  TouchedComponent=%p or %p, with name=%s"),
 		   TouchedComponent, grabBox, *grabBox->GetName());
@@ -571,23 +579,13 @@ void APop::CustomOnClicked(UPrimitiveComponent* clickedComponent, FKey inKey)
 			   *clickedComponent->GetName());
 	}
 
-	AMyRunebergVR_Pawn* thePawn = Cast< AMyRunebergVR_Pawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	//AMyRunebergVR_Pawn* thePawn = Cast< AMyRunebergVR_Pawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 
-	thePawn = ((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn;
+	//thePawn = ((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn;
 
-#if 0 /* Drop or Pickup */
-	//
-	// Attach clickedComponent to PawnRootMesh->Scene->MotionController_Right
-	//
-	if (picked)
-		Drop();
-	else
-		Pickup();
-#endif
-
-#if 1 /* Signal that Pop wants to be dropped or picked */
+	// Signal that Pop wants to be dropped or picked
 	((AvreduGameMode*)GetWorld()->GetAuthGameMode())->AddWantsPicking(this);
-#endif
+
 
 }
 
@@ -602,38 +600,86 @@ void APop::Pickup() {
 }
 #endif
 
+//
+// Highlight a section of the mesh by passing the sectionIx.
+// Highlight all sections of the mesh by passing -1.
+//
+// lightLevel 0 is not highlighted, 1 is highlighted, 2 is more highlighted
+//
+void APop::Highlight(int sectionIx, int lightLevel) {
 
+	UMaterialInstanceDynamic* mi = nullptr;
+	if (sectionIx == -1) {
+	}
+	else {
+		switch (sectionIx % 8) {
 
-
-#if 0 /* Moved to PopManager */
-UActorComponent* APop::GetRightMotionController() {
-
-	AMyRunebergVR_Pawn*	thePawn = ((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn;
-	USceneComponent* theRoot = thePawn->PawnRootMesh;
-	TArray < USceneComponent* > children;
-
-	theRoot->GetChildrenComponents(true, children);
-
-	UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: children.Num()=%d"), children.Num());
-
-	for (int ix = 0; ix < children.Num(); ++ix) {
-
-		USceneComponent* child = children[ix];
-
-		UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: child=%p, name=%s"),
-			child, *child->GetName());
-
-		if (child->GetName() == "MotionController_Right") {
-			UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: Returning %p"), child);
-			//UMotionControllerComponent* motCon = Cast<UMotionControllerComponent>(child);
-			return child;
+		case 0:
+			mi = MaterialInstance1;
+			break;
+		case 1:
+			mi = MaterialInstance2;
+			break;
+		case 2:
+			mi = MaterialInstance3;
+			break;
+		case 3:
+			mi = MaterialInstance4;
+			break;
+		case 4:
+			mi = MaterialInstance5;
+			break;
+		case 5:
+			mi = MaterialInstance6;
+			break;
+		case 6:
+			mi = MaterialInstance7;
+			break;
+		case 7:
+			mi = MaterialInstance8;
+			break;
 		}
 
+		verify(mi != nullptr);
 	}
 
-	return nullptr;
+	AvreduGameMode* theGameMode = (AvreduGameMode*)GetWorld()->GetAuthGameMode();
+	FLinearColor color = theGameMode->deHighlightColor;
+
+	switch (lightLevel) {
+
+		case 0:
+			// De-highlight
+			color = theGameMode->deHighlightColor;
+			break;
+		case 1:
+			// Highlight
+			color = theGameMode->highlightColor;
+			break;
+		case 2:
+			// Highlight more
+			color = theGameMode->brightHighlightColor;
+			break;
+		default:
+			// At this point, this verify will always fail
+			verify(lightLevel >= 0 && lightLevel <= 2);
+	}
+
+	if (sectionIx == -1) {
+		MaterialInstance1->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MaterialInstance2->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MaterialInstance3->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MaterialInstance4->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MaterialInstance5->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MaterialInstance6->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MaterialInstance7->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MaterialInstance8->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+	}
+	else {
+		mi->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+	}
 }
-#endif
+
 
 void APop::LogComponentHierarchy(USceneComponent* rootComp) {
 
