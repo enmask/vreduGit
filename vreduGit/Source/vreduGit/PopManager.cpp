@@ -21,7 +21,10 @@ void APopManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	numTicks = 0;
 	numPops = 0;
+	pickedPop = nullptr;
+	brightPop = nullptr;
 }
 
 // Called every frame
@@ -31,19 +34,73 @@ void APopManager::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	UWorld* const World = GetWorld();
-	AvreduGameMode* theGameMode = (AvreduGameMode*)World->GetAuthGameMode();
-	TSet< APop* > wantsPicking = theGameMode->GetWantsPicking();
+	AvreduGameMode* theGameMode = GetGameMode();
 
+	PickupThoseWhoWant();
+	//DropChildToThoseWhoWant();
+
+	int highlightUpdatePeriod = theGameMode->highlightUpdatePeriod;
+
+	if (numTicks % highlightUpdatePeriod == 0)
+		HighlightCloseTopChildren(nullptr);
+
+	numTicks++;
+}
+
+
+AvreduGameMode* APopManager::GetGameMode() {
+	UWorld* const theWorld = GetWorld();
+
+	verify(theWorld != nullptr);
+
+	return Cast<AvreduGameMode>(theWorld->GetAuthGameMode());
+}
+
+
+void APopManager::PickupThoseWhoWant() {
+
+	AvreduGameMode* theGameMode = GetGameMode();
+	TArray< APop* > wantsPicking = theGameMode->GetWantsPicking();
+
+	/* */
 	for (APop* pop : wantsPicking) {
 
-		UE_LOG(LogTemp, Warning, TEXT("APopManager::Tick: pop %p wants picking"), pop);
+		UE_LOG(LogTemp, Warning, TEXT("APopManager::Tick: pop %p wants PICKING. pop->picked=%s"),
+			   pop, (pop->picked)?TEXT("true"):TEXT("false"));
 
-		pop->picked ? Drop(pop) : Pickup(pop);
+		//pop->picked ? Drop(pop) : Pickup(pop);
+		pop->picked ? DropAndAddChild(pop) : Pickup(pop);
+
 		theGameMode->RemoveWantsPicking(pop);
 	}
+	/* */
+
+	/* *
+	for (int ix = wantsPicking.Num() - 1; ix >= 0; --ix) {
+		APop* pop = wantsPicking[ix];
+		pop->picked ? DropAndAddChild(pop) : Pickup(pop);
+		theGameMode->RemoveWantsPicking(ix);
+	}
+	* */
+
 
 }
+
+#if 0
+void APopManager::DropChildToThoseWhoWant() {
+
+	AvreduGameMode* theGameMode = GetGameMode();
+	APop* wantsChild = theGameMode->GetWantsPicking();
+	
+	if (wantsChild != nullptr && pickedPop != nullptr) {
+
+		Drop(pickedPop);
+		AddChild(wantsChild, pickedPop);
+
+	}
+}
+#endif
+
 
 void APopManager::Pickup(APop* pop) {
 
@@ -55,10 +112,10 @@ void APopManager::Pickup(APop* pop) {
 						   FAttachmentTransformRules::SnapToTargetIncludingScale,
 						   NAME_None);
 
-	HighlightCloseTopChildren(pop);
-
 	pop->picked = true;
+	pickedPop = pop;
 
+	HighlightCloseTopChildren(pop);
 }
 
 #if 1 /* Just drop, don't join */
@@ -66,18 +123,23 @@ void APopManager::Drop(APop* pop) {
 	pop->GetRootComponent()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	pop->mesh->SetSimulatePhysics(true);
 	pop->picked = false;
+	pickedPop = nullptr;
 }
 #endif
 
-#if 0 /* Drop and insert as child to Pop */
-void APop::Drop() {
-	GetRootComponent()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	mesh->SetSimulatePhysics(true);
-	picked = false;
+// Drop and insert as child to Pop
+void APopManager::DropAndAddChild(APop* pop) {
 
-	// thePopManager->AddChild(...);
+	if (brightPop != nullptr) {
+
+		verify(brightPop != pop);
+
+		Drop(pop);
+		AddChild(brightPop, pop);
+	}
+	
 }
-#endif
+
 
 
 UActorComponent* APopManager::GetRightMotionController() {
@@ -129,10 +191,12 @@ APop* APopManager::Spawn(AThing* thing, FTransform transform) {
 	//
 	newPop->FinishSpawning(transform);
 
-	numPops++;
+	IncPopsCounter();
+	controlPops.Add(newPop);
 
-	UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn: Will return newPop=%p with name=<%s>, numPops=%d"),
-		   newPop, *newPop->GetName(), numPops);
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Spawn: Will return newPop=%p with name=<%s>, controlPops.Num()=%d, numPops=%d"),
+		   newPop, *newPop->GetName(), controlPops.Num(), numPops);
+
 	return newPop;
 }
 
@@ -141,20 +205,50 @@ APop* APopManager::Spawn(AThing* thing, FTransform transform) {
 //
 void APopManager::DestroyPop(APop* pop) {
 
-	UE_LOG(LogTemp, Warning, TEXT("APopManager::DestroyPop: Will return newPop=%p with name=<%s> ..."),
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::DestroyPop: Will destroy newPop=%p with name=<%s> ..."),
 		   pop, *pop->GetName());
 
+	controlPops.Remove(pop);
+	UE_LOG(LogTemp, Warning,
+		   TEXT("DestroyPop: controlPops.Num() decreased to: %d. numPops will be decreased from %d..."),
+		   controlPops.Num(), numPops);
 	pop->Destroy();
-	numPops--;
-
-	UE_LOG(LogTemp, Warning, TEXT("...  After DestroyPop, numPops=%d"), numPops);
+	DecPopsCounter();
+	UE_LOG(LogTemp, Warning, TEXT("... to %d"), numPops);
 
 }
 
 
+void APopManager::IncPopsCounter() {
+	UE_LOG(LogTemp, Warning, TEXT("IncPopsCounter called, numPops=%d (before inc)"), numPops);
+	numPops++;
+	LogControlPops();
+}
 
+
+void APopManager::DecPopsCounter() {
+	UE_LOG(LogTemp, Warning, TEXT("DecPopsCounter called, numPops=%d (before dec)"), numPops);
+	numPops--;
+	LogControlPops();
+}
+
+
+void APopManager::LogControlPops() {
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::LogPopsCounter: numPops=%d. Here come the %d counted pops:"),
+		   numPops, controlPops.Num());
+	for (auto& currentAct : controlPops) {
+		UE_LOG(LogTemp, Warning, TEXT("currentAct=%p, thing name=<%s>"),
+			   currentAct, *currentAct->thingRef->name);
+	}
+}
 
 void APopManager::AddChild(APop* parent, APop* toBeChild) {
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::AddChild: parent=%p, name=%s. toBeChild=%p, name=%s"),
+		   parent, *parent->thingRef->name, toBeChild, *toBeChild->thingRef->name);
+
+	verify(parent != toBeChild);
 
 	// parent and toBeChild may or may not already have children
 	// No new Pop is needed
@@ -278,9 +372,11 @@ void APopManager::RotateAroundLocalY(APop* p, float degrees) {
 }
 
 //
+// Highlight close-by Pop:s, i.e. close to popParam.
+// If popParam is null, use the held Pop, if any.
 // TODO: Maybe implement FindCloseTopChildren instead
 //
-void APopManager::HighlightCloseTopChildren(APop* pop) {
+void APopManager::HighlightCloseTopChildren(APop* popParam) {
 
 	/* Sweep solution, will probably not use that...
 	FCollisionShape MySphere = FCollisionShape::MakeSphere(500.0f); // 5M Radius
@@ -288,53 +384,160 @@ void APopManager::HighlightCloseTopChildren(APop* pop) {
 	GetWorld()->SweepMultiByChannel(OutResults, SweepStart, SweepEnd, FQuat::Identity, TraceChannel, MySphere);
 	*/
 
+	APop* pop;
+
+	brightPop = nullptr;
+
+	if (popParam == nullptr)
+		pop = pickedPop;
+	else
+		pop = popParam;
+
+	if (pop == nullptr)
+		return;
+
 	TArray<AActor*> thePops;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APop::StaticClass(), thePops);
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: before verify: thePops.Num()=%d, numPops=%d"),
+		   thePops.Num(), numPops);
+
+	for (auto& currentAct : thePops) {
+		UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentAct=%p, IsValid=%s, pendingKill=%s"),
+			   currentAct, IsValid(currentAct) ? TEXT("true") : TEXT("false"), currentAct->IsPendingKill() ? TEXT("true") : TEXT("false"));
+
+	}
+
+	//TSet < AActor* > thePopsSet = TSet < AActor* >(thePops);
+	TSet < AActor* > thePopsSet(thePops);
+	for (auto& currentSetAct : thePopsSet) {
+		UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentSetAct=%p"),
+			   currentSetAct);
+
+	}
+
 
 	// All Pop:s found in the level should equal the number of Pop:s that the PopManager keeps track of
 	verify(thePops.Num() == numPops);
 
-	for (auto& currentAct : thePops) {    //For example lets set the actors location to (0,0,0)
-		//currentPop->SetActorLocation(FVector(0, 0, 0), false, 0, ETeleportType::None);
+	APop* closestPop = nullptr;
+
+	for (auto& currentAct : thePops) {
 		
 		APop* currentPop = Cast<APop>(currentAct);
 		UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentPop=%p, name=%s, thing name=%s"),
 			   currentPop, *currentPop->GetName(), *currentPop->thingRef->name);
 
+		if (currentPop->picked)
+			continue;
+
 		if (currentPop == pop)
 			continue;
 
 		if (IsClose(currentPop, pop)) {
-			UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentPop <%s> *IS* close to pop <%s>"),
-				   *currentPop->thingRef->name, *pop->thingRef->name);
+			UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentPop %p (%s) *IS* close to pop %p (%s), so highlight currentPop. picked=%s"),
+				   currentPop, *currentPop->thingRef->name, pop, *pop->thingRef->name, (pop->picked) ? TEXT("true") : TEXT("false"));
 
-			// Hightlight all sections of this Pop
+			// This currentPop is close, so highlight all its sections
 			currentPop->Highlight(-1, 1);
+
+			if (IsVeryClose(currentPop, pop) && IsCloser(currentPop, closestPop, pop)) {
+
+				UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: Setting closestPop = currentPop, %p (%s), picked=%s"),
+					   currentPop, *currentPop->thingRef->name, (currentPop->picked) ? TEXT("true") : TEXT("false"));
+				closestPop = currentPop;
+			}
 
 		}
 		else {
 			UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: currentPop <%s> is NOT close to pop <%s>"),
 				*currentPop->thingRef->name, *pop->thingRef->name);
+
+			// De-highlight all sections of this Pop
+			currentPop->Highlight(-1, 0);
 		}
+	}
+
+	if (closestPop != nullptr) {
+
+		// We found a Pop that is "closest of very close". Brightly highlight it,
+		// to notify the player that if dropped, the Thing of the held Pop will become
+		// a sibling of the Thing:s corresponding to the bright-highlighed mesh sections
+
+		UE_LOG(LogTemp, Warning, TEXT("APopManager::HighlightCloseTopChildren: Will make closestPop %p (%s) BRIGHT! picked=%s"),
+			   closestPop, *closestPop->thingRef->name, (closestPop->picked) ? TEXT("true") : TEXT("false"));
+
+		closestPop->Highlight(-1, 2);
+
+		brightPop = closestPop;
+
+		verify(brightPop != pickedPop);
+
 	}
 
 }
 
 
-bool APopManager::IsClose(APop* pop1, APop* pop2) {
-	UWorld* const World = GetWorld();
-	AvreduGameMode* theGameMode = (AvreduGameMode*)World->GetAuthGameMode();
-	FVector loc1 = pop1->GetActorLocation();
-	FVector loc2 = pop2->GetActorLocation();
-	float distSquared = (loc2 - loc1).SizeSquared();
+bool APopManager::IsClose(APop* pop, APop* refPop) {
+	AvreduGameMode* theGameMode = GetGameMode();
+	return IsCloseAux(theGameMode->closeDistanceSquared, pop, refPop);
+}
+
+
+
+bool APopManager::IsVeryClose(APop* pop, APop* refPop) {
+	AvreduGameMode* theGameMode = GetGameMode();
+	return IsCloseAux(theGameMode->veryCloseDistanceSquared, pop, refPop);
+}
+
+#if 0
+bool APopManager::IsClose(APop* pop, APop* refPop) {
+	AvreduGameMode* theGameMode = GetGameMode();
+	
+	FVector loc = pop->GetActorLocation();
+	FVector refLoc = refPop->GetActorLocation();
+	float distSquared = (refLoc - loc).SizeSquared();
 
 	UE_LOG(LogTemp, Warning, TEXT("APopManager::IsClose: pop1 loc: X=%f  Y=%f  Z=%f,   pop2 loc: X=%f  Y=%f  Z=%f"),
-		   loc1.X, loc1.Y, loc1.Z, loc2.X, loc2.Y, loc2.Z);
-
+		   loc.X, loc.Y, loc.Z, refLoc.X, refLoc.Y, refLoc.Z);
 
 	UE_LOG(LogTemp, Warning, TEXT("APopManager::IsClose: distSquared=%f, theGameMode->closeDistanceSquared=%f"),
 		   distSquared, theGameMode->closeDistanceSquared);
 
 	return (distSquared <= theGameMode->closeDistanceSquared);
+}
+#endif
 
+
+bool APopManager::IsCloseAux(float distanceLimit, APop* pop, APop* refPop) {
+	AvreduGameMode* theGameMode = GetGameMode();
+
+	FVector loc = pop->GetActorLocation();
+	FVector refLoc = refPop->GetActorLocation();
+	float distSquared = (refLoc - loc).SizeSquared();
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::IsClose: pop1 loc: X=%f  Y=%f  Z=%f,   pop2 loc: X=%f  Y=%f  Z=%f"),
+		loc.X, loc.Y, loc.Z, refLoc.X, refLoc.Y, refLoc.Z);
+
+	return (distSquared <= distanceLimit);
+}
+
+
+bool APopManager::IsCloser(APop* pop1, APop* pop2, APop* refPop) {
+
+	if (pop2 == nullptr)
+		return true;
+
+	UWorld* const World = GetWorld();
+	AvreduGameMode* theGameMode = (AvreduGameMode*)World->GetAuthGameMode();
+	FVector loc1 = pop1->GetActorLocation();
+	FVector loc2 = pop2->GetActorLocation();
+	FVector refLoc = refPop->GetActorLocation();
+	float dist1Squared = (refLoc - loc1).SizeSquared();
+	float dist2Squared = (refLoc - loc2).SizeSquared();
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::IsCloser: pop1 loc: X=%f  Y=%f  Z=%f,   pop2 loc: X=%f  Y=%f  Z=%f,   refPop loc: X=%f  Y=%f  Z=%f"),
+		loc1.X, loc1.Y, loc1.Z, loc2.X, loc2.Y, loc2.Z, refLoc.X, refLoc.Y, refLoc.Z);
+
+	return (dist1Squared < dist2Squared);
 }

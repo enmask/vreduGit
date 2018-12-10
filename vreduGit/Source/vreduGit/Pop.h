@@ -9,6 +9,7 @@
 
 class AThing;
 struct FTrafoArray;
+class AvreduGameMode;
 
 UCLASS()
 class VREDUGIT_API APop : public AActor
@@ -34,14 +35,22 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		URuntimeMeshComponent* mesh;
 
-	UMaterialInstanceDynamic* MaterialInstance1;
-	UMaterialInstanceDynamic* MaterialInstance2;
-	UMaterialInstanceDynamic* MaterialInstance3;
-	UMaterialInstanceDynamic* MaterialInstance4;
-	UMaterialInstanceDynamic* MaterialInstance5;
-	UMaterialInstanceDynamic* MaterialInstance6;
-	UMaterialInstanceDynamic* MaterialInstance7;
-	UMaterialInstanceDynamic* MaterialInstance8;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstance1;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstance2;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstance3;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstance4;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstance5;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstance6;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstance7;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstance8;
 
 	UPROPERTY(EditAnywhere)
 		UStaticMesh* meshCube;
@@ -61,6 +70,8 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	AvreduGameMode* GetGameMode();
 
 	FString ToString();
 	

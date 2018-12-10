@@ -169,6 +169,10 @@ void AThing::ComputeMeshData(TArray<FVertexArray>& verts2Dim, TArray<FInt32Array
 	TArray<FColor>& vertexColors, TArray<FRuntimeMeshTangent>& tangents,
 	TArray<FTransform>& collisionCubePositions) {
 
+	UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshData() called, thing-this=%p, name=%s"),
+		   this, *this->name);
+
+
 	FTransform trafoZero(FQuat(0, 0, 0, 1), FVector(0, 0, 0), FVector(1, 1, 1));
 
 
@@ -179,9 +183,10 @@ void AThing::ComputeMeshData(TArray<FVertexArray>& verts2Dim, TArray<FInt32Array
 	/* Log2DimVertsArray(verts2Dim);
 	Log2DimIntsArray(tris2Dim);
 	Log2DimColorArray(colors2Dim);
+	*/
 
 	UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshData() end, vertices.Num()=%d"), vertices.Num());
-	*/
+
 }
 
 
@@ -194,11 +199,11 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 	TArray<FTransform>& collisionCubePositions) {
 
 	FVector loc = baseTrafo.GetLocation();
-	//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() called, treeLevel=%d, subtreeNo=%d, baseTrafo location is  %f  %f  %f"),
-	//	   treeLevel, subtreeNo, loc.X, loc.Y, loc.Z);
+	UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() called, Thing-this=%p, name=%s, treeLevel=%d, subtreeNo=%d, baseTrafo location is  %f  %f  %f"),
+		   this, *name, treeLevel, subtreeNo, loc.X, loc.Y, loc.Z);
 
 	if (subThings.Num() == 0) {
-		//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an ATOM, trafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
+		UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an ATOM, trafo location is  %f  %f  %f"), loc.X, loc.Y, loc.Z);
 
 		// Add mesh data for this atom
 		AddMeshDataForOneAtom(treeLevel, subtreeNo, verts2Dim, tris2Dim, colors2Dim, collisions2Dim, baseTrafo, vertices, Triangles, normals, UV0, vertexColors, tangents);
@@ -211,14 +216,23 @@ void AThing::ComputeMeshDataAux(int32 treeLevel, int32 subtreeNo,
 	}
 	else {
 
-		//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an non-ATOM with %d children, check them recursively"), subThings.Num());
+		UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux() found an non-ATOM with %d children, check them recursively"), subThings.Num());
+
+
+#if 1 /* Pre-logging, debug possible cyclic links */
+		for (int32 thingIx = 0; thingIx < subThings.Num(); ++thingIx) {
+			AThing* subThing = subThings[thingIx];
+			UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux(): pre-logging: subThing=%p with name=%s"), subThing, *subThing->name);
+		}
+#endif
+
 
 		// Build meshes for each sub-tree recursively
 		for (int32 thingIx = 0; thingIx < subThings.Num(); ++thingIx) {
 
 			AThing* subThing = subThings[thingIx];
 
-			//UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux(): subThing=%p with name=%s"), subThing, *subThing->name);
+			UE_LOG(LogTemp, Warning, TEXT("AThing::ComputeMeshDataAux(): subThing=%p with name=%s"), subThing, *subThing->name);
 
 			int32 trafoIx = thingIx;
 			FTransform subThingTrafo = subThingRelTrafos[trafoIx];

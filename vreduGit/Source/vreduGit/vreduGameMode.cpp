@@ -59,15 +59,6 @@ AvreduGameMode::AvreduGameMode(const FObjectInitializer& ObjectInitializer)
 	}
 #endif
 
-
-	UWorld* const World = GetWorld();
-	if (World)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode constructor: World exists"));
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode constructor: World does NOT exist"));
-	}
 }
 
 
@@ -76,53 +67,16 @@ void AvreduGameMode::StartPlay() {
 
 	Super::StartPlay();
 
-
-	//vrMovement = NewObject<URunebergVR_Movement>(this, TEXT("vrMovement"));
-	//theGameplayManager = NewObject<AGameplayManager>(this, TEXT("The GameplayManager"));
-	//WaitingScreen = NewObject<UDifferentVariables>(this, UDifferentVariables::StaticClass());
-	//theGameplayManager = NewObject<AGameplayManager>(this, AGameplayManager::StaticClass());
-
 	UWorld* world = GetWorld();
-	//APlayerUnitController* cont = world->SpawnActor< APlayerUnitController >();
 	theGameplayManager = world->SpawnActor< AGameplayManager >();
-
-	if (theGameplayManager) {
-		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::StartPlay: theGameplayManager is NOT null"));
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::StartPlay: theGameplayManager IS null"));
-	}
-
 	theThingManager = world->SpawnActor< AThingManager >();
-
-	if (theThingManager) {
-		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::StartPlay: theThingManager is NOT null"));
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::StartPlay: theThingManager IS null"));
-	}
-
 	thePopManager = world->SpawnActor< APopManager >();
 
-	UWorld* const World = GetWorld();
-	if (World)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::StartPlay: World exists"));
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::StartPlay: World does NOT exist"));
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::StartPlay: this (game mode)=%p, World=%p, theThingManager=%p"),
-		this, World, theThingManager);
-
-
-	// crashes
-	//theGameplayManager->CallBeginPlay();
+	//wantsDropping = false;
 }
 
 
-TSet< APop* > AvreduGameMode::GetWantsPicking() {
+TArray< APop* > AvreduGameMode::GetWantsPicking() {
 	return wantsPicking;
 }
 
@@ -133,3 +87,17 @@ void AvreduGameMode::AddWantsPicking(APop* pop) {
 void AvreduGameMode::RemoveWantsPicking(APop* pop) {
 	wantsPicking.Remove(pop);
 }
+
+void AvreduGameMode::RemoveWantsPickingAt(int ix) {
+	wantsPicking.RemoveAt(ix);
+}
+
+#if 0
+APop* AvreduGameMode::GetWantsDropping() {
+	return wantsDropping;
+}
+
+void AvreduGameMode::SetWantsDropping(bool value) {
+	wantsDropping = value;
+}
+#endif

@@ -58,6 +58,14 @@ public:
 		float closeDistanceSquared = 500000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float veryCloseDistanceSquared = 200000.0f;
+
+	// E.g. if highlightUpdatePeriod is 100, every 100 call to PopManager::Tick() will update
+	// the highlight status of close-by Pop:s
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		int highlightUpdatePeriod = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		FLinearColor deHighlightColor = FLinearColor(0.0916f, 0.271f, 0.0705f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
@@ -68,16 +76,29 @@ public:
 
 	// TODO: Maybe move wantsPicking and its 2 access functions to a new separate class PopSignals
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")
-		TSet< APop* > wantsPicking;
+		TArray< APop* > wantsPicking;
+
+	// The held Pop signals that it wants dropping. PopManager will later on check if someone wants the help Pop as child
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")
+	//	bool wantsDropping;
 
 	UFUNCTION()
-		TSet< APop* > GetWantsPicking();
+		TArray< APop* > GetWantsPicking();
 
 	UFUNCTION()
 		void AddWantsPicking(APop* pop);
 
 	UFUNCTION()
 		void RemoveWantsPicking(APop* pop);
+
+	UFUNCTION()
+		void RemoveWantsPickingAt(int ix);
+
+	//UFUNCTION()
+	//	bool GetWantsDropping();
+
+	//UFUNCTION()
+	//	void SetWantsDropping(bool value);
 
 	virtual void StartPlay() override;
 

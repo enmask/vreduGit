@@ -77,7 +77,7 @@ void AMyRunebergVR_Pawn::BeginPlay()
 
 void AMyRunebergVR_Pawn::Tick(float DeltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::Tick called, this=%p"), this);
+	//UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::Tick called, this=%p"), this);
 
 	Super::Tick(DeltaTime);
 
@@ -99,7 +99,6 @@ void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMyRunebergVR_Pawn::MoveForwardBackward);
 
 	PlayerInputComponent->BindAxis("Turn", this, &AMyRunebergVR_Pawn::TurnAtRate);
-
 
 	PlayerInputComponent->BindAction("MoveForward", IE_Pressed, this, &AMyRunebergVR_Pawn::MoveForwardKeyb);
 	PlayerInputComponent->BindAction("MoveBackward", IE_Pressed, this, &AMyRunebergVR_Pawn::MoveBackwardKeyb);

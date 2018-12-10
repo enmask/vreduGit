@@ -92,6 +92,93 @@ void AGameplayManager::Tick(float DeltaTime)
 	if (numTicks == 1) {
 
 
+
+#if 0
+		/* Just an array test, remove this soon! */
+
+		TArray<int> tstArray1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (int i : tstArray1) {
+			tstArray1.Remove(i);
+		}
+
+		for (int ix = 0; ix < tstArray1.Num(); ++ix) {
+			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstArray1[%d]=%d"), ix, tstArray1[ix]);
+		}
+
+		TArray<int> tstArray2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (int ix = 0; ix < tstArray2.Num(); ++ix) {
+			tstArray2.RemoveAt(ix);
+		}
+
+		for (int ix = 0; ix < tstArray2.Num(); ++ix)
+			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstArray2[%d]=%d"), ix, tstArray2[ix]);
+
+		TArray<int> tstArray3 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (int ix = 0; ix < tstArray3.Num(); ++ix) {
+			tstArray3.RemoveAt(ix);
+		}
+
+		for (int ix = 0; ix < tstArray3.Num(); ++ix)
+			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstArray3[%d]=%d"), ix, tstArray3[ix]);
+
+
+		TArray<int> tstArray4 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (int ix = tstArray4.Num()-1; ix >= 0; --ix) {
+			tstArray4.RemoveAt(ix);
+		}
+
+		for (int ix = 0; ix < tstArray4.Num(); ++ix)
+			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstArray4[%d]=%d"), ix, tstArray4[ix]);
+
+
+
+
+
+		TSet<int> tstSet1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (int i : tstSet1) {
+			tstSet1.Remove(i);
+		}
+
+		for (int i : tstSet1)
+			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstSet1[something]=%d"), i);
+
+
+		TSet<int> tstSet2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (int ix = 0; ix < tstSet2.Num(); ++ix) {
+			tstSet2.Remove(ix);
+		}
+
+		for (int i : tstSet2)
+			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstSet2[something]=%d"), i);
+
+		TSet<int> tstSet3 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (int ix = 0; ix < tstSet3.Num(); ++ix) {
+			tstSet3.Remove(ix);
+		}
+
+		for (int i : tstSet3)
+			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstSet3[something]=%d"), i);
+
+
+		TSet<int> tstSet4 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (int ix = tstSet4.Num() - 1; ix >= 0; --ix) {
+			tstSet4.Remove(ix);
+		}
+
+		for (int i : tstSet4)
+			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstSet4[something]=%d"), i);
+
+
+
+
+
+#endif
+	/* Just an array test, remove this soon! */
+
+
+
+
+
 		// Create a test Pop
 		//AThing* AThingManager::SpawnThingAtom(FString name) {
 		///UWorld* const World = GetWorld();

@@ -230,11 +230,22 @@ void APop::BeginPlay()
 	Super::BeginPlay();
 }
 
+
 // Called every frame
 void APop::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+
+AvreduGameMode* APop::GetGameMode() {
+	UWorld* const theWorld = GetWorld();
+
+	verify(theWorld != nullptr);
+
+	return Cast<AvreduGameMode>(theWorld->GetAuthGameMode());
+}
+
 
 FString APop::ToString() {
 
@@ -579,26 +590,11 @@ void APop::CustomOnClicked(UPrimitiveComponent* clickedComponent, FKey inKey)
 			   *clickedComponent->GetName());
 	}
 
-	//AMyRunebergVR_Pawn* thePawn = Cast< AMyRunebergVR_Pawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-
-	//thePawn = ((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn;
-
 	// Signal that Pop wants to be dropped or picked
 	((AvreduGameMode*)GetWorld()->GetAuthGameMode())->AddWantsPicking(this);
 
-
 }
 
-#if 0
-void APop::Pickup() {
-	UActorComponent* motCon = GetRightMotionController();
-	DisableComponentsSimulatePhysics();
-	AttachToComponent(Cast<USceneComponent>(motCon),
-					  FAttachmentTransformRules::SnapToTargetIncludingScale,
-					  NAME_None);
-	picked = true;
-}
-#endif
 
 //
 // Highlight a section of the mesh by passing the sectionIx.
@@ -607,6 +603,9 @@ void APop::Pickup() {
 // lightLevel 0 is not highlighted, 1 is highlighted, 2 is more highlighted
 //
 void APop::Highlight(int sectionIx, int lightLevel) {
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::Highlight: this=%p (%s), sectionIx=%d, lightLevel=%d"),
+		   this, *this->thingRef->name, sectionIx, lightLevel);
 
 	UMaterialInstanceDynamic* mi = nullptr;
 	if (sectionIx == -1) {
