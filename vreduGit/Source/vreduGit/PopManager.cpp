@@ -30,7 +30,7 @@ void APopManager::BeginPlay()
 // Called every frame
 void APopManager::Tick(float DeltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("APopManager::Tick called"));
+	//UE_LOG(LogTemp, Warning, TEXT("APopManager::Tick called"));
 
 	Super::Tick(DeltaTime);
 

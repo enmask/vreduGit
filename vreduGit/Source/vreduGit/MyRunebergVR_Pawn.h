@@ -7,6 +7,7 @@
 #include "MyRunebergVR_Pawn.generated.h"
 
 class URunebergVR_Movement;
+class AvreduGameMode;
 
 /**
  * 
@@ -25,16 +26,26 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
+
+	AvreduGameMode* GetGameMode();
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		URunebergVR_Movement* vrMovement;
 
-	void TurnAtRate(float Rate);
+	UActorComponent* GetRightMotionController();
+
+	void TurnSideAtRate(float Rate);
+	void TurnUpDownAtRate(float Rate);
 
 	void MoveForwardBackward(float AxisValue);
-	void MoveForwardKeyb();
-	void MoveBackwardKeyb();
+	//void MoveForwardKeyb();
+	//void MoveBackwardKeyb();
+
+	void MoveRControllerForwardBackward(float AxisValue);
+	void MoveRControllerSide(float AxisValue);
+	void MoveRControllerUpDown(float AxisValue);
 
 	//void StartGrowing();
 	//void StopGrowing();
