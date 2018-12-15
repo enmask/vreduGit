@@ -5,10 +5,23 @@
 #include "Components/InputComponent.h"
 #include "Thing.h"    // Probably just temporary, Thing should be handled in ThingManager instead
 #include "vreduGameMode.h"
+#include "PopManager.h"
 #include "RunebergVR_Movement.h"
 
-/*
+/* 
 AMyRunebergVR_Pawn::AMyRunebergVR_Pawn(const class FObjectInitializer& PCIP)
+{
+	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn CONSTRUCTOR called"));
+
+	//AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	//PrimaryActorTick.bCanEverTick = true;
+
+}
+ */
+
+/*
+AMyRunebergVR_Pawn::AMyRunebergVR_Pawn()
 {
 	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn CONSTRUCTOR called"));
 
@@ -29,9 +42,14 @@ void AMyRunebergVR_Pawn::BeginPlay()
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	PrimaryActorTick.bCanEverTick = true;
 
+	//rightHandMesh = NewObject<UStaticMeshComponent>(this, TEXT("rightHandMesh"));
+	//rightHandMesh->AttachTo(MotionController_Right);
+
 	//vrMovement = CreateDefaultSubobject<URunebergVR_Movement>(TEXT("vrMovement"));
 	vrMovement = NewObject<URunebergVR_Movement>(this, TEXT("vrMovement"));
 
+	pickModeEnum = EPickModeEnum::M_Pick;
+	dropModeEnum = EDropModeEnum::M_Drop;
 
 	if (vrMovement) {
 		UE_LOG(LogTemp, Warning, TEXT("vrMovement is NOT null"));
@@ -42,8 +60,10 @@ void AMyRunebergVR_Pawn::BeginPlay()
 
 	// Place the right motion controller (for grabbed Pop:s)
 	//MotionController_Right->SetRelativeLocation(FVector(0.f, 0.f, 110.f));
+	
+#if 0 /* Commenting out to be able to edit value in editor instead */
 	MotionController_Right->SetRelativeLocation(FVector(200.f, 200.f, -50.f));   // (Far, Right, High)
-
+#endif
 
 	// Set global pawn
 	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::BeginPlay: Setting global thePawn to %p"), this);
@@ -99,6 +119,24 @@ AvreduGameMode* AMyRunebergVR_Pawn::GetGameMode() {
 }
 
 
+
+FString AMyRunebergVR_Pawn::GetPickModeEnumAsString(EPickModeEnum EnumValue)
+{
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPickModeEnum"), true);
+	if (!EnumPtr) return FString("Invalid");
+
+	return EnumPtr->GetNameByValue((int64)EnumValue).ToString(); // for EnumValue == M_Pick returns "Pick"
+}
+
+
+FString AMyRunebergVR_Pawn::GetDropModeEnumAsString(EDropModeEnum EnumValue)
+{
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EDropModeEnum"), true);
+	if (!EnumPtr) return FString("Invalid");
+
+	return EnumPtr->GetNameByValue((int64)EnumValue).ToString(); // for EnumValue == M_Drop returns "Drop"
+}
+
 void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) {
 	//UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::SetupPlayerInputComponent called"));
 
@@ -119,6 +157,7 @@ void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("MoveRSide", this, &AMyRunebergVR_Pawn::MoveRControllerSide);
 	PlayerInputComponent->BindAxis("MoveRUpDown", this, &AMyRunebergVR_Pawn::MoveRControllerUpDown);
 
+	PlayerInputComponent->BindAction("TogglePickDropMode", IE_Pressed, this, &AMyRunebergVR_Pawn::TogglePickDropMode);
 
 }
 
@@ -177,7 +216,7 @@ void AMyRunebergVR_Pawn::MoveRControllerForwardBackward(float AxisValue) {
 	USceneComponent* motConSceneComp = Cast<USceneComponent>(motCon);
 	FTransform rTrafo = motConSceneComp->GetRelativeTransform();
 	FVector rLoc = rTrafo.GetLocation();
-	rLoc.X = rLoc.X + 10.0f * AxisValue;
+	rLoc.X = rLoc.X + controllerSpeed * AxisValue;
 	motConSceneComp->SetRelativeLocation(rLoc);
 
 }
@@ -189,7 +228,7 @@ void AMyRunebergVR_Pawn::MoveRControllerSide(float AxisValue) {
 	USceneComponent* motConSceneComp = Cast<USceneComponent>(motCon);
 	FTransform rTrafo = motConSceneComp->GetRelativeTransform();
 	FVector rLoc = rTrafo.GetLocation();
-	rLoc.Y = rLoc.Y - 10.0f * AxisValue;
+	rLoc.Y = rLoc.Y - controllerSpeed * AxisValue;
 	motConSceneComp->SetRelativeLocation(rLoc);
 }
 
@@ -201,10 +240,41 @@ void AMyRunebergVR_Pawn::MoveRControllerUpDown(float AxisValue) {
 	USceneComponent* motConSceneComp = Cast<USceneComponent>(motCon);
 	FTransform rTrafo = motConSceneComp->GetRelativeTransform();
 	FVector rLoc = rTrafo.GetLocation();
-	rLoc.Z = rLoc.Z - 10.0f * AxisValue;
+	rLoc.Z = rLoc.Z - controllerSpeed * AxisValue;
 	motConSceneComp->SetRelativeLocation(rLoc);
 }
 
+void AMyRunebergVR_Pawn::TogglePickDropMode() {
+	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::TogglePickDropMode called"));
+
+	//GameplayManager.cpp:    APopManager * thePopManager = ((AvreduGameMode*)World->GetAuthGameMode())->thePopManager;
+	AvreduGameMode* theGameMode = GetGameMode();
+
+	if (theGameMode->thePopManager->pickedPop == nullptr) {
+		// Nothing is picked, toggle pick mode
+		if (pickModeEnum == EPickModeEnum::M_Pick)
+			pickModeEnum = EPickModeEnum::M_PickChild;
+		else
+			pickModeEnum = EPickModeEnum::M_Pick;
+
+		UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::TogglePickDropMode: Pick mode toggled to %s"),
+			*GetPickModeEnumAsString(pickModeEnum));
+	}
+	else {
+		// Something is picked, toggle drop mode
+		if (dropModeEnum == EDropModeEnum::M_Drop)
+			dropModeEnum = EDropModeEnum::M_DropChild;
+		else if (dropModeEnum == EDropModeEnum::M_DropChild)
+			dropModeEnum = EDropModeEnum::M_DropSibling;
+		else
+			dropModeEnum = EDropModeEnum::M_Drop;
+
+		UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::TogglePickDropMode: Drop mode toggled to %s"),
+			  *GetDropModeEnumAsString(dropModeEnum));
+
+	}
+
+}
 
 UActorComponent* AMyRunebergVR_Pawn::GetRightMotionController() {
 

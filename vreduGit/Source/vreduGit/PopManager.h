@@ -28,6 +28,8 @@ public:
 
 	AvreduGameMode* GetGameMode();
 
+	UPROPERTY(VisibleAnywhere)
+		APop* pickedPop;
 
 	//
 	// API methods
@@ -92,9 +94,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		int numPops;
-
-	UPROPERTY(VisibleAnywhere)
-		APop* pickedPop;
 
 	UPROPERTY(VisibleAnywhere)
 		APop* brightPop;

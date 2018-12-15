@@ -63,7 +63,7 @@ public:
 	// E.g. if highlightUpdatePeriod is 100, every 100 call to PopManager::Tick() will update
 	// the highlight status of close-by Pop:s
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
-		int highlightUpdatePeriod = 100;
+		int highlightUpdatePeriod = 25;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		FLinearColor deHighlightColor = FLinearColor(0.0916f, 0.271f, 0.0705f);
