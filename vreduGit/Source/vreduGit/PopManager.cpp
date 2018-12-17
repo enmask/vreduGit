@@ -439,7 +439,8 @@ void APopManager::HighlightCloseTopChildren(APop* popParam) {
 				   currentPop, *currentPop->thingRef->name, pop, *pop->thingRef->name, (pop->picked) ? TEXT("true") : TEXT("false"));
 
 			// This currentPop is close, so highlight all its sections
-			currentPop->Highlight(-1, 1);
+			//currentPop->Highlight(-1, 1);
+			currentPop->HighlightWireChild(-1, 1);
 
 			if (IsVeryClose(currentPop, pop) && IsCloser(currentPop, closestPop, pop)) {
 

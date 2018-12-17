@@ -33,35 +33,17 @@ class VREDUGIT_API AMyRunebergVR_Pawn : public ARunebergVR_Pawn
 {
 	GENERATED_BODY()
 	
-public:
-
-	//AMyRunebergVR_Pawn(const class FObjectInitializer& PCIP);
-	//AMyRunebergVR_Pawn();
-
-
-	//UPROPERTY(VisibleAnywhere)
-	//	UStaticMeshComponent* rightHandMesh;
-
 protected:
 	virtual void BeginPlay() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	void SetupMaterial();
+
 	AvreduGameMode* GetGameMode();
 
-#if 1
 	FString GetPickModeEnumAsString(EPickModeEnum EnumValue);
-#else
-	FString GetPickModeEnumAsString(EPickModeEnum EnumValue)
-	{
-		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPickModeEnum"), true);
-		if (!EnumPtr) return FString("Invalid");
-
-		return EnumPtr->GetNameByValue((int64)EnumValue).ToString(); // for EnumValue == M_Pick returns "Pick"
-	}
-#endif
-
 	FString GetDropModeEnumAsString(EDropModeEnum EnumValue);
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -78,6 +60,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		float controllerSpeed;
 
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstancePink;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstanceYellow;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstanceGreen;
+
 	UActorComponent* GetRightMotionController();
 
 	void TurnSideAtRate(float Rate);
@@ -92,6 +81,10 @@ public:
 	void MoveRControllerUpDown(float AxisValue);
 
 	void TogglePickDropMode();
+	void UpdateControllerModeColor();
+
+
+
 
 	//void StartGrowing();
 	//void StopGrowing();

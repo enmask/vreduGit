@@ -23,7 +23,7 @@ AActorMouse::AActorMouse()
 
 
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material1(TEXT("Material'/Game/Materials/M_Atom'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material1(TEXT("Material'/Game/Materials/M_Atom1'"));
 	if (Material1.Succeeded()) {
 		UE_LOG(LogTemp, Warning, TEXT("ActorMouse constructor: Material1 succeeded"));
 		//auto* MaterialInstance1 = UMaterialInstanceDynamic::Create(Material1.Object, Material1.Object);

@@ -36,21 +36,38 @@ public:
 		URuntimeMeshComponent* mesh;
 
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstance1;
+		UMaterialInstanceDynamic* MIAtom1;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstance2;
+		UMaterialInstanceDynamic* MIAtom2;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstance3;
+		UMaterialInstanceDynamic* MIAtom3;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstance4;
+		UMaterialInstanceDynamic* MIAtom4;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstance5;
+		UMaterialInstanceDynamic* MIAtom5;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstance6;
+		UMaterialInstanceDynamic* MIAtom6;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstance7;
+		UMaterialInstanceDynamic* MIAtom7;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstance8;
+		UMaterialInstanceDynamic* MIAtom8;
+
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIWire1;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIWire2;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIWire3;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIWire4;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIWire5;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIWire6;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIWire7;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIWire8;
 
 	UPROPERTY(EditAnywhere)
 		UStaticMesh* meshCube;
@@ -67,6 +84,8 @@ public:
 
 	// Highlight (or de-highlight) the Pop, or a part of it, in a color to make it stand out to the user
 	void Highlight(int sectionIx, int lightLevel);
+	void HighlightWireChild(int sectionIx, int lightLevel);
+
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -97,5 +116,8 @@ private:
 
 	void LogComponentHierarchy(USceneComponent* rootComp);
 	UActorComponent* GetRightMotionController();
+
+	UMaterialInstanceDynamic* section2MIWire(int sectionIx);
+
 
 };

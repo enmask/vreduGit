@@ -110,6 +110,44 @@ void AMyRunebergVR_Pawn::Tick(float DeltaTime)
 }
 
 
+void AMyRunebergVR_Pawn::SetupMaterial() {
+
+	/*
+		UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstanceFaintPurple;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstanceYellow;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MaterialInstanceGreen;
+	*/
+
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialPink(TEXT("Material'/Game/Materials/M_Atom3'"));
+	if (MaterialPink.Succeeded()) {
+		MaterialInstancePink = UMaterialInstanceDynamic::Create(MaterialPink.Object, MaterialPink.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: MaterialPink failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialYellow(TEXT("Material'/Game/Materials/M_Atom6'"));
+	if (MaterialYellow.Succeeded()) {
+		MaterialInstanceYellow = UMaterialInstanceDynamic::Create(MaterialYellow.Object, MaterialYellow.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: MaterialYellow failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialGreen(TEXT("Material'/Game/Materials/M_Atom1'"));
+	if (MaterialGreen.Succeeded()) {
+		MaterialInstanceGreen = UMaterialInstanceDynamic::Create(MaterialGreen.Object, MaterialGreen.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: MaterialGreen failed"));
+	}
+}
+
+
 AvreduGameMode* AMyRunebergVR_Pawn::GetGameMode() {
 	UWorld* const theWorld = GetWorld();
 
@@ -274,7 +312,31 @@ void AMyRunebergVR_Pawn::TogglePickDropMode() {
 
 	}
 
+	UpdateControllerModeColor();
+
 }
+
+void AMyRunebergVR_Pawn::UpdateControllerModeColor() {
+
+
+	// Jag har redan gul (M_Atom6 eller M_Atom7), grön (M_Atom1) och
+	// t.ex. rosa (M_Atom3) färg för atomer. Det enklaste är att
+	// använda dem till tången också.
+
+	AvreduGameMode* theGameMode = GetGameMode();
+
+	if (theGameMode->thePopManager->pickedPop == nullptr) {
+
+		
+
+	}
+	else {
+
+	}
+
+
+}
+
 
 UActorComponent* AMyRunebergVR_Pawn::GetRightMotionController() {
 

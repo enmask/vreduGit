@@ -102,69 +102,141 @@ void APop::TestSetupPhysics() {
 
 void APop::TestSetupMaterial() {
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material1(TEXT("Material'/Game/Materials/M_Atom'"));
-	if (Material1.Succeeded()) {
-		MaterialInstance1 = UMaterialInstanceDynamic::Create(Material1.Object, Material1.Object);
+	static ConstructorHelpers::FObjectFinder<UMaterial> MAtom1(TEXT("Material'/Game/Materials/M_Atom1'"));
+	if (MAtom1.Succeeded()) {
+		MIAtom1 = UMaterialInstanceDynamic::Create(MAtom1.Object, MAtom1.Object);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Pop: Material1 failed"));
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material 1 failed"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material2(TEXT("Material'/Game/Materials/M_Atom2'"));
-	if (Material2.Succeeded()) {
-		MaterialInstance2 = UMaterialInstanceDynamic::Create(Material2.Object, Material2.Object);
+	static ConstructorHelpers::FObjectFinder<UMaterial> MAtom2(TEXT("Material'/Game/Materials/M_Atom2'"));
+	if (MAtom2.Succeeded()) {
+		MIAtom2 = UMaterialInstanceDynamic::Create(MAtom2.Object, MAtom2.Object);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Pop: Material2 failed"));
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material 2 failed"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material3(TEXT("Material'/Game/Materials/M_Atom3'"));
-	if (Material3.Succeeded()) {
-		MaterialInstance3 = UMaterialInstanceDynamic::Create(Material3.Object, Material3.Object);
+	static ConstructorHelpers::FObjectFinder<UMaterial> MAtom3(TEXT("Material'/Game/Materials/M_Atom3'"));
+	if (MAtom3.Succeeded()) {
+		MIAtom3 = UMaterialInstanceDynamic::Create(MAtom3.Object, MAtom3.Object);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Pop: Material3 failed"));
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material 3 failed"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material4(TEXT("Material'/Game/Materials/M_Atom4'"));
-	if (Material4.Succeeded()) {
-		MaterialInstance4 = UMaterialInstanceDynamic::Create(Material4.Object, Material4.Object);
+	static ConstructorHelpers::FObjectFinder<UMaterial> MAtom4(TEXT("Material'/Game/Materials/M_Atom4'"));
+	if (MAtom4.Succeeded()) {
+		MIAtom4 = UMaterialInstanceDynamic::Create(MAtom4.Object, MAtom4.Object);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Pop: Material4 failed"));
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material 4 failed"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material5(TEXT("Material'/Game/Materials/M_Atom5'"));
-	if (Material5.Succeeded()) {
-		MaterialInstance5 = UMaterialInstanceDynamic::Create(Material5.Object, Material5.Object);
+	static ConstructorHelpers::FObjectFinder<UMaterial> MAtom5(TEXT("Material'/Game/Materials/M_Atom5'"));
+	if (MAtom5.Succeeded()) {
+		MIAtom5 = UMaterialInstanceDynamic::Create(MAtom5.Object, MAtom5.Object);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Pop: Material5 failed"));
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material 5 failed"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material6(TEXT("Material'/Game/Materials/M_Atom6'"));
-	if (Material6.Succeeded()) {
-		MaterialInstance6 = UMaterialInstanceDynamic::Create(Material6.Object, Material6.Object);
+#if 1
+	static ConstructorHelpers::FObjectFinder<UMaterial> MAtom6(TEXT("Material'/Game/Materials/M_Atom6'"));
+#else /* Temporary... */
+	static ConstructorHelpers::FObjectFinder<UMaterial> Material6(TEXT("Material'/Game/Materials/M_AtomWireChild'"));
+#endif
+
+	if (MAtom6.Succeeded()) {
+		MIAtom6 = UMaterialInstanceDynamic::Create(MAtom6.Object, MAtom6.Object);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Pop: Material6 failed"));
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material 6 failed"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material7(TEXT("Material'/Game/Materials/M_Atom7'"));
-	if (Material7.Succeeded()) {
-		MaterialInstance7 = UMaterialInstanceDynamic::Create(Material7.Object, Material7.Object);
+	static ConstructorHelpers::FObjectFinder<UMaterial> MAtom7(TEXT("Material'/Game/Materials/M_Atom7'"));
+	if (MAtom7.Succeeded()) {
+		MIAtom7 = UMaterialInstanceDynamic::Create(MAtom7.Object, MAtom7.Object);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Pop: Material7 failed"));
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material 7 failed"));
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> Material8(TEXT("Material'/Game/Materials/M_Atom8'"));
-	if (Material8.Succeeded()) {
-		MaterialInstance8 = UMaterialInstanceDynamic::Create(Material8.Object, Material8.Object);
+	static ConstructorHelpers::FObjectFinder<UMaterial> MAtom8(TEXT("Material'/Game/Materials/M_Atom8'"));
+	if (MAtom8.Succeeded()) {
+		MIAtom8 = UMaterialInstanceDynamic::Create(MAtom8.Object, MAtom8.Object);
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Pop: Material8 failed"));
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material 8 failed"));
 	}
+
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MWire1(TEXT("Material'/Game/Materials/M_Wire1'"));
+	if (MWire1.Succeeded()) {
+		MIWire1 = UMaterialInstanceDynamic::Create(MWire1.Object, MWire1.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 1 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MWire2(TEXT("Material'/Game/Materials/M_Wire2'"));
+	if (MWire2.Succeeded()) {
+		MIWire2 = UMaterialInstanceDynamic::Create(MWire2.Object, MWire2.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 2 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MWire3(TEXT("Material'/Game/Materials/M_Wire3'"));
+	if (MWire3.Succeeded()) {
+		MIWire3 = UMaterialInstanceDynamic::Create(MWire3.Object, MWire3.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 3 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MWire4(TEXT("Material'/Game/Materials/M_Wire4'"));
+	if (MWire4.Succeeded()) {
+		MIWire4 = UMaterialInstanceDynamic::Create(MWire4.Object, MWire4.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 4 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MWire5(TEXT("Material'/Game/Materials/M_Wire5'"));
+	if (MWire5.Succeeded()) {
+		MIWire5 = UMaterialInstanceDynamic::Create(MWire5.Object, MWire5.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 5 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MWire6(TEXT("Material'/Game/Materials/M_Wire6'"));
+	if (MWire6.Succeeded()) {
+		MIWire6 = UMaterialInstanceDynamic::Create(MWire6.Object, MWire6.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 6 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MWire7(TEXT("Material'/Game/Materials/M_Wire7'"));
+	if (MWire7.Succeeded()) {
+		MIWire7 = UMaterialInstanceDynamic::Create(MWire7.Object, MWire7.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 7 failed"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> MWire8(TEXT("Material'/Game/Materials/M_Wire8'"));
+	if (MWire8.Succeeded()) {
+		MIWire8 = UMaterialInstanceDynamic::Create(MWire8.Object, MWire8.Object);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 8 failed"));
+	}
+
+
 }
 
 
@@ -319,7 +391,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 		switch (i % 8) {
 
 			case 0:
-				mesh->SetSectionMaterial(i, MaterialInstance1);
+				mesh->SetMaterial(0, MIAtom1);
 				break;
 			case 1:
 
@@ -328,28 +400,28 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 #endif
 
-				mesh->SetSectionMaterial(i, MaterialInstance2);
+				mesh->SetSectionMaterial(i, MIAtom2);
 				break;
 			case 2:
-				mesh->SetSectionMaterial(i, MaterialInstance3);
+				mesh->SetSectionMaterial(i, MIAtom3);
 				break;
 			case 3:
-				mesh->SetSectionMaterial(i, MaterialInstance4);
+				mesh->SetSectionMaterial(i, MIAtom4);
 				break;
 			case 4:
-				mesh->SetSectionMaterial(i, MaterialInstance5);
+				mesh->SetSectionMaterial(i, MIAtom5);
 				break;
 			case 5:
-				mesh->SetSectionMaterial(i, MaterialInstance6);
+				mesh->SetSectionMaterial(i, MIAtom6);
 				break;
 			case 6:
-				mesh->SetSectionMaterial(i, MaterialInstance7);
+				mesh->SetSectionMaterial(i, MIAtom7);
 				break;
 			case 7:
-				mesh->SetSectionMaterial(i, MaterialInstance8);
+				mesh->SetSectionMaterial(i, MIAtom8);
 				break;
 			default:
-				mesh->SetSectionMaterial(i, MaterialInstance1);
+				mesh->SetSectionMaterial(i, MIAtom1);
 		}
 
 	}
@@ -486,42 +558,12 @@ void APop::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
 	//
 	// Highlight the Pop that the mouse pointer is over
 	//
-#if 1
+#if 0
 	Highlight(subtree, 1);
 #else
-	UMaterialInstanceDynamic* mi = nullptr;
-	switch (subtree % 8) {
-
-		case 0:
-			mi = MaterialInstance1;
-			break;
-		case 1:
-			mi = MaterialInstance2;
-			break;
-		case 2:
-			mi = MaterialInstance3;
-			break;
-		case 3:
-			mi = MaterialInstance4;
-			break;
-		case 4:
-			mi = MaterialInstance5;
-			break;
-		case 5:
-			mi = MaterialInstance6;
-			break;
-		case 6:
-			mi = MaterialInstance7;
-			break;
-		case 7:
-			mi = MaterialInstance8;
-			break;
-	}
-
-	verify(mi != nullptr);
-
-	mi->SetVectorParameterValue(FName(TEXT("EmissiveColor")), FLinearColor(0.97f, 0.32f, 0.30f));
+	HighlightWireChild(subtree, 1);
 #endif
+
 }
 
 void APop::CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent)
@@ -538,41 +580,10 @@ void APop::CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent)
 	//
 	// De-highlight the Pop that the mouse pointer was over
 	//
-#if 1
+#if 0
 	Highlight(subtree, 0);
 #else
-	UMaterialInstanceDynamic* mi = nullptr;
-	switch (subtree % 8) {
-
-	case 0:
-		mi = MaterialInstance1;
-		break;
-	case 1:
-		mi = MaterialInstance2;
-		break;
-	case 2:
-		mi = MaterialInstance3;
-		break;
-	case 3:
-		mi = MaterialInstance4;
-		break;
-	case 4:
-		mi = MaterialInstance5;
-		break;
-	case 5:
-		mi = MaterialInstance6;
-		break;
-	case 6:
-		mi = MaterialInstance7;
-		break;
-	case 7:
-		mi = MaterialInstance8;
-		break;
-	}
-
-	verify(mi != nullptr);
-
-	mi->SetVectorParameterValue(FName(TEXT("EmissiveColor")), FLinearColor(0.0916f, 0.271f, 0.0705f));
+	HighlightWireChild(subtree, 0);
 #endif
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnEndMouseOver: Pop Mouse End,  TouchedComponent=%p or %p, with name=%s"),
@@ -614,28 +625,28 @@ void APop::Highlight(int sectionIx, int lightLevel) {
 		switch (sectionIx % 8) {
 
 		case 0:
-			mi = MaterialInstance1;
+			mi = MIAtom1;
 			break;
 		case 1:
-			mi = MaterialInstance2;
+			mi = MIAtom2;
 			break;
 		case 2:
-			mi = MaterialInstance3;
+			mi = MIAtom3;
 			break;
 		case 3:
-			mi = MaterialInstance4;
+			mi = MIAtom4;
 			break;
 		case 4:
-			mi = MaterialInstance5;
+			mi = MIAtom5;
 			break;
 		case 5:
-			mi = MaterialInstance6;
+			mi = MIAtom6;
 			break;
 		case 6:
-			mi = MaterialInstance7;
+			mi = MIAtom7;
 			break;
 		case 7:
-			mi = MaterialInstance8;
+			mi = MIAtom8;
 			break;
 		}
 
@@ -653,7 +664,14 @@ void APop::Highlight(int sectionIx, int lightLevel) {
 			break;
 		case 1:
 			// Highlight
+#if 0
 			color = theGameMode->highlightColor;
+#else /* Wireframe version of the code */
+			color = theGameMode->deHighlightColor;
+			mi = MIWire1;
+			UE_LOG(LogTemp, Warning, TEXT("APop::Highlight: mi was set to MIWire1 (%p)"), mi);
+
+#endif
 			break;
 		case 2:
 			// Highlight more
@@ -665,18 +683,96 @@ void APop::Highlight(int sectionIx, int lightLevel) {
 	}
 
 	if (sectionIx == -1) {
-		MaterialInstance1->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
-		MaterialInstance2->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
-		MaterialInstance3->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
-		MaterialInstance4->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
-		MaterialInstance5->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
-		MaterialInstance6->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
-		MaterialInstance7->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
-		MaterialInstance8->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MIAtom1->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MIAtom2->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MIAtom3->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MIAtom4->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MIAtom5->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MIAtom6->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MIAtom7->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
+		MIAtom8->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
 	}
 	else {
 		mi->SetVectorParameterValue(FName(TEXT("EmissiveColor")), color);
 	}
+}
+
+
+void APop::HighlightWireChild(int sectionIx, int lightLevel) {
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::Highlight: this=%p (%s), sectionIx=%d"),
+		this, *this->thingRef->name, sectionIx);
+
+	switch (lightLevel) {
+
+		case 0:
+			// Hardcode MIAtom1 for now (green atm)
+			if (sectionIx == -1)
+				mesh->SetMaterial(0, MIAtom1);
+			else
+				mesh->SetSectionMaterial(sectionIx, MIAtom1);
+			break;
+			
+		case 1:
+		case 2:   /* TEMPORARY, should have own implementation */
+			if (sectionIx == -1) {
+				//mesh->SetMaterial(0, MIWire1);
+				for (int sectIx = 0; sectIx < 8; ++sectIx) {
+					mesh->SetSectionMaterial(sectIx, section2MIWire(sectIx));
+				}
+			}
+			else
+				//mesh->SetSectionMaterial(sectionIx, MIWire1);
+				mesh->SetSectionMaterial(sectionIx, section2MIWire(sectionIx));
+			break;
+
+		//case 2:
+		// Bright-highlight is NYI atm
+	}
+	
+}
+
+
+UMaterialInstanceDynamic* APop::section2MIWire(int sectionIx) {
+
+	UMaterialInstanceDynamic* mi = nullptr;
+
+	switch (sectionIx) {
+
+		case 0:
+			mi = MIWire1;
+			break;
+
+		case 1:
+			mi = MIWire2;
+			break;
+
+		case 2:
+			mi = MIWire3;
+			break;
+
+		case 3:
+			mi = MIWire4;
+			break;
+
+		case 4:
+			mi = MIWire5;
+			break;
+
+		case 5:
+			mi = MIWire6;
+			break;
+
+		case 6:
+			mi = MIWire7;
+			break;
+
+		case 7:
+			mi = MIWire8;
+			break;
+	}
+
+	return mi;
 }
 
 
