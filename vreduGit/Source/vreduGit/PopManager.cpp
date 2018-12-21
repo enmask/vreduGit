@@ -112,6 +112,18 @@ void APopManager::Pickup(APop* pop) {
 						   FAttachmentTransformRules::SnapToTargetIncludingScale,
 						   NAME_None);
 
+	// Move the picked pop forward a bit so that it doesn't get too close to camera
+	/*
+		FTransform cloneTrafo = p->GetActorTransform();
+	FVector cloneLoc = cloneTrafo.GetLocation();
+	cloneLoc.X += 60.0;
+	cloneLoc.Z += 30.0;
+	cloneTrafo.SetLocation(cloneLoc);
+	*/
+	FVector popLoc = pop->GetActorLocation();
+	popLoc.Y = popLoc.Y + 100.0f;
+	pop->SetActorLocation(popLoc);
+
 	pop->picked = true;
 	pickedPop = pop;
 

@@ -65,6 +65,8 @@ void AMyRunebergVR_Pawn::BeginPlay()
 	MotionController_Right->SetRelativeLocation(FVector(200.f, 200.f, -50.f));   // (Far, Right, High)
 #endif
 
+	SetupMaterial();
+
 	// Set global pawn
 	UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::BeginPlay: Setting global thePawn to %p"), this);
 	((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn = this;
@@ -112,16 +114,15 @@ void AMyRunebergVR_Pawn::Tick(float DeltaTime)
 
 void AMyRunebergVR_Pawn::SetupMaterial() {
 
-	/*
-		UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstanceFaintPurple;
-	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstanceYellow;
-	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstanceGreen;
-	*/
 
+	AvreduGameMode* theGameMode = GetGameMode();
+	MIHandPick = UMaterialInstanceDynamic::Create(theGameMode->MHandPick, theGameMode->MHandPick);
+	MIHandPickChild = UMaterialInstanceDynamic::Create(theGameMode->MHandPickChild, theGameMode->MHandPickChild);
+	MIHandDrop = UMaterialInstanceDynamic::Create(theGameMode->MHandDrop, theGameMode->MHandDrop);
+	MIHandDropChild = UMaterialInstanceDynamic::Create(theGameMode->MHandDropChild, theGameMode->MHandDropChild);
+	MIHandDropSibling = UMaterialInstanceDynamic::Create(theGameMode->MHandDropSibling, theGameMode->MHandDropSibling);
 
+#if 0
 	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialPink(TEXT("Material'/Game/Materials/M_Atom3'"));
 	if (MaterialPink.Succeeded()) {
 		MaterialInstancePink = UMaterialInstanceDynamic::Create(MaterialPink.Object, MaterialPink.Object);
@@ -141,10 +142,13 @@ void AMyRunebergVR_Pawn::SetupMaterial() {
 	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialGreen(TEXT("Material'/Game/Materials/M_Atom1'"));
 	if (MaterialGreen.Succeeded()) {
 		MaterialInstanceGreen = UMaterialInstanceDynamic::Create(MaterialGreen.Object, MaterialGreen.Object);
+		UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::SetupMaterial(), MaterialInstanceGreen=%p"),
+			   MaterialInstanceGreen);
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Pop: MaterialGreen failed"));
 	}
+#endif
 }
 
 
@@ -196,6 +200,8 @@ void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("MoveRUpDown", this, &AMyRunebergVR_Pawn::MoveRControllerUpDown);
 
 	PlayerInputComponent->BindAction("TogglePickDropMode", IE_Pressed, this, &AMyRunebergVR_Pawn::TogglePickDropMode);
+
+	PlayerInputComponent->BindAction("SpawnAtom", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtom);
 
 }
 
@@ -316,27 +322,114 @@ void AMyRunebergVR_Pawn::TogglePickDropMode() {
 
 }
 
-void AMyRunebergVR_Pawn::UpdateControllerModeColor() {
 
+void AMyRunebergVR_Pawn::SpawnAtom() {
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::SpawnAtom: called"));
 
-	// Jag har redan gul (M_Atom6 eller M_Atom7), grön (M_Atom1) och
-	// t.ex. rosa (M_Atom3) färg för atomer. Det enklaste är att
-	// använda dem till tången också.
-
+	//
+	// Spawn pop
+	//
 	AvreduGameMode* theGameMode = GetGameMode();
+	AThingManager* theThingManager = theGameMode->theThingManager;
+	APopManager* thePopManager = theGameMode->thePopManager;
+	verify(theThingManager != nullptr);
+	verify(thePopManager != nullptr);
+	FVector loc(300.0f, 200.0f, 100.0f);
+	FTransform dummyTrafo(loc);
 
-	if (theGameMode->thePopManager->pickedPop == nullptr) {
+	AThing* t = theThingManager->SpawnThingAtom("AN ATOM");
+	APop* p = thePopManager->Spawn(t, dummyTrafo);
 
-		
-
-	}
-	else {
-
-	}
-
+	//
+	// Pickup the new pop, since it should start in hand
+	//
+	///////////////
+	thePopManager->Pickup(p);
 
 }
 
+
+
+void AMyRunebergVR_Pawn::UpdateControllerModeColor() {
+
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerModeColor: called"));
+	AvreduGameMode* theGameMode = GetGameMode();
+
+	if (theGameMode->thePopManager->pickedPop == nullptr)
+		UpdateControllerPickModeColor();
+	else
+		UpdateControllerDropModeColor();
+}
+
+
+void AMyRunebergVR_Pawn::UpdateControllerPickModeColor() {
+
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerPickModeColor: called"));
+
+	AvreduGameMode* theGameMode = GetGameMode();
+	UActorComponent* rMeshAC = GetRightMotionControllerMesh();
+	UStaticMeshComponent* rMesh = Cast<UStaticMeshComponent>(rMeshAC);
+
+	UE_LOG(LogTemp, Warning,
+		   TEXT("AMyRunebergVR_Pawn::UpdateControllerPickModeColor: Before update, material is: <%p>, theGameMode=%p"),
+		   rMesh->GetMaterial(0), theGameMode);
+
+	if (pickModeEnum == EPickModeEnum::M_Pick) {
+
+		UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerPickModeColor: Will set MIHandPick material <%p>, MHandPick=%p, MIHandPickTestNumber=%d, (pawn)MIHandPick=%p"),
+			   theGameMode->MIHandPick, theGameMode->MHandPick, theGameMode->MIHandPickTestNumber, MIHandPick);
+
+		rMesh->SetMaterial(0, MIHandPick);
+		//rMesh->SetMaterial(0, theGameMode->MIHandPick);
+	}
+	else {
+
+		UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerPickModeColor: Will set MIHandPickChild material <%p>"),
+			   MIHandPickChild);
+
+		rMesh->SetMaterial(0, MIHandPickChild);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerPickModeColor: After update, material is: <%p>"),
+		   rMesh->GetMaterial(0));
+
+}
+
+
+void AMyRunebergVR_Pawn::UpdateControllerDropModeColor() {
+
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerDropModeColor: called"));
+
+	AvreduGameMode* theGameMode = GetGameMode();
+	UActorComponent* rMeshAC = GetRightMotionControllerMesh();
+	UStaticMeshComponent* rMesh = Cast<UStaticMeshComponent>(rMeshAC);
+
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerDropModeColor: Before update, material is: <%p>"),
+		rMesh->GetMaterial(0));
+
+	if (dropModeEnum == EDropModeEnum::M_Drop) {
+		UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerDropModeColor: Will set MIHandDrop material <%p>"),
+			   MIHandDrop);
+
+		rMesh->SetMaterial(0, MIHandDrop);
+	}
+	else if (dropModeEnum == EDropModeEnum::M_DropChild) {
+		UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerDropModeColor: Will set MIHandDropChild material <%p>"),
+			   MIHandDropChild);
+
+		rMesh->SetMaterial(0, MIHandDropChild);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerDropModeColor: Will set MIHandDropSibling material <%p>"),
+			   MIHandDropSibling);
+
+		rMesh->SetMaterial(0, MIHandDropSibling);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::UpdateControllerDropModeColor: After update, material is: <%p>"),
+		   rMesh->GetMaterial(0));
+
+}
 
 UActorComponent* AMyRunebergVR_Pawn::GetRightMotionController() {
 
@@ -349,6 +442,20 @@ UActorComponent* AMyRunebergVR_Pawn::GetRightMotionController() {
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: children.Num()=%d"), children.Num());
 
+
+#if 0
+	// Extra pre-loop just for logging
+	for (int ix = 0; ix < children.Num(); ++ix) {
+
+		USceneComponent* child = children[ix];
+
+		UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController PRE-LOOP: child=%p, name=%s"),
+			child, *child->GetName());
+	}
+#endif
+
+
+
 	for (int ix = 0; ix < children.Num(); ++ix) {
 
 		USceneComponent* child = children[ix];
@@ -358,6 +465,36 @@ UActorComponent* AMyRunebergVR_Pawn::GetRightMotionController() {
 
 		if (child->GetName() == "MotionController_Right") {
 			UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionController: Returning %p"), child);
+			//UMotionControllerComponent* motCon = Cast<UMotionControllerComponent>(child);
+			return child;
+		}
+
+	}
+
+	return nullptr;
+}
+
+
+UActorComponent* AMyRunebergVR_Pawn::GetRightMotionControllerMesh() {
+
+	AvreduGameMode* theGameMode = GetGameMode();
+	AMyRunebergVR_Pawn*	thePawn = theGameMode->thePawn;
+	USceneComponent* theRoot = thePawn->PawnRootMesh;
+	TArray < USceneComponent* > children;
+
+	theRoot->GetChildrenComponents(true, children);
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionControllerMesh: children.Num()=%d"), children.Num());
+
+	for (int ix = 0; ix < children.Num(); ++ix) {
+
+		USceneComponent* child = children[ix];
+
+		UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionControllerMesh: child=%p, name=%s"),
+			child, *child->GetName());
+
+		if (child->GetName() == "rightMesh") {
+			UE_LOG(LogTemp, Warning, TEXT("APop::GetRightMotionControllerMesh: Returning %p"), child);
 			//UMotionControllerComponent* motCon = Cast<UMotionControllerComponent>(child);
 			return child;
 		}

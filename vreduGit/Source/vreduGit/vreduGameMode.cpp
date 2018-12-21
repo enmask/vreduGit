@@ -6,59 +6,87 @@
 AvreduGameMode::AvreduGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	//PlayerControllerClass = AStrategyPlayerController::StaticClass();
-	//PlayerControllerClass = APlayerController::StaticClass();
-
-	//SpectatorClass = AStrategySpectatorPawn::StaticClass();
-
-	//DefaultPawnClass = AStrategySpectatorPawn::StaticClass();
 	DefaultPawnClass = AMyRunebergVR_Pawn::StaticClass();
 
-	//GameStateClass = AStrategyGameState::StaticClass();
-	//GameStateClass = AGameState::StaticClass();
+	SetupMaterial();
+
+}
 
 
-	//HUDClass = AStrategyHUD::StaticClass();
-	/*
-	if ((GEngine != nullptr) && (GEngine->GameViewport != nullptr))
-	{
-		GEngine->GameViewport->SetSuppressTransitionMessage(true);
-	}
-	*/
+void AvreduGameMode::SetupMaterial() {
 
-	//
-	// Create the GameplayManager
-	//
-#if 0 /* Moved to StartPlay() */
-	theGameplayManager = CreateDefaultSubobject<AGameplayManager>(TEXT("The GameplayManager"));
+	UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial() called, this=%p"), this);
 
-	if (theGameplayManager) {
-		UE_LOG(LogTemp, Warning, TEXT("theGameplayManager is NOT null"));
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("theGameplayManager IS null"));
-	}
-#endif
+	/*static*/ ConstructorHelpers::FObjectFinder<UMaterial> MHandPickTmp(TEXT("Material'/Game/Materials/M_HandPick'"));
+	if (MHandPickTmp.Succeeded()) {
 
-	//
-	// Create the PopManager
-	//
-	// NYI
+		// Store also the material, not only the dyn.mat.instance (needed for outside-class use)
+		// TODO: Store ONLY the material, not the MID
+		MHandPick = MHandPickTmp.Object;
 
-#if 0 /* May move to StartPlay() */
-	//
-	// Create the ThingManager
-	//
-	theThingManager = CreateDefaultSubobject<AThingManager>(TEXT("The ThingManager"));
+		MIHandPick = UMaterialInstanceDynamic::Create(MHandPickTmp.Object, MHandPickTmp.Object);
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial(): MIHandPick=%p, MHandPick=%p"),
+			   MIHandPick, MHandPick);
 
-	if (theThingManager) {
-		UE_LOG(LogTemp, Warning, TEXT("theThingManager is NOT null"));
+		// TEST
+		MIHandPickTestNumber = 17;
+
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("theThingManager IS null"));
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial: MHandPick failed"));
 	}
-#endif
 
+	/*static*/ ConstructorHelpers::FObjectFinder<UMaterial> MHandPickChildTmp(TEXT("Material'/Game/Materials/M_HandPickChild'"));
+	if (MHandPickChildTmp.Succeeded()) {
+
+		MHandPickChild = MHandPickChildTmp.Object;
+
+		MIHandPickChild = UMaterialInstanceDynamic::Create(MHandPickChildTmp.Object, MHandPickChildTmp.Object);
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial(): MIHandPickChild=%p, MHandPickChild=%p"),
+			MIHandPickChild, MHandPickChild);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial: MHandPickChild failed"));
+	}
+
+	/*static*/ ConstructorHelpers::FObjectFinder<UMaterial> MHandDropTmp(TEXT("Material'/Game/Materials/M_HandDrop'"));
+	if (MHandDropTmp.Succeeded()) {
+
+		MHandDrop = MHandDropTmp.Object;
+
+		MIHandDrop = UMaterialInstanceDynamic::Create(MHandDropTmp.Object, MHandDropTmp.Object);
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial(): MIHandDrop=%p"),
+			MIHandDrop);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial: MHandDrop failed"));
+	}
+
+	/*static*/ ConstructorHelpers::FObjectFinder<UMaterial> MHandDropChildTmp(TEXT("Material'/Game/Materials/M_HandDropChild'"));
+	if (MHandDropChildTmp.Succeeded()) {
+
+		MHandDropChild = MHandDropChildTmp.Object;
+
+		MIHandDropChild = UMaterialInstanceDynamic::Create(MHandDropChildTmp.Object, MHandDropChildTmp.Object);
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial(): MIHandDropChild=%p"),
+			MIHandDropChild);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial: MHandDropChild failed"));
+	}
+
+	/*static*/ ConstructorHelpers::FObjectFinder<UMaterial> MHandDropSiblingTmp(TEXT("Material'/Game/Materials/M_HandDropSibling'"));
+	if (MHandDropSiblingTmp.Succeeded()) {
+
+		MHandDropSibling = MHandDropSiblingTmp.Object;
+
+		MIHandDropSibling = UMaterialInstanceDynamic::Create(MHandDropSiblingTmp.Object, MHandDropSiblingTmp.Object);
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial(): MIHandDropSibling=%p"),
+			MIHandDropSibling);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("AvreduGameMode::SetupMaterial: MHandDropSibling failed"));
+	}
 }
 
 

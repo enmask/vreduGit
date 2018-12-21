@@ -60,14 +60,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		float controllerSpeed;
 
+
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstancePink;
+		UMaterialInstanceDynamic* MIHandPick;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstanceYellow;
+		UMaterialInstanceDynamic* MIHandPickChild;
 	UPROPERTY(VisibleAnywhere)
-		UMaterialInstanceDynamic* MaterialInstanceGreen;
+		UMaterialInstanceDynamic* MIHandDrop;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandDropChild;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandDropSibling;
 
 	UActorComponent* GetRightMotionController();
+	UActorComponent* GetRightMotionControllerMesh();
 
 	void TurnSideAtRate(float Rate);
 	void TurnUpDownAtRate(float Rate);
@@ -81,10 +87,14 @@ public:
 	void MoveRControllerUpDown(float AxisValue);
 
 	void TogglePickDropMode();
+	//
+	// Let the user spawn atoms in hand
+	//
+	void SpawnAtom();
+
 	void UpdateControllerModeColor();
-
-
-
+	void UpdateControllerPickModeColor();
+	void UpdateControllerDropModeColor();
 
 	//void StartGrowing();
 	//void StopGrowing();

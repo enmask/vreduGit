@@ -78,6 +78,32 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")
 		TArray< APop* > wantsPicking;
 
+	UPROPERTY(VisibleAnywhere)
+		UMaterial* MHandPick;
+	UPROPERTY(VisibleAnywhere)
+		UMaterial* MHandPickChild;
+	UPROPERTY(VisibleAnywhere)
+		UMaterial* MHandDrop;
+	UPROPERTY(VisibleAnywhere)
+		UMaterial* MHandDropChild;
+	UPROPERTY(VisibleAnywhere)
+		UMaterial* MHandDropSibling;
+
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandPick;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandPickChild;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandDrop;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandDropChild;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandDropSibling;
+
+	// TEST
+	UPROPERTY(VisibleAnywhere)
+		int MIHandPickTestNumber;
+
 	// The held Pop signals that it wants dropping. PopManager will later on check if someone wants the help Pop as child
 	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")
 	//	bool wantsDropping;
@@ -101,5 +127,9 @@ public:
 	//	void SetWantsDropping(bool value);
 
 	virtual void StartPlay() override;
+
+private:
+
+	void SetupMaterial();
 
 };
