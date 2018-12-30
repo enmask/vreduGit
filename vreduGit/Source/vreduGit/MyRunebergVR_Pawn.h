@@ -9,22 +9,6 @@
 class URunebergVR_Movement;
 class AvreduGameMode;
 
-UENUM(BlueprintType)
-enum class EPickModeEnum : uint8
-{
-	M_Pick		UMETA(DisplayName = "Pick"),
-	M_PickChild UMETA(DisplayName = "PickChild")
-};
-
-UENUM(BlueprintType)
-enum class EDropModeEnum : uint8
-{
-	M_Drop			UMETA(DisplayName = "Drop"),
-	M_DropChild		UMETA(DisplayName = "DropChild"),
-	M_DropSibling	UMETA(DisplayName = "DropSibling")
-};
-
-
 /**
  * 
  */
@@ -43,16 +27,12 @@ public:
 
 	AvreduGameMode* GetGameMode();
 
+#if 0
 	FString GetPickModeEnumAsString(EPickModeEnum EnumValue);
 	FString GetDropModeEnumAsString(EDropModeEnum EnumValue);
+#endif
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Enum)
-		EPickModeEnum pickModeEnum;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Enum)
-		EDropModeEnum dropModeEnum;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		URunebergVR_Movement* vrMovement;
@@ -60,11 +40,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
 		float controllerSpeed;
 
-
 	UPROPERTY(VisibleAnywhere)
 		UMaterialInstanceDynamic* MIHandPick;
 	UPROPERTY(VisibleAnywhere)
 		UMaterialInstanceDynamic* MIHandPickChild;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandClone;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* MIHandCloneChild;
 	UPROPERTY(VisibleAnywhere)
 		UMaterialInstanceDynamic* MIHandDrop;
 	UPROPERTY(VisibleAnywhere)

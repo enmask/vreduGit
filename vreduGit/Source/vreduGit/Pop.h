@@ -110,11 +110,12 @@ public:
 	UFUNCTION()
 		void CustomOnClicked(UPrimitiveComponent* clickedComponent, FKey inKey);
 
+	void LogComponentHierarchy(USceneComponent* rootComp);
+
 private:
 	void AddGrabBoxes(TArray<FTransform>& grabBoxLocations);
 	void AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim);
 
-	void LogComponentHierarchy(USceneComponent* rootComp);
 	UActorComponent* GetRightMotionController();
 
 	UMaterialInstanceDynamic* section2MIWire(int sectionIx);

@@ -345,7 +345,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	TArray<FRuntimeMeshTangent> tangents;
 	TArray<FColor> vertexColors;
 
-	//UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh called, thingRef has the name: %s"), *thingRef->name);
+	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh called, this-pop=%p, thingRef has the name: %s"), this, *thingRef->name);
 
 
 	// Build combined mesh data for the full tree of the Thing that this Pop instantiates
@@ -778,7 +778,8 @@ UMaterialInstanceDynamic* APop::section2MIWire(int sectionIx) {
 
 void APop::LogComponentHierarchy(USceneComponent* rootComp) {
 
-	UE_LOG(LogTemp, Warning, TEXT("APop::LogComponentHierarchy: Called, rootComp=%p"), rootComp);
+	UE_LOG(LogTemp, Warning, TEXT("APop::LogComponentHierarchy: Called, this-pop=%p, thing-name=%s, rootComp=%p"),
+		   this, *thingRef->name, rootComp);
 
 /*
 	void GetChildrenComponents

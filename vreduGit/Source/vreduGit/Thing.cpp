@@ -335,15 +335,15 @@ void AThing::AddMeshDataForOneAtom(int32 treeLevel, int32 subtreeNo,
 	FVector vertx6(-1.000000, 1.000000, 1.000000);
 	FVector vertx7(-1.000000, 1.000000, -1.000000);
 
-	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, 30.0f * vertx0, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, 30.0f * vertx1, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, 30.0f * vertx2, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, 30.0f * vertx3, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, CUBEMESH_SIZE * vertx0, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, CUBEMESH_SIZE * vertx1, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, CUBEMESH_SIZE * vertx2, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, CUBEMESH_SIZE * vertx3, vertices, newIndices);
 
-	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, 30.0f * vertx4, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, 30.0f * vertx5, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, 30.0f * vertx6, vertices, newIndices);
-	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, 30.0f * vertx7, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, CUBEMESH_SIZE * vertx4, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, CUBEMESH_SIZE * vertx5, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, CUBEMESH_SIZE * vertx6, vertices, newIndices);
+	AddVertex(treeLevel, subtreeNo, verts2Dim, colors2Dim, collisions2Dim, baseTrafo, CUBEMESH_SIZE * vertx7, vertices, newIndices);
 
 	//
 	// Now add to the 2-dim tris array

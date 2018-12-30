@@ -13,6 +13,7 @@
 
 // Basic constants
 #define CUBE_SIZE 60
+#define CUBEMESH_SIZE 20
 
 
 USTRUCT()

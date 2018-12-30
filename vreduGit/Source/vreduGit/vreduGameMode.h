@@ -83,12 +83,17 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		UMaterial* MHandPickChild;
 	UPROPERTY(VisibleAnywhere)
+		UMaterial* MHandClone;
+	UPROPERTY(VisibleAnywhere)
+		UMaterial* MHandCloneChild;
+	UPROPERTY(VisibleAnywhere)
 		UMaterial* MHandDrop;
 	UPROPERTY(VisibleAnywhere)
 		UMaterial* MHandDropChild;
 	UPROPERTY(VisibleAnywhere)
 		UMaterial* MHandDropSibling;
 
+#if 0 /* Moved to pawn */
 	UPROPERTY(VisibleAnywhere)
 		UMaterialInstanceDynamic* MIHandPick;
 	UPROPERTY(VisibleAnywhere)
@@ -103,6 +108,7 @@ public:
 	// TEST
 	UPROPERTY(VisibleAnywhere)
 		int MIHandPickTestNumber;
+#endif
 
 	// The held Pop signals that it wants dropping. PopManager will later on check if someone wants the help Pop as child
 	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")

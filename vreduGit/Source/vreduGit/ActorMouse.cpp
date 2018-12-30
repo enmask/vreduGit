@@ -201,7 +201,7 @@ void AActorMouse::BuildCube()
 	vertexColors.Add(FColor::Green);
 	vertexColors.Add(FColor::Green);
 
-	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh, will call CreateMeshSection"));
+	UE_LOG(LogTemp, Warning, TEXT("APop::BuildCube, will call CreateMeshSection"));
 
 
 	// For a moment, just pass verts and tris

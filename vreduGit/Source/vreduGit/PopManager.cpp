@@ -25,6 +25,9 @@ void APopManager::BeginPlay()
 	numPops = 0;
 	pickedPop = nullptr;
 	brightPop = nullptr;
+
+	pickModeEnum = EPickModeEnum::M_Pick;
+	dropModeEnum = EDropModeEnum::M_Drop;
 }
 
 // Called every frame
@@ -57,33 +60,100 @@ AvreduGameMode* APopManager::GetGameMode() {
 }
 
 
+bool APopManager::IsPickMode() {
+	return (pickModeEnum == EPickModeEnum::M_Pick);
+}
+
+bool APopManager::IsPickChildMode() {
+	return (pickModeEnum == EPickModeEnum::M_PickChild);
+}
+
+bool APopManager::IsCloneMode() {
+	return (pickModeEnum == EPickModeEnum::M_Clone);
+}
+
+bool APopManager::IsCloneChildMode() {
+	return (pickModeEnum == EPickModeEnum::M_CloneChild);
+}
+
+bool APopManager::IsDropMode() {
+	return (dropModeEnum == EDropModeEnum::M_Drop);
+}
+
+bool APopManager::IsDropChildMode() {
+	return (dropModeEnum == EDropModeEnum::M_DropChild);
+}
+
+bool APopManager::IsDropSiblingMode() {
+	return (dropModeEnum == EDropModeEnum::M_DropSibling);
+}
+
+
+void APopManager::TogglePickDropMode() {
+
+	if (pickedPop == nullptr) {
+		// Nothing is picked, toggle pick mode
+		if (pickModeEnum == EPickModeEnum::M_Pick)
+			pickModeEnum = EPickModeEnum::M_PickChild;
+		else if (pickModeEnum == EPickModeEnum::M_PickChild)
+			pickModeEnum = EPickModeEnum::M_Clone;
+		else if (pickModeEnum == EPickModeEnum::M_Clone)
+			pickModeEnum = EPickModeEnum::M_CloneChild;
+		else
+			pickModeEnum = EPickModeEnum::M_Pick;
+
+		///UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::TogglePickDropMode: Pick mode toggled to %s"),
+		///	   *GetPickModeEnumAsString(pickModeEnum));
+	}
+	else {
+		// Something is picked, toggle drop mode
+		if (dropModeEnum == EDropModeEnum::M_Drop)
+			dropModeEnum = EDropModeEnum::M_DropChild;
+		else if (dropModeEnum == EDropModeEnum::M_DropChild)
+			dropModeEnum = EDropModeEnum::M_DropSibling;
+		else
+			dropModeEnum = EDropModeEnum::M_Drop;
+
+		///UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::TogglePickDropMode: Drop mode toggled to %s"),
+		///	   *GetDropModeEnumAsString(dropModeEnum));
+	}
+}
+
 void APopManager::PickupThoseWhoWant() {
 
 	AvreduGameMode* theGameMode = GetGameMode();
 	TArray< APop* > wantsPicking = theGameMode->GetWantsPicking();
 
-	/* */
 	for (APop* pop : wantsPicking) {
 
 		UE_LOG(LogTemp, Warning, TEXT("APopManager::Tick: pop %p wants PICKING. pop->picked=%s"),
 			   pop, (pop->picked)?TEXT("true"):TEXT("false"));
 
 		//pop->picked ? Drop(pop) : Pickup(pop);
-		pop->picked ? DropAndAddChild(pop) : Pickup(pop);
+		//pop->picked ? DropAndAddChild(pop) : Pickup(pop);
+
+		if (pop->picked) {
+			if (IsDropMode())
+				Drop(pop);
+			else if (IsDropChildMode())
+				DropAndAddChild(pop);
+			else
+				DropSibling(pop);
+		}
+		else {
+			if (IsPickMode())
+				Pickup(pop);
+			else if (IsPickChildMode())
+				PickChild(pop);
+			else if (IsCloneMode())
+				ClonePick(pop, "A CLONE");
+			else
+				CloneChild(pop, "A CLONE");
+		}
 
 		theGameMode->RemoveWantsPicking(pop);
+		UpdateControllerModeColor();
 	}
-	/* */
-
-	/* *
-	for (int ix = wantsPicking.Num() - 1; ix >= 0; --ix) {
-		APop* pop = wantsPicking[ix];
-		pop->picked ? DropAndAddChild(pop) : Pickup(pop);
-		theGameMode->RemoveWantsPicking(ix);
-	}
-	* */
-
-
 }
 
 #if 0
@@ -121,37 +191,158 @@ void APopManager::Pickup(APop* pop) {
 	cloneTrafo.SetLocation(cloneLoc);
 	*/
 	FVector popLoc = pop->GetActorLocation();
-	popLoc.Y = popLoc.Y + 100.0f;
+#if 0
+	popLoc.Y = popLoc.Y + 400.0f;  // Was 100.0
 	pop->SetActorLocation(popLoc);
+#else
+	/* */
+	//FTransform subThingRelTrafo = UKismetMathLibrary::ConvertTransformToRelative(parent->GetTransform(), toBeChild->GetTransform());
+	FTransform popAbsTrafo(FVector(0.0, 400.0, 0.0));
+	USceneComponent* motConSC = Cast<USceneComponent>(motCon);
+	FTransform motConRelTrafo = motConSC->GetRelativeTransform();
+	//USceneComponent::GetComponentLocation
+	FTransform motConAbsTrafo = motConSC->GetComponentTransform();
+	FTransform popRelTrafo = UKismetMathLibrary::ConvertTransformToRelative(motConAbsTrafo, popAbsTrafo);
+	/**
+	pop->SetActorTransform(popRelTrafo);
+	**/
+	UE_LOG(LogTemp, Warning,
+		   TEXT("APopManager::Pickup trafos:  popAbsTrafo=%s,  motConRelTrafo=%s, motConAbsTrafo=%s,  popRelTrafo=%s"),
+		   *popAbsTrafo.ToHumanReadableString(), *motConRelTrafo.ToHumanReadableString(), *motConAbsTrafo.ToHumanReadableString(), *popRelTrafo.ToHumanReadableString());
+	/* */
 
+	FTransform popTrafo(FVector(100, 0, 0));
+	//pop->SetActorTransform(popTrafo);
+	pop->SetActorTransform(popTrafo * motConAbsTrafo);
+
+#endif
 	pop->picked = true;
 	pickedPop = pop;
 
 	HighlightCloseTopChildren(pop);
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup end"), pop);
 }
 
-#if 1 /* Just drop, don't join */
+
+void APopManager::PickChild(APop* pop) {
+	UE_LOG(LogTemp, Warning, TEXT("***NYI!  NUI!  NYI!  APopManager::PickChild called, pop=%p. NYI!  NYI!  NYI!***"), pop);
+}
+
+// Deep copy a Pop and all its Thing:s.
+// Return the clone Pop.
+//APop* APopManager::Clone(APop* origPop, FString cloneName) {
+APop* APopManager::Clone(APop* p, FString cloneName) {
+
+	//
+	//  Pop PopManager::Clone(Pop p, FString cloneName)
+	//
+
+	UWorld* const World = GetWorld();
+	AThingManager* theThingManager = ((AvreduGameMode*)World->GetAuthGameMode())->theThingManager;
+
+	AThing* cloneThing = theThingManager->Clone(p->thingRef, cloneName);
+
+	// HACK: Temporary hack, move the clone along x so that it doesn't collide with the original
+	FTransform cloneTrafo = p->GetActorTransform();
+	FVector cloneLoc = cloneTrafo.GetLocation();
+
+	UE_LOG(LogTemp,
+		Warning,
+		TEXT("APopManager::Clone: orig loc X=%f Y=%f Z=%f,  cloneLoc: X=%f Y=%f Z=%f"),
+		p->GetActorTransform().GetLocation().X, p->GetActorTransform().GetLocation().Y, p->GetActorTransform().GetLocation().Z,
+		cloneLoc.X, cloneLoc.Y, cloneLoc.Z);
+
+	APop* clonePop = Spawn(cloneThing, cloneTrafo);
+
+	//		clonePop->thingRef = theThingManager->Clone(p->thingRef, cloneName)
+	//
+	//
+	//  Thing ThingManager::Clone(Thing t, FString cloneName)
+	//
+	//		cloneThing = new AThing
+	//		cloneThing->name = cloneName
+	//		
+	//		for (child in t->subThings,  childRelTrafo in t->subThingRelTrafos,  childRole in t->subThingRoles) {
+	//			cloneThing->subThings.Add(Clone(child))
+	//			cloneThing->subThingRelTrafos.Add(FTransform(childRelTrafo))
+	//			cloneThing->subThingRoles.Add(childRole)
+	//
+	//      
+
+	return clonePop;
+}
+
+
+#if 1
+// Deep copy origPop and give the thing of the copy the name <cloneName>
+// Return the copy
+void APopManager::ClonePick(APop* origPop, FString cloneName) {
+	UE_LOG(LogTemp, Warning,
+		   TEXT("APopManager::Clone called, origPop=%p, cloneName=%s"),
+		   origPop, (cloneName != "") ? *cloneName : TEXT("<empty string>"));
+
+	APop* clonePop = Clone(origPop, cloneName);
+	Pickup(clonePop);
+}
+#endif
+
+
+// Deep copy one child of origPop and give the thing of the copy the name <cloneName> or
+// , if cloneName is "", original name with "_cloneName" appended
+// ***NYI. TODO: Add parameter that specifies which child to clone
+APop* APopManager::CloneChild(APop* origPop, FString cloneName) {
+	UE_LOG(LogTemp, Warning,
+		   TEXT("***NYI!  NUI!  NYI!  APopManager::CloneChild called, origPop=%p, cloneName=%s. NYI!  NYI!  NYI!***"),
+		   origPop, (cloneName != "") ? *cloneName : TEXT("<empty string>"));
+	return nullptr;
+}
+
 void APopManager::Drop(APop* pop) {
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Drop called, pop=%p"), pop);
+
 	pop->GetRootComponent()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	pop->mesh->SetSimulatePhysics(true);
 	pop->picked = false;
 	pickedPop = nullptr;
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Drop end"));
 }
-#endif
+
 
 // Drop and insert as child to Pop
+// TODO: Change name from DropAndAddChild to DropChild
 void APopManager::DropAndAddChild(APop* pop) {
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::DropAndAddChild called, pop=%p. Will call LogComponentHierarchy for pop"), pop);
+	pop->LogComponentHierarchy(pop->GetRootComponent());
 
 	if (brightPop != nullptr) {
+
+		UE_LOG(LogTemp, Warning, TEXT("APopManager::DropAndAddChild (called), pop=%p. Will call LogComponentHierarchy for brightPop"), pop);
+		brightPop->LogComponentHierarchy(brightPop->GetRootComponent());
 
 		verify(brightPop != pop);
 
 		Drop(pop);
 		AddChild(brightPop, pop);
 	}
-	
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::DropAndAddChild end, pop=%p. Will call LogComponentHierarchy for pop"), pop);
+	pop->LogComponentHierarchy(pop->GetRootComponent());
+	if (brightPop != nullptr) {
+		UE_LOG(LogTemp, Warning, TEXT("APopManager::DropAndAddChild (end), pop=%p. Will call LogComponentHierarchy for brightPop"), pop);
+		brightPop->LogComponentHierarchy(brightPop->GetRootComponent());
+	}
 }
 
+void APopManager::DropSibling(APop* pop) {
+	UE_LOG(LogTemp, Warning, TEXT("***NYI!  NUI!  NYI!  APopManager::DropSibling called, pop=%p. NYI!  NYI!  NYI!***"), pop);
+}
+
+void APopManager::UpdateControllerModeColor() {
+	AMyRunebergVR_Pawn*	thePawn = ((AvreduGameMode*)GetWorld()->GetAuthGameMode())->thePawn;
+	thePawn->UpdateControllerModeColor();
+}
 
 
 UActorComponent* APopManager::GetRightMotionController() {
@@ -302,71 +493,6 @@ void APopManager::AddChild(APop* parent, APop* toBeChild) {
 
 	// Rebuild mesh to get the combined mesh
 	parent->BuildMesh();
-}
-
-
-// Deep copy a Pop and all its Thing:s.
-// Return the clone Pop.
-//APop* APopManager::Clone(APop* origPop, FString cloneName) {
-APop* APopManager::Clone(APop* p, FString cloneName) {
-
-	// Pseudo code:
-	//
-	/// Clone the Pop
-	// clonePop = new APop
-	// cloneThing = new AThing
-	// cloneThing.name = cloneName
-	// origThing = origPop.thingRef
-	//
-	// for (child in origThing.subThings) {
-	//		p = new APop
-	//		origPop.subThing
-	//
-	//		Clone(
-	//
-	
-	//
-	//  Pop PopManager::Clone(Pop p, FString cloneName)
-	//
-
-	UWorld* const World = GetWorld();
-	AThingManager* theThingManager = ((AvreduGameMode*)World->GetAuthGameMode())->theThingManager;
-
-	AThing* cloneThing = theThingManager->Clone(p->thingRef, cloneName);
-
-	// HACK: Temporary hack, move the clone along x so that it doesn't collide with the original
-	FTransform cloneTrafo = p->GetActorTransform();
-	FVector cloneLoc = cloneTrafo.GetLocation();
-#if 0 /* Deactivated the hack */
-	cloneLoc.X += 60.0;
-	cloneLoc.Z += 30.0;
-	cloneTrafo.SetLocation(cloneLoc);
-#endif
-
-	UE_LOG(LogTemp,
-		   Warning,
-		   TEXT("APopManager::Clone: orig loc X=%f Y=%f Z=%f,  cloneLoc: X=%f Y=%f Z=%f"),
-		   p->GetActorTransform().GetLocation().X, p->GetActorTransform().GetLocation().Y, p->GetActorTransform().GetLocation().Z,
-		   cloneLoc.X, cloneLoc.Y, cloneLoc.Z);
-
-	APop* clonePop = Spawn(cloneThing, cloneTrafo);
-
-	//		clonePop->thingRef = theThingManager->Clone(p->thingRef, cloneName)
-	//
-	//
-	//  Thing ThingManager::Clone(Thing t, FString cloneName)
-	//
-	//		cloneThing = new AThing
-	//		cloneThing->name = cloneName
-	//		
-	//		for (child in t->subThings,  childRelTrafo in t->subThingRelTrafos,  childRole in t->subThingRoles) {
-	//			cloneThing->subThings.Add(Clone(child))
-	//			cloneThing->subThingRelTrafos.Add(FTransform(childRelTrafo))
-	//			cloneThing->subThingRoles.Add(childRole)
-	//
-	//      
-
-	return clonePop;
 }
 
 
