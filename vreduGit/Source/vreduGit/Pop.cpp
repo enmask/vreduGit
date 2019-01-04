@@ -49,9 +49,11 @@ void APop::TestSetupCollisionBox() {
 	//box->AttachTo(mesh);
 	RootComponent = mesh;
 	////box->SetupAttachment(mesh);
-
-	////box->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
-	////box->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	
+	// TEST 190103
+	mesh->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
+	// TEST 190103
+	mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	//box->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	
 	//box->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);
@@ -80,10 +82,25 @@ void APop::TestSetupCollisionBox() {
 }
 
 void APop::TestSetupPhysics() {
+
+	bool simPhys = mesh->IsSimulatingPhysics();
+	bool simPhys2 = mesh->IsAnySimulatingPhysics();
+	UE_LOG(LogTemp, Warning, TEXT("APop::TestSetupPhysics: Before mesh->SetSimulatePhysics(true):  simPhys1=%s, simPhys2=%s"),
+		   simPhys ? TEXT("true") : TEXT("false"),
+		   simPhys2 ? TEXT("true") : TEXT("false"));
+
 	mesh->SetSimulatePhysics(true);
+
+	bool simPhys3 = mesh->IsSimulatingPhysics();
+	bool simPhys4 = mesh->IsAnySimulatingPhysics();
+	UE_LOG(LogTemp, Warning, TEXT("APop::TestSetupPhysics: After mesh->SetSimulatePhysics(true):  simPhys3=%s, simPhys4=%s"),
+		simPhys3 ? TEXT("true") : TEXT("false"),
+		simPhys4 ? TEXT("true") : TEXT("false"));
+
+
 	////box->SetSimulatePhysics(false);    // WAS true!!!    !!!
 
-	mesh->SetEnableGravity(false);
+	mesh->SetEnableGravity(true);
 	//this->GetRootPrimitiveComponent()->SetEnableGravity(true);
 	////box->SetEnableGravity(false);
 
@@ -91,8 +108,10 @@ void APop::TestSetupPhysics() {
 	//box->ToggleVisibility(true);
 	////box->SetVisibility(true);
 
+	// Reinserted these 190102
 	//bUseComplexAsSimpleCollision = false;
 	//mesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseSimpleAsComplex;
+	mesh->SetCollisionUseComplexAsSimple(false);
 
 	//this->SphereCollider->SetWorldScale3D(Scale * 1.5f);
 	////box->SetWorldScale3D(FVector(20.0, 20.0, 20.0));
@@ -265,7 +284,7 @@ void APop::init(AThing* thing, FTransform trafo) {
 	RootComponent = mesh;
 	mesh->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
 	mesh->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);  // Try also PhysicsOnly
-	mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);
+	mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Overlap);  /// Was ECR_Block before 190102
 
 	mesh->SetSimulatePhysics(true);
 
@@ -306,9 +325,174 @@ void APop::BeginPlay()
 // Called every frame
 void APop::Tick(float DeltaTime)
 {
+	//const bool simulatesPhysics = Component->BodyInstance.bSimulatePhysics;
+	//RootComponent->IsPhysicsCollisionEnabled
+	//RootComponent->IsAnySimulatingPhysics
+	//RootComponent->GetCollisionEnabled()
+	//this->GetRootPrimitiveComponent()->SetEnableGravity(true);
+	UPrimitiveComponent* primComp = this->GetRootPrimitiveComponent();
+
+	//bool canEdit = RootComponent->CanEdi
+	bool canEdit = primComp->CanEditSimulatePhysics();
+
+	//CanEditSimulatePhysics()
+	//bool simPhys = RootComponent->BodyInstance.bSimulatePhysics;
+	bool simPhys = primComp->BodyInstance.bSimulatePhysics;
+	bool simPhys2 = primComp->IsSimulatingPhysics();
+
+
+	//bool simPhys2 = primComp->
+	USceneComponent* rootSC = this->GetRootComponent();
+	bool simPhys3 = rootSC->IsSimulatingPhysics();
+
+	primComp->SetSimulatePhysics(true);
+
+	bool simPhys4 = rootSC->IsSimulatingPhysics();
+	bool simPhys5 = primComp->IsSimulatingPhysics();
+
+
+	//bool isCollEnabled = primComp->BodyInstance.GetCollisionEnabled();
+	//ECollisionEnabled::QueryOnly
+	ECollisionEnabled::Type isCollEnabled = primComp->BodyInstance.GetCollisionEnabled();
+	FString isCollEnabledStr = ECollisionEnabled2Str(isCollEnabled);
+
+	FString popCollChannelStr = ECollisionChannel2Str(primComp->GetCollisionObjectType());
+
+	bool popGrav = primComp->IsGravityEnabled();
+
+#if 1
+	UE_LOG(LogTemp, Warning,
+		   TEXT("APop::Tick: this-pop=%p, name: %s, 1.canEditSim=%s, 2.bSimulatePhysics: %s (simPhys2=%s, simPhys3=%s, simPhys4=%s, simPhys5=%s), 3.isCollEnabled=%s, 4.popCollChannelStr=%s, 5.popGrav=%s"),
+		   this,
+		   *thingRef->name,
+		   canEdit ? TEXT("true") : TEXT("false"),
+		   simPhys ? TEXT("true") : TEXT("false"),
+		   simPhys2 ? TEXT("true") : TEXT("false"),
+		   simPhys3 ? TEXT("true") : TEXT("false"),
+		   simPhys4 ? TEXT("true") : TEXT("false"),
+		   simPhys5 ? TEXT("true") : TEXT("false"),
+		   *isCollEnabledStr,
+		   *popCollChannelStr,
+		   popGrav ? TEXT("true") : TEXT("false"));
+
+
+	for (int i = 0; i < grabBoxes.Num() && i < 10; ++i) {
+		UBoxComponent* grabBox = grabBoxes[i];
+		//UPrimitiveComponent* grabBoxPrimComp = grabBox->GetRo
+		//this->GetRootPrimitiveComponent();
+
+		bool grabBoxCanEdit = grabBox->CanEditSimulatePhysics();
+		//bool grabBoxSimPhys = primComp->BodyInstance.bSimulatePhysics;
+		bool grabBoxSimPhys = grabBox->IsSimulatingPhysics();
+		//bool grabBoxIsCollEnabled = primComp->BodyInstance.GetCollisionEnabled();
+		ECollisionEnabled::Type grabBoxIsCollEnabled = grabBox->GetCollisionEnabled();
+		FString grabBoxIsCollEnabledStr = ECollisionEnabled2Str(grabBoxIsCollEnabled);
+		FString grabBoxCollChannelStr = ECollisionChannel2Str(grabBox->GetCollisionObjectType());
+		bool grabBoxGrav = primComp->IsGravityEnabled();
+		UE_LOG(LogTemp, Warning,
+			TEXT("APop::Tick: grabBox=%p, GetName()=%s, 1.grabBoxCanEdit=%s,  2.grabBoxSimPhys: %s,  3.grabBoxIsCollEnabled=%s, 4.CollChannel=%s,  5.grabBoxGrav=%s"),
+			this,
+			*grabBox->GetName(),
+			grabBoxCanEdit ? TEXT("true") : TEXT("false"),
+			grabBoxSimPhys ? TEXT("true") : TEXT("false"),
+			*grabBoxIsCollEnabledStr,
+			*grabBoxCollChannelStr,
+			grabBoxGrav ? TEXT("true") : TEXT("false"));
+
+		// TEST: Now also try to ALTER settings!
+		//box->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryOnly)
+		//Try 1:  primComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		//Try 2: (Invalid Simulate Options: Body (Pop_0.Pop mesh test) is set to simulate physics but
+		//									Collision Enabled is incompatible
+		//primComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// Try 3:
+		//primComp->SetSimulatePhysics(false);
+
+		// Try 4:
+		//primComp->SetSimulatePhysics(false);
+		//primComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// Try 5:
+		//grabBox->SetSimulatePhysics(false);
+		//SetActorEnableCollision(true);
+
+		// Try 6:
+		//primComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	}
+#endif
+
 	Super::Tick(DeltaTime);
 }
 
+
+FString APop::ECollisionEnabled2Str(ECollisionEnabled::Type eCollEnabled) {
+
+	FString s;
+
+	switch (eCollEnabled) {
+		case ECollisionEnabled::NoCollision:
+			s = "NoCollision";
+			break;
+		case ECollisionEnabled::PhysicsOnly:
+			s = "PhysicsOnly";
+			break;
+		case ECollisionEnabled::QueryAndPhysics:
+			s = "QueryAndPhysics";
+			break;
+		case ECollisionEnabled::QueryOnly:
+			s = "QueryOnly";
+			break;
+		default:
+			UE_LOG(LogTemp, Warning, TEXT("APop::ECollisionEnabled2Str: ERROR, eCollEnabled has unknown value!"));
+			FGenericPlatformMisc::RequestExit(false);
+	}
+	return s;
+}
+
+
+//ECollisionChannel::ECC_PhysicsBody
+FString APop::ECollisionChannel2Str(ECollisionChannel eCollChannel) {
+
+	FString s;
+
+	switch (eCollChannel) {
+	case ECollisionChannel::ECC_Camera:
+		s = "ECC_Camera";
+		break;
+	case ECollisionChannel::ECC_Destructible:
+		s = "ECC_Destructible";
+		break;
+	case ECollisionChannel::ECC_EngineTraceChannel1:
+		s = "ECC_EngineTraceChannel1";
+		break;
+	case ECollisionChannel::ECC_OverlapAll_Deprecated:
+		s = "ECC_OverlapAll_Deprecated";
+		break;
+	case ECollisionChannel::ECC_Pawn:
+		s = "ECC_Pawn";
+		break;
+	case ECollisionChannel::ECC_PhysicsBody:
+		s = "ECC_PhysicsBody";
+		break;
+	case ECollisionChannel::ECC_Vehicle:
+		s = "ECC_Vehicle";
+		break;
+	case ECollisionChannel::ECC_Visibility:
+		s = "ECC_Visibility";
+		break;
+	case ECollisionChannel::ECC_WorldDynamic:
+		s = "ECC_WorldDynamic";
+		break;
+	case ECollisionChannel::ECC_WorldStatic:
+		s = "ECC_WorldStatic";
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("APop::ECollisionChannel2Str: Other ECollisionChannel found, maybe check for more?"));
+	}
+	return s;
+}
 
 AvreduGameMode* APop::GetGameMode() {
 	UWorld* const theWorld = GetWorld();
@@ -376,7 +560,10 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	//Mesh->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, false, EUpdateFrequency::Frequent);
 	for (int i = 0; i < verts2Dim.Num(); ++i) {
 
-		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, colors2Dim[i].Colors, TArray<FRuntimeMeshTangent>(), false);
+		// TEST!!!
+		// TEST 190104: Try passing true to create collision automatically! ***
+		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, colors2Dim[i].Colors, TArray<FRuntimeMeshTangent>(), true);
+
 
 		// Set a material on just this mesh section
 #if 0
@@ -434,22 +621,28 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	//
 
 	// NEW TEST (just to see if there might be an old collision mesh that messes thing up)
-	/*
-	Mesh->ClearCollisionConvexMeshes();  // TODO: maybe use ClearAllMeshCollisionSections instad..............
+	/**/
+	// TEST 190103
+	//mesh->ClearCollisionConvexMeshes();  // TODO: maybe use ClearAllMeshCollisionSections instad..............
 
-	Mesh->AddCollisionConvexMesh(verts2Dim[0].Verts); // Todo, I should probably do this for 0, 1, 2, ... Num()
-	*/
+	// TEST 190103
+	//mesh->AddCollisionConvexMesh(verts2Dim[0].Verts); // Todo, I should probably do this for 0, 1, 2, ... Num()
+	/**/
 
-	//Mesh->RegisterComponent();
+	// TEST 190103
+	mesh->RegisterComponent();
 
-	//Mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	// TEST 190103
+	mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 
-	//Mesh->BodyInstance.SetResponseToAllChannels(ECR_Block);
+	// TEST 190103
+	mesh->BodyInstance.SetResponseToAllChannels(ECR_Block);
 
-	//AddGrabBoxes(collisionCubePositions);
+	// AddGrabBoxes(collisionCubePositions);
 
+#if 0 /* TEST why no falling */
 	AddGrabBoxes2Dim(collisions2Dim);
-
+#endif
 }
 
 
@@ -533,11 +726,15 @@ void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 			collisionBoxN->SetSimulatePhysics(false);
 			collisionBoxN->SetEnableGravity(false);
 			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
-			collisionBoxN->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+			collisionBoxN->SetCollisionResponseToChannel(ECC_Visibility, ECR_Overlap); // Was ECR_Block before 190102
+			collisionBoxN->SetMobility(EComponentMobility::Movable);  // New 190102
 			collisionBoxN->OnBeginCursorOver.AddDynamic(this, &APop::CustomOnBeginMouseOver);
 			collisionBoxN->OnEndCursorOver.AddDynamic(this, &APop::CustomOnEndMouseOver);
 			collisionBoxN->OnClicked.AddDynamic(this, &APop::CustomOnClicked);
-			collisionBoxN->RegisterComponent();
+			collisionBoxN->SetCollisionProfileName(TEXT("GrabBox"));  // New 190102
+
+			//collisionBoxN->RegisterComponent();
+			FinishAndRegisterComponent(collisionBoxN);  // Trying this 190102
 
 			grabBoxes.Add(collisionBoxN);
 		}

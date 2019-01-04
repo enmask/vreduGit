@@ -89,6 +89,9 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	// Only for logging
+	FString ECollisionEnabled2Str(ECollisionEnabled::Type eCollEnabled);
+	FString ECollisionChannel2Str(ECollisionChannel eCollChannel);
 
 	AvreduGameMode* GetGameMode();
 

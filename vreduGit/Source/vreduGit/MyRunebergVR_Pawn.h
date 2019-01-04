@@ -74,6 +74,8 @@ public:
 	// Let the user spawn atoms in hand
 	//
 	void SpawnAtom();
+	void SpawnAtomInTheMiddleOfNowhere();
+	void SpawnAtomInTheMiddleOfNowhere2();
 
 	void UpdateControllerModeColor();
 	void UpdateControllerPickModeColor();

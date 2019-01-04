@@ -231,12 +231,8 @@ void APopManager::PickChild(APop* pop) {
 
 // Deep copy a Pop and all its Thing:s.
 // Return the clone Pop.
-//APop* APopManager::Clone(APop* origPop, FString cloneName) {
+// TODO: Shouldn't Clone() increase numPops? (Except in the shadow-pop case)
 APop* APopManager::Clone(APop* p, FString cloneName) {
-
-	//
-	//  Pop PopManager::Clone(Pop p, FString cloneName)
-	//
 
 	UWorld* const World = GetWorld();
 	AThingManager* theThingManager = ((AvreduGameMode*)World->GetAuthGameMode())->theThingManager;
@@ -245,6 +241,7 @@ APop* APopManager::Clone(APop* p, FString cloneName) {
 
 	// HACK: Temporary hack, move the clone along x so that it doesn't collide with the original
 	FTransform cloneTrafo = p->GetActorTransform();
+#if 0
 	FVector cloneLoc = cloneTrafo.GetLocation();
 
 	UE_LOG(LogTemp,
@@ -252,24 +249,9 @@ APop* APopManager::Clone(APop* p, FString cloneName) {
 		TEXT("APopManager::Clone: orig loc X=%f Y=%f Z=%f,  cloneLoc: X=%f Y=%f Z=%f"),
 		p->GetActorTransform().GetLocation().X, p->GetActorTransform().GetLocation().Y, p->GetActorTransform().GetLocation().Z,
 		cloneLoc.X, cloneLoc.Y, cloneLoc.Z);
+#endif
 
 	APop* clonePop = Spawn(cloneThing, cloneTrafo);
-
-	//		clonePop->thingRef = theThingManager->Clone(p->thingRef, cloneName)
-	//
-	//
-	//  Thing ThingManager::Clone(Thing t, FString cloneName)
-	//
-	//		cloneThing = new AThing
-	//		cloneThing->name = cloneName
-	//		
-	//		for (child in t->subThings,  childRelTrafo in t->subThingRelTrafos,  childRole in t->subThingRoles) {
-	//			cloneThing->subThings.Add(Clone(child))
-	//			cloneThing->subThingRelTrafos.Add(FTransform(childRelTrafo))
-	//			cloneThing->subThingRoles.Add(childRole)
-	//
-	//      
-
 	return clonePop;
 }
 
@@ -374,15 +356,16 @@ UActorComponent* APopManager::GetRightMotionController() {
 }
 
 
-APop* APopManager::Spawn(AThing* thing, FTransform transform) {
+APop* APopManager::Spawn(AThing* thing, FTransform transform, ESpawnActorCollisionHandlingMethod collisionHandling) {
 
 	//
 	// Start spawning
 	//
 
 	UWorld* const World = GetWorld();
+	APop* newPop = nullptr;
 
-	APop* newPop = World->SpawnActorDeferred<APop>(APop::StaticClass(), transform);
+	newPop = World->SpawnActorDeferred<APop>(APop::StaticClass(), transform, nullptr, nullptr, collisionHandling);
 
 	//
 	// Initialize the Pop

@@ -184,6 +184,9 @@ void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAction("SpawnAtom", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtom);
 
+	PlayerInputComponent->BindAction("Experimental1", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere);
+	PlayerInputComponent->BindAction("Experimental2", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere2);
+
 }
 
 
@@ -306,6 +309,46 @@ void AMyRunebergVR_Pawn::SpawnAtom() {
 
 }
 
+
+
+void AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere() {
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere: called"));
+
+	//
+	// Spawn pop
+	//
+	AvreduGameMode* theGameMode = GetGameMode();
+	AThingManager* theThingManager = theGameMode->theThingManager;
+	APopManager* thePopManager = theGameMode->thePopManager;
+	verify(theThingManager != nullptr);
+	verify(thePopManager != nullptr);
+	FVector loc(500.0f, 500.0f, 250.0f); // In the middle of nowhere
+	FTransform dummyTrafo(loc);
+
+	AThing* t = theThingManager->SpawnThingAtom("AN ATOM IN THE MIDDLE OF NOWHERE");
+	APop* p = thePopManager->Spawn(t, dummyTrafo);
+
+}
+
+void AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere2() {
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere: called"));
+
+	//
+	// Spawn pop
+	//
+	AvreduGameMode* theGameMode = GetGameMode();
+	AThingManager* theThingManager = theGameMode->theThingManager;
+	APopManager* thePopManager = theGameMode->thePopManager;
+	verify(theThingManager != nullptr);
+	verify(thePopManager != nullptr);
+	FVector loc(520.0f, 520.0f, 270.0f); // In the middle of nowhere
+	FTransform dummyTrafo(loc);
+
+	AThing* t = theThingManager->SpawnThingAtom("AN ATOM IN THE MIDDLE OF NOWHERE");
+	//APop* p = thePopManager->Spawn(t, dummyTrafo, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	APop* p = thePopManager->Spawn(t, dummyTrafo, ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding);
+
+}
 
 
 void AMyRunebergVR_Pawn::UpdateControllerModeColor() {

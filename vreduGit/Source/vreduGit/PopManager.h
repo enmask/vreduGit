@@ -59,7 +59,9 @@ public:
 	//
 
 	// Spawn a Pop in the world. Its shape is described by "thing"
-	APop* Spawn(AThing* thing, FTransform transform);
+	APop* Spawn(AThing* thing,
+				FTransform transform,
+				ESpawnActorCollisionHandlingMethod collisionHandling = ESpawnActorCollisionHandlingMethod::Undefined);
 
 	// Destroy a Pop
 	void DestroyPop(APop* pop);
