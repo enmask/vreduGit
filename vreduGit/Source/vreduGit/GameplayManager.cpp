@@ -326,6 +326,7 @@ void AGameplayManager::Tick(float DeltaTime)
 #endif
 	}
 
+#if 0 /* Comment out all rim stuff, partly bc perfomance */
 
 	if (numTicks == 70) {
 
@@ -389,6 +390,7 @@ void AGameplayManager::Tick(float DeltaTime)
 		///APopManager* thePopManager = ((AvreduGameMode*)World->GetAuthGameMode())->thePopManager;
 		thePopManager->RotateAroundLocalY(spokeClone8, 315.0);
 	}
+
 
 #if 0 /* Only one hub thing */
 	if (numTicks == 1500) {
@@ -1527,6 +1529,7 @@ void AGameplayManager::Tick(float DeltaTime)
 
 	}
 
+#endif
 
 #if 0 /* Comment out to let spokes stay separate from the rim */
 	//

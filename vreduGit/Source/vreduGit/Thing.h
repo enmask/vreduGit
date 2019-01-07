@@ -12,7 +12,7 @@
 //DECLARE_LOG_CATEGORY_EXTERN(LogVredu, Log, All);
 
 // Basic constants
-#define CUBE_SIZE 60
+#define CUBE_SIZE 40
 #define CUBEMESH_SIZE 20
 
 

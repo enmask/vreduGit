@@ -92,6 +92,7 @@ public:
 	// Only for logging
 	FString ECollisionEnabled2Str(ECollisionEnabled::Type eCollEnabled);
 	FString ECollisionChannel2Str(ECollisionChannel eCollChannel);
+	FString ECollisionResponse2Str(ECollisionResponse eCollResponse);
 
 	AvreduGameMode* GetGameMode();
 

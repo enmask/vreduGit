@@ -23,7 +23,7 @@ APop::APop()
 void APop::init2() {
 
 	//mesh = NewObject<USceneComponent>(this, TEXT("RootSceneComponent"));
-	mesh = CreateDefaultSubobject<URuntimeMeshComponent>(TEXT("Pop mesh test"));
+	mesh = CreateDefaultSubobject<URuntimeMeshComponent>(TEXT("Pop mesh"));
 	//RootComponent = mesh;
 	mesh->AttachTo(RootComponent);
 
@@ -56,9 +56,45 @@ void APop::TestSetupCollisionBox() {
 	mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	//box->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	
-	//box->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);
-	mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ECollisionResponse response4Early = mesh->BodyInstance.GetResponseToChannel(ECC_WorldDynamic);
+	UE_LOG(LogTemp, Warning,
+		TEXT("APop::TestSetupCollisionBox: Before SetResponseToAllChannels: response4Early=%s"),
+		*ECollisionResponse2Str(response4Early));
+
+	//mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+	response4Early = mesh->BodyInstance.GetResponseToChannel(ECC_WorldDynamic);
+	UE_LOG(LogTemp, Warning,
+		   TEXT("APop::TestSetupCollisionBox: Between SetResponseToAllChannels and SetResponseToChannel: response4Early=%s"),
+		   *ECollisionResponse2Str(response4Early));
+
+	// TEST HACK 190105: Ignore WorldDynamic, because I'm testing out grabBoxes as WorldDynamic
+	//mesh->BodyInstance.SetResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+
+	// TEST HACK 190106: Ignore PhysicsBody as well, because I'm welding now, so the child (grabBoxes)
+	// will mimic the parent (RMC), I guess. Possibly both parent and child will be PhysicsBody,
+	// and if they block PhysicsBody, they might collide with each other and "explode"...
+	mesh->BodyInstance.SetResponseToAllChannels(ECR_Ignore);
+		//SetResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
+
+	mesh->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+
+
+
+
+	response4Early = mesh->BodyInstance.GetResponseToChannel(ECC_WorldDynamic);
+	UE_LOG(LogTemp, Warning,
+		TEXT("APop::TestSetupCollisionBox: After SetResponseToChannel: response4Early=%s"),
+		*ECollisionResponse2Str(response4Early));
+
+	//mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	/// Changed to BLOCK 190104    mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	////box->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+
+	// 190105: Try to make pop collide with Floor
+	mesh->SetNotifyRigidBodyCollision(true);
 
 
 	/*
@@ -284,7 +320,10 @@ void APop::init(AThing* thing, FTransform trafo) {
 	RootComponent = mesh;
 	mesh->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
 	mesh->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);  // Try also PhysicsOnly
-	mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Overlap);  /// Was ECR_Block before 190102
+
+	/* Commented out 190105 (want ignore for WorldDynamic) */
+	mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);  /// Was ECR_Block from 190102 to 190104
+	/* */
 
 	mesh->SetSimulatePhysics(true);
 
@@ -319,6 +358,32 @@ void APop::init(AThing* thing, FTransform trafo) {
 void APop::BeginPlay()
 {
 	Super::BeginPlay();
+
+#if 0
+	// TEST: Call WeldTo() now, when simulate physics is hopefully all done and ready
+	for (int i = 0; i < grabBoxes.Num(); ++i) {
+
+		UBoxComponent* grabBox = grabBoxes[i];
+
+		if (mesh->IsSimulatingPhysics()) {
+			UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: ***true***"), this);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: *false*"), this);
+		}
+
+
+		grabBox->WeldTo(mesh);
+
+		if (mesh->IsSimulatingPhysics()) {
+			UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay after WeldTo, this-pop=%p, IsSimulatingPhysics: ***true***"), this);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay after WeldTo, this-pop=%p, IsSimulatingPhysics: *false*"), this);
+		}
+
+	}
+#endif
 }
 
 
@@ -358,11 +423,20 @@ void APop::Tick(float DeltaTime)
 
 	FString popCollChannelStr = ECollisionChannel2Str(primComp->GetCollisionObjectType());
 
+	ECollisionResponse response1 = GetComponentsCollisionResponseToChannel(ECC_Camera);
+	ECollisionResponse response2 = GetComponentsCollisionResponseToChannel(ECC_Pawn);
+	ECollisionResponse response3 = GetComponentsCollisionResponseToChannel(ECC_PhysicsBody);
+	ECollisionResponse response4 = GetComponentsCollisionResponseToChannel(ECC_WorldDynamic);
+	ECollisionResponse response4_2 = primComp->GetCollisionResponseToChannel(ECC_WorldDynamic);
+
+	FVector logLoc = GetActorLocation();
+
 	bool popGrav = primComp->IsGravityEnabled();
 
 #if 1
+/* ////
 	UE_LOG(LogTemp, Warning,
-		   TEXT("APop::Tick: this-pop=%p, name: %s, 1.canEditSim=%s, 2.bSimulatePhysics: %s (simPhys2=%s, simPhys3=%s, simPhys4=%s, simPhys5=%s), 3.isCollEnabled=%s, 4.popCollChannelStr=%s, 5.popGrav=%s"),
+		   TEXT("APop::Tick: this-pop=%p, name: %s, 1.canEditSim=%s, 2.bSimulatePhysics: %s (simPhys2=%s, simPhys3=%s, simPhys4=%s, simPhys5=%s), 3.isCollEnabled=%s, 4.popCollChannelStr=%s, 5.popGrav=%s, response1=%s, response2=%s, response3=%s, response4=%s, response4_2=%s, loc: X=%f  Y=%f  Z=%f"),
 		   this,
 		   *thingRef->name,
 		   canEdit ? TEXT("true") : TEXT("false"),
@@ -373,11 +447,18 @@ void APop::Tick(float DeltaTime)
 		   simPhys5 ? TEXT("true") : TEXT("false"),
 		   *isCollEnabledStr,
 		   *popCollChannelStr,
-		   popGrav ? TEXT("true") : TEXT("false"));
-
+		   popGrav ? TEXT("true") : TEXT("false"),
+		   *ECollisionResponse2Str(response1),
+		   *ECollisionResponse2Str(response2),
+		   *ECollisionResponse2Str(response3),
+		   *ECollisionResponse2Str(response4),
+		   *ECollisionResponse2Str(response4_2),
+		   logLoc.X, logLoc.Y, logLoc.Z);
+*/
 
 	for (int i = 0; i < grabBoxes.Num() && i < 10; ++i) {
 		UBoxComponent* grabBox = grabBoxes[i];
+		//UPrimitiveComponent* grabBoxPrimComp = grabBox->GetRo
 		//UPrimitiveComponent* grabBoxPrimComp = grabBox->GetRo
 		//this->GetRootPrimitiveComponent();
 
@@ -389,6 +470,7 @@ void APop::Tick(float DeltaTime)
 		FString grabBoxIsCollEnabledStr = ECollisionEnabled2Str(grabBoxIsCollEnabled);
 		FString grabBoxCollChannelStr = ECollisionChannel2Str(grabBox->GetCollisionObjectType());
 		bool grabBoxGrav = primComp->IsGravityEnabled();
+#if 0 /* //// */
 		UE_LOG(LogTemp, Warning,
 			TEXT("APop::Tick: grabBox=%p, GetName()=%s, 1.grabBoxCanEdit=%s,  2.grabBoxSimPhys: %s,  3.grabBoxIsCollEnabled=%s, 4.CollChannel=%s,  5.grabBoxGrav=%s"),
 			this,
@@ -398,6 +480,7 @@ void APop::Tick(float DeltaTime)
 			*grabBoxIsCollEnabledStr,
 			*grabBoxCollChannelStr,
 			grabBoxGrav ? TEXT("true") : TEXT("false"));
+#endif
 
 		// TEST: Now also try to ALTER settings!
 		//box->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryOnly)
@@ -424,6 +507,51 @@ void APop::Tick(float DeltaTime)
 #endif
 
 	Super::Tick(DeltaTime);
+
+
+#if 1 /* Tick() weld experiment */
+
+	//UPrimitiveComponent* primComp = this->GetRootPrimitiveComponent();
+	//FBodyInstance BI = primComp->BodyInstance;
+	//bool grabBoxSimPhys = primComp->BodyInstance.bSimulatePhysics;
+	//bool simPhys5 = primComp->IsSimulatingPhysics();
+
+	////UE_LOG(LogTemp, Warning, TEXT("APop::Tick: BI.WeldParent=%p"), primComp->BodyInstance.WeldParent);
+
+	if (!primComp->BodyInstance.WeldParent) {
+		////UE_LOG(LogTemp, Warning, TEXT("APop::Tick: Will weld, if RMC IsSimulating"));
+
+		// TEST: Call WeldTo() now, when simulate physics is hopefully all done and ready
+		for (int i = 0; i < grabBoxes.Num(); ++i) {
+
+			UBoxComponent* grabBox = grabBoxes[i];
+
+			if (mesh->IsSimulatingPhysics()) {
+				////UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: ***true***, so YEP, will Weld!"), this);
+
+				grabBox->WeldTo(mesh);
+			}
+			else {
+				////UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: *false*, so will NOT WledTo yet!"), this);
+			}
+
+#if 0 /* //// */
+			if (mesh->IsSimulatingPhysics()) {
+				UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay after WeldTo, this-pop=%p, IsSimulatingPhysics: ***true***"), this);
+			}
+			else {
+				UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay after WeldTo, this-pop=%p, IsSimulatingPhysics: *false*"), this);
+			}
+#endif
+		}
+	}
+	else {
+		////UE_LOG(LogTemp, Warning, TEXT("APop::Tick: Will not weld again!"));
+	}
+
+#endif
+
+
 }
 
 
@@ -494,6 +622,31 @@ FString APop::ECollisionChannel2Str(ECollisionChannel eCollChannel) {
 	return s;
 }
 
+
+FString APop::ECollisionResponse2Str(ECollisionResponse eCollResponse) {
+
+	FString s;
+
+	switch (eCollResponse) {
+		case ECollisionResponse::ECR_Ignore:
+			s = "ECR_Ignore";
+			break;
+		case ECollisionResponse::ECR_Block:
+			s = "ECR_Block";
+			break;
+		case ECollisionResponse::ECR_Overlap:
+			s = "ECR_Overlap";
+			break;
+		default:
+			UE_LOG(LogTemp, Warning, TEXT("APop::ECollisionResponse2Str: ERROR, eCollResponse has unknown value!"));
+			FGenericPlatformMisc::RequestExit(false);
+	}
+	return s;
+}
+
+
+
+
 AvreduGameMode* APop::GetGameMode() {
 	UWorld* const theWorld = GetWorld();
 
@@ -562,8 +715,10 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 
 		// TEST!!!
 		// TEST 190104: Try passing true to create collision automatically! ***
-		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, colors2Dim[i].Colors, TArray<FRuntimeMeshTangent>(), true);
+		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, colors2Dim[i].Colors, TArray<FRuntimeMeshTangent>(), false);
 
+		// TEST 190106
+		mesh->SetMeshSectionCollisionEnabled(i, true);
 
 		// Set a material on just this mesh section
 #if 0
@@ -630,17 +785,19 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	/**/
 
 	// TEST 190103
+	//mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+
+	// TEST 190103
 	mesh->RegisterComponent();
 
-	// TEST 190103
-	mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+
 
 	// TEST 190103
-	mesh->BodyInstance.SetResponseToAllChannels(ECR_Block);
+	//mesh->BodyInstance.SetResponseToAllChannels(ECR_Block);
 
 	// AddGrabBoxes(collisionCubePositions);
 
-#if 0 /* TEST why no falling */
+#if 1 /* TEST why no falling */
 	AddGrabBoxes2Dim(collisions2Dim);
 #endif
 }
@@ -713,28 +870,50 @@ void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 			FName boxName = FName(*boxNameStr);
 
 			collisionBoxN = NewObject<UBoxComponent>(this, boxName);
-
+#if 0 /* Before 190106 */
 			collisionBoxN->SetupAttachment(mesh);
+#else
+			//UPrimitiveComponent::WeldTo
+			//collisionBoxN->WeldTo(mesh);
+#endif
+
 			collisionBoxN->InitBoxExtent(FVector(CUBE_SIZE / 2, CUBE_SIZE / 2, CUBE_SIZE / 2));
 
 			FVector locAfter = trafo.GetLocation();
 
 			collisionBoxN->SetRelativeTransform(trafo);  // TODO: Add (50 50 50) to the location part
-			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);		// Grabbable
+			//collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);		// Grabbable
+			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);		// Grabbable
+
 			collisionBoxN->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// Try also QueryOnly
-			collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Overlap);  // Maybe overlap just for the grab sphere is faster?
+			collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);  // Maybe overlap just for the grab sphere is faster?
+
+			collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+
 			collisionBoxN->SetSimulatePhysics(false);
-			collisionBoxN->SetEnableGravity(false);
-			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
-			collisionBoxN->SetCollisionResponseToChannel(ECC_Visibility, ECR_Overlap); // Was ECR_Block before 190102
+			collisionBoxN->SetEnableGravity(true);
+
+			//UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes2Dim: Before setting to WorldDynamic: objType=%s"),
+			//	   *ECollision
+
+			//collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
 			collisionBoxN->SetMobility(EComponentMobility::Movable);  // New 190102
 			collisionBoxN->OnBeginCursorOver.AddDynamic(this, &APop::CustomOnBeginMouseOver);
 			collisionBoxN->OnEndCursorOver.AddDynamic(this, &APop::CustomOnEndMouseOver);
 			collisionBoxN->OnClicked.AddDynamic(this, &APop::CustomOnClicked);
+			/*	
 			collisionBoxN->SetCollisionProfileName(TEXT("GrabBox"));  // New 190102
+			*/
+
+			// 190105: Try to make grabBoxes collide with Floor
+			collisionBoxN->SetNotifyRigidBodyCollision(true);
+
 
 			//collisionBoxN->RegisterComponent();
 			FinishAndRegisterComponent(collisionBoxN);  // Trying this 190102
+
+			// Moving the WeldTo call around to try to make the welding not break...
+			//collisionBoxN->WeldTo(mesh);
 
 			grabBoxes.Add(collisionBoxN);
 		}
