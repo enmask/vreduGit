@@ -474,6 +474,8 @@ void APopManager::AddChild(APop* parent, APop* toBeChild) {
 	// Destroy toBeChild Pop
 	DestroyPop(toBeChild);
 
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::AddChild will now call BuildMesh"));
+
 	// Rebuild mesh to get the combined mesh
 	parent->BuildMesh();
 }

@@ -120,6 +120,8 @@ private:
 	void AddGrabBoxes(TArray<FTransform>& grabBoxLocations);
 	void AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim);
 
+	void AddToGrabBoxesArray(UBoxComponent* collisionBox);
+
 	UActorComponent* GetRightMotionController();
 
 	UMaterialInstanceDynamic* section2MIWire(int sectionIx);

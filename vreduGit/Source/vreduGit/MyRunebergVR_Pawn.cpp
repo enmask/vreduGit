@@ -344,7 +344,7 @@ void AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere2() {
 	FVector loc(520.0f, 520.0f, 270.0f); // In the middle of nowhere
 	FTransform dummyTrafo(loc);
 
-	AThing* t = theThingManager->SpawnThingAtom("AN ATOM IN THE MIDDLE OF NOWHERE");
+	AThing* t = theThingManager->SpawnThingAtom("ANOTHER ATOM IN THE MIDDLE OF NOWHERE");
 	//APop* p = thePopManager->Spawn(t, dummyTrafo, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	APop* p = thePopManager->Spawn(t, dummyTrafo, ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding);
 

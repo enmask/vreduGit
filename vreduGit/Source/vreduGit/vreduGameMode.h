@@ -78,6 +78,39 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")
 		TArray< APop* > wantsPicking;
 
+	//
+	// Setting for debugging of grabBox location error
+	//
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		int numTicksAddChild = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float spoke1Pos = 200.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float spoke2Pos = 200.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float spoke3Pos = 200.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float spoke4Pos = 200.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float spoke5Pos = 200.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float spoke6Pos = 200.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float spoke7Pos = 200.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float spoke8Pos = 200.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		bool convertGrabBoxRelToWorld = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float cmAdjustmentZ = 0.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float percentAdjustmentZ = 0.0;
+
 	UPROPERTY(VisibleAnywhere)
 		UMaterial* MHandPick;
 	UPROPERTY(VisibleAnywhere)

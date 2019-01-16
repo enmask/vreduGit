@@ -86,6 +86,11 @@ void AGameplayManager::Tick(float DeltaTime)
 	AThingManager* theThingManager = ((AvreduGameMode*)World->GetAuthGameMode())->theThingManager;
 	APopManager* thePopManager = ((AvreduGameMode*)World->GetAuthGameMode())->thePopManager;
 
+
+	// Return now, to skip all about the wheels
+	//return;
+
+
 	//
 	// Do things like spawning some things/pops in the first call to Tick()
 	//
@@ -219,14 +224,16 @@ void AGameplayManager::Tick(float DeltaTime)
 		AThing* atomSpoke7 = theThingManager->SpawnThingAtom("ATOMSPOKE7");
 		AThing* atomSpoke8 = theThingManager->SpawnThingAtom("ATOMSPOKE8");
 
-		FTransform trafoX0_1Y0Z2(FQuat(0, 0, 0, 1), FVector(0, 0, 200), FVector(1, 1, 1));
-		FTransform trafoX0_2Y0Z2(FQuat(0, 0, 0, 1), FVector(80, 0, 200), FVector(1, 1, 1));
-		FTransform trafoX0_3Y0Z2(FQuat(0, 0, 0, 1), FVector(160, 0, 200), FVector(1, 1, 1));
-		FTransform trafoX0_4Y0Z2(FQuat(0, 0, 0, 1), FVector(240, 0, 200), FVector(1, 1, 1));
-		FTransform trafoX0_5Y0Z2(FQuat(0, 0, 0, 1), FVector(320, 0, 200), FVector(1, 1, 1));
-		FTransform trafoX0_6Y0Z2(FQuat(0, 0, 0, 1), FVector(400, 0, 200), FVector(1, 1, 1));
-		FTransform trafoX0_7Y0Z2(FQuat(0, 0, 0, 1), FVector(480, 0, 200), FVector(1, 1, 1));
-		FTransform trafoX0_8Y0Z2(FQuat(0, 0, 0, 1), FVector(560, 0, 200), FVector(1, 1, 1));
+		AvreduGameMode* theGameMode = GetGameMode();
+
+		FTransform trafoX0_1Y0Z2(FQuat(0, 0, 0, 1), FVector(0, 0, theGameMode->spoke1Pos), FVector(1, 1, 1));
+		FTransform trafoX0_2Y0Z2(FQuat(0, 0, 0, 1), FVector(80, 0, theGameMode->spoke2Pos), FVector(1, 1, 1));
+		FTransform trafoX0_3Y0Z2(FQuat(0, 0, 0, 1), FVector(160, 0, theGameMode->spoke3Pos), FVector(1, 1, 1));
+		FTransform trafoX0_4Y0Z2(FQuat(0, 0, 0, 1), FVector(240, 0, theGameMode->spoke4Pos), FVector(1, 1, 1));
+		FTransform trafoX0_5Y0Z2(FQuat(0, 0, 0, 1), FVector(320, 0, theGameMode->spoke5Pos), FVector(1, 1, 1));
+		FTransform trafoX0_6Y0Z2(FQuat(0, 0, 0, 1), FVector(400, 0, theGameMode->spoke6Pos), FVector(1, 1, 1));
+		FTransform trafoX0_7Y0Z2(FQuat(0, 0, 0, 1), FVector(480, 0, theGameMode->spoke7Pos), FVector(1, 1, 1));
+		FTransform trafoX0_8Y0Z2(FQuat(0, 0, 0, 1), FVector(560, 0, theGameMode->spoke8Pos), FVector(1, 1, 1));
 
 		spokePop1 = thePopManager->Spawn(atomSpoke1, trafoX0_1Y0Z2);
 		spokePop2 = thePopManager->Spawn(atomSpoke2, trafoX0_2Y0Z2);
@@ -294,7 +301,9 @@ void AGameplayManager::Tick(float DeltaTime)
 		testPop1, testPop2, testPop3, testPop4, testPop5, ptr1, ptr2, ptr3, ptr4, ptr5);
 		*/
 
-	if (numTicks == 50) {
+	AvreduGameMode* theGameMode = GetGameMode();
+
+	if (numTicks == theGameMode->numTicksAddChild) {
 
 		// Add Pop2 as child of Pop1
 		///UWorld* const World = GetWorld();
@@ -1608,6 +1617,14 @@ void AGameplayManager::Tick(float DeltaTime)
 
 #endif
 
+}
+
+AvreduGameMode* AGameplayManager::GetGameMode() {
+	UWorld* const theWorld = GetWorld();
+
+	verify(theWorld != nullptr);
+
+	return Cast<AvreduGameMode>(theWorld->GetAuthGameMode());
 }
 
 void AGameplayManager::CheckIfTestRun() {

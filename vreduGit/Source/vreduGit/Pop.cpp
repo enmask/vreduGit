@@ -79,9 +79,6 @@ void APop::TestSetupCollisionBox() {
 
 	mesh->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 
-
-
-
 	response4Early = mesh->BodyInstance.GetResponseToChannel(ECC_WorldDynamic);
 	UE_LOG(LogTemp, Warning,
 		TEXT("APop::TestSetupCollisionBox: After SetResponseToChannel: response4Early=%s"),
@@ -301,6 +298,8 @@ void APop::init(AThing* thing, FTransform trafo) {
 	thingRef = thing;
 	picked = false;
 
+	UE_LOG(LogTemp, Warning, TEXT("APop::init() will now call BuildMesh"));
+
 	BuildMesh();
 	mesh->RegisterComponent();
 
@@ -430,13 +429,15 @@ void APop::Tick(float DeltaTime)
 	ECollisionResponse response4_2 = primComp->GetCollisionResponseToChannel(ECC_WorldDynamic);
 
 	FVector logLoc = GetActorLocation();
+	FTransform logTrafo = mesh->GetRelativeTransform();
+	FVector logLoc2 = logTrafo.GetLocation();
 
 	bool popGrav = primComp->IsGravityEnabled();
 
 #if 1
-/* ////
+/* */ ////
 	UE_LOG(LogTemp, Warning,
-		   TEXT("APop::Tick: this-pop=%p, name: %s, 1.canEditSim=%s, 2.bSimulatePhysics: %s (simPhys2=%s, simPhys3=%s, simPhys4=%s, simPhys5=%s), 3.isCollEnabled=%s, 4.popCollChannelStr=%s, 5.popGrav=%s, response1=%s, response2=%s, response3=%s, response4=%s, response4_2=%s, loc: X=%f  Y=%f  Z=%f"),
+		   TEXT("APop::Tick: this-pop=%p, name: %s, 1.canEditSim=%s, 2.bSimulatePhysics: %s (simPhys2=%s, simPhys3=%s, simPhys4=%s, simPhys5=%s), 3.isCollEnabled=%s, 4.popCollChannelStr=%s, 5.popGrav=%s, response1=%s, response2=%s, response3=%s, response4=%s, response4_2=%s, loc: X=%f  Y=%f  Z=%f, loc2: X=%f  Y=%f  Z=%f"),
 		   this,
 		   *thingRef->name,
 		   canEdit ? TEXT("true") : TEXT("false"),
@@ -453,8 +454,10 @@ void APop::Tick(float DeltaTime)
 		   *ECollisionResponse2Str(response3),
 		   *ECollisionResponse2Str(response4),
 		   *ECollisionResponse2Str(response4_2),
-		   logLoc.X, logLoc.Y, logLoc.Z);
-*/
+		   logLoc.X, logLoc.Y, logLoc.Z,
+		   logLoc2.X, logLoc2.Y, logLoc2.Z);
+
+	/* */
 
 	for (int i = 0; i < grabBoxes.Num() && i < 10; ++i) {
 		UBoxComponent* grabBox = grabBoxes[i];
@@ -470,16 +473,18 @@ void APop::Tick(float DeltaTime)
 		FString grabBoxIsCollEnabledStr = ECollisionEnabled2Str(grabBoxIsCollEnabled);
 		FString grabBoxCollChannelStr = ECollisionChannel2Str(grabBox->GetCollisionObjectType());
 		bool grabBoxGrav = primComp->IsGravityEnabled();
-#if 0 /* //// */
+		FVector grabBoxLoc = grabBox->GetRelativeTransform().GetLocation();
+#if 1 /* //// */
 		UE_LOG(LogTemp, Warning,
-			TEXT("APop::Tick: grabBox=%p, GetName()=%s, 1.grabBoxCanEdit=%s,  2.grabBoxSimPhys: %s,  3.grabBoxIsCollEnabled=%s, 4.CollChannel=%s,  5.grabBoxGrav=%s"),
+			TEXT("APop::Tick: grabBox=%p, GetName()=%s, 1.grabBoxCanEdit=%s,  2.grabBoxSimPhys: %s,  3.grabBoxIsCollEnabled=%s, 4.CollChannel=%s,  5.grabBoxGrav=%s,  6.grabBoxLoc:  X=%f  Y=%f  Z=%f"),
 			this,
 			*grabBox->GetName(),
 			grabBoxCanEdit ? TEXT("true") : TEXT("false"),
 			grabBoxSimPhys ? TEXT("true") : TEXT("false"),
 			*grabBoxIsCollEnabledStr,
 			*grabBoxCollChannelStr,
-			grabBoxGrav ? TEXT("true") : TEXT("false"));
+			grabBoxGrav ? TEXT("true") : TEXT("false"),
+			grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z);
 #endif
 
 		// TEST: Now also try to ALTER settings!
@@ -518,35 +523,79 @@ void APop::Tick(float DeltaTime)
 
 	////UE_LOG(LogTemp, Warning, TEXT("APop::Tick: BI.WeldParent=%p"), primComp->BodyInstance.WeldParent);
 
-	if (!primComp->BodyInstance.WeldParent) {
-		////UE_LOG(LogTemp, Warning, TEXT("APop::Tick: Will weld, if RMC IsSimulating"));
+	//if (!primComp->BodyInstance.WeldParent) {
+	////UE_LOG(LogTemp, Warning, TEXT("APop::Tick: Will weld, if RMC IsSimulating"));
 
-		// TEST: Call WeldTo() now, when simulate physics is hopefully all done and ready
-		for (int i = 0; i < grabBoxes.Num(); ++i) {
+	// TEST: Call WeldTo() now, when simulate physics is hopefully all done and ready
+	for (int i = 0; i < grabBoxes.Num(); ++i) {
 
-			UBoxComponent* grabBox = grabBoxes[i];
+		UBoxComponent* grabBox = grabBoxes[i];
 
-			if (mesh->IsSimulatingPhysics()) {
-				////UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: ***true***, so YEP, will Weld!"), this);
+		UE_LOG(LogTemp, Warning, TEXT("APop::Tick before WeldTo-if, this-pop=%p, IsSimulatingPhysics: %s, WeldPArent=%p"),
+			   this, mesh->IsSimulatingPhysics() ? TEXT("true") : TEXT("false"), grabBox->BodyInstance.WeldParent);
 
-				grabBox->WeldTo(mesh);
-			}
-			else {
-				////UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: *false*, so will NOT WledTo yet!"), this);
-			}
+		if (mesh->IsSimulatingPhysics() && !grabBox->BodyInstance.WeldParent) {
+			////UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: ***true***, so YEP, will Weld!"), this);
 
-#if 0 /* //// */
-			if (mesh->IsSimulatingPhysics()) {
-				UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay after WeldTo, this-pop=%p, IsSimulatingPhysics: ***true***"), this);
-			}
-			else {
-				UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay after WeldTo, this-pop=%p, IsSimulatingPhysics: *false*"), this);
-			}
-#endif
+			FTransform meshTrafo = mesh->GetRelativeTransform();
+			FVector meshLoc = meshTrafo.GetLocation();
+			FTransform grabBoxCompTrafo = grabBox->GetComponentTransform();
+			// TODO: Check implementation of GetComponentTransform and GetRelativeTransform. I guess they
+			// give the same result for a non-child, but which is most efficient?
+			FTransform grabBoxRelTrafo = grabBox->GetRelativeTransform();
+			FVector grabBoxCompLoc = grabBoxCompTrafo.GetLocation();
+			FVector grabBoxRelLoc = grabBoxRelTrafo.GetLocation();
+
+			FTransform grabBoxWorldTrafo1 = grabBoxRelTrafo * meshTrafo;
+			FTransform grabBoxWorldTrafo2 = meshTrafo * grabBoxRelTrafo;
+			FVector grabBoxWorldLoc1 = grabBoxWorldTrafo1.GetLocation();
+			FVector grabBoxWorldLoc2 = grabBoxWorldTrafo2.GetLocation();
+
+			FVector grabBoxLoc = grabBox->GetRelativeTransform().GetLocation();
+			/*
+			UE_LOG(LogTemp, Warning,
+				   TEXT("APop::Tick right before WeldTo: this-pop=%p,  meshLoc:  X=%f  Y=%f  Z=%f, grabBoxNo=%d (of %d),  grabBox=%p grabBox rel. loc:  X=%f  Y=%f  Z=%f,  WeldParent=%p,  grabBoxCompLoc:  X=%f  Y=%f  Z=%f,  grabBoxRelLoc:  X=%f  Y=%f  Z=%f,  grabBoxWorldLoc1:  X=%f  Y=%f  Z=%f,  grabBoxWorldLoc2:  X=%f  Y=%f  Z=%f"),
+				   this, meshLoc.X, meshLoc.Y, meshLoc.Z, i, grabBoxes.Num(), grabBox, grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z, grabBox->BodyInstance.WeldParent,
+				   grabBoxCompLoc.X, grabBoxCompLoc.Y, grabBoxCompLoc.Z, grabBoxRelLoc.X, grabBoxRelLoc.Y, grabBoxRelLoc.Z,
+				   grabBoxWorldLoc1.X, grabBoxWorldLoc1.Y, grabBoxWorldLoc1.Z,
+				   grabBoxWorldLoc2.X, grabBoxWorldLoc2.Y, grabBoxWorldLoc2.Z);
+			*/
+			AvreduGameMode* theGameMode = GetGameMode();
+
+			// HACK to reduce the adjustment
+			// 		float cmAdjustmentZ = 0.0;
+			//				float percentAdjustmentZ = 0.0;
+			// relAdjustmentZ: 0.0 means non-affected grabBoxRelLoc (this is the default)
+			//					   0.5 means 50% grabBoxRelLoc, 50% grabBoxWorldLoc
+			//					   1.0 means 100% changed to grabBoxWorldLoc
+			//FVector grabBoxCompromiseLoc = 0.5f * (grabBoxRelLoc + grabBoxWorldLoc2);
+			FVector grabBoxCompromiseLoc = (1.0 - theGameMode->percentAdjustmentZ) * grabBoxRelLoc +
+											theGameMode->percentAdjustmentZ * grabBoxWorldLoc2;
+
+			grabBoxCompromiseLoc.Z = grabBoxCompromiseLoc.Z + theGameMode->cmAdjustmentZ;
+
+			grabBoxWorldTrafo2.SetLocation(grabBoxCompromiseLoc);
+
+			// WeldTo will expect grabBox to have a world transform, make it so
+			if (theGameMode->convertGrabBoxRelToWorld)
+				grabBox->SetRelativeTransform(grabBoxWorldTrafo2);
+
+			grabBox->WeldTo(mesh);
+
+			FTransform meshTrafoNew = mesh->GetRelativeTransform();
+			FVector meshLocNew = meshTrafoNew.GetLocation();
+			FTransform grabBoxTrafoNew = grabBox->GetRelativeTransform();
+			FVector grabBoxLocNew = grabBoxTrafoNew.GetLocation();
+
+			/*
+			UE_LOG(LogTemp, Warning,
+				TEXT("APop::Tick right AFTER WeldTo: this-pop=%p, grabBoxNo=%d (of %d),  grabBox=%p,  ,  meshLocNew:  X=%f  Y=%f  Z=%f, grabBox rel. loc:  X=%f  Y=%f  Z=%f,  grabBoxLocNew:  X=%f  Y=%f  Z=%f,  WeldParent=%p"),
+				this, i, grabBoxes.Num(), grabBox, meshLocNew.X, meshLocNew.Y, meshLocNew.Z, grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z, grabBoxLocNew.X, grabBoxLocNew.Y, grabBoxLocNew.Z, grabBox->BodyInstance.WeldParent);
+			*/
 		}
-	}
-	else {
-		////UE_LOG(LogTemp, Warning, TEXT("APop::Tick: Will not weld again!"));
+		else {
+			////UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: *false*, so will NOT WledTo yet!"), this);
+		}
 	}
 
 #endif
@@ -699,8 +748,44 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	TArray<FTransform> collisionCubePositions;
 	thingRef->ComputeMeshData(verts2Dim, tris2Dim, colors2Dim, collisions2Dim, vertices, Triangles, normals, UV0, vertexColors, tangents, collisionCubePositions);
 
-	//UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: ComputeMeshData gave back collisionCubePositions.Num()==%d,  verts2Dim.Num()=%d,  tris2Dim.Num()=%d,  colors2Dim.Num()=%d,  collisions2Dim.Num()=%d"),
-	//	collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num(), colors2Dim.Num(), collisions2Dim.Num());
+	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: ComputeMeshData gave back collisionCubePositions.Num()==%d,  verts2Dim.Num()=%d,  tris2Dim.Num()=%d,  colors2Dim.Num()=%d,  collisions2Dim.Num()=%d"),
+		   collisionCubePositions.Num(), verts2Dim.Num(), tris2Dim.Num(), colors2Dim.Num(), collisions2Dim.Num());
+
+
+	FVertexArray vertArray;
+
+	// Log collision cube positions
+	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: Logging verts2Dim:"));
+	for (int i = 0; i < verts2Dim.Num(); ++i) {
+
+		vertArray = verts2Dim[i];
+
+		UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: Found a new vertArray (no. %d)"), i);
+		FVector vert;
+
+		for (int j = 0; j < vertArray.Verts.Num(); ++j) {
+
+			vert = vertArray.Verts[j];
+
+			UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: Found a new vert (no. %d): X=%f  Y=%f  Z=%f"),
+				j, vert.X, vert.Y, vert.Z);
+
+		}
+	}
+
+	FTransform collCubeTrafo;
+	FVector collCubeLoc;
+	// Log collision cube positions
+	UE_LOG(LogTemp, Warning, TEXT("APop::BuildMesh: Logging collisionCubePositions: "));
+	for (int i = 0; i < collisionCubePositions.Num(); ++i) {
+		collCubeTrafo = collisionCubePositions[i];
+		collCubeLoc = collCubeTrafo.GetLocation();
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APop::BuildMesh: collCubeLoc:  X=%f  Y=%f  Z=%f"),
+			   collCubeLoc.X, collCubeLoc.Y, collCubeLoc.Z);
+
+	}
 
 	// The mesh may already have data. Remove it
 	mesh->ClearAllMeshSections();
@@ -713,7 +798,6 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	//Mesh->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, false, EUpdateFrequency::Frequent);
 	for (int i = 0; i < verts2Dim.Num(); ++i) {
 
-		// TEST!!!
 		// TEST 190104: Try passing true to create collision automatically! ***
 		mesh->CreateMeshSection(i, verts2Dim[i].Verts, tris2Dim[i].Ints, TArray<FVector>(), UV0, colors2Dim[i].Colors, TArray<FRuntimeMeshTangent>(), false);
 
@@ -855,6 +939,8 @@ void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes2Dim called, address %p, collisions2Dim.Num()==%d"), this, collisions2Dim.Num());
 
+	grabBoxes.Empty();
+
 	UBoxComponent* collisionBoxN;
 
 	for (int32 subtreeNo = 0; subtreeNo < collisions2Dim.Num(); ++subtreeNo) {
@@ -879,9 +965,24 @@ void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 
 			collisionBoxN->InitBoxExtent(FVector(CUBE_SIZE / 2, CUBE_SIZE / 2, CUBE_SIZE / 2));
 
+			FTransform popTrafo = GetTransform();
+			FVector popLoc = popTrafo.GetLocation();
 			FVector locAfter = trafo.GetLocation();
+			// Adjust so that collisionBoxN has the world trafo instead of local trafo.
+			// This will be changed by the weld of collision box to mesh later on.
+			// The weld expects a world trafo but leaves a local trafo as a final result.
+#if 1 /* With adjustment */
+			FTransform adjustedTrafo = trafo * popTrafo;
+#else /* Without adjustment */
+			FTransform adjustedTrafo = trafo;
+#endif
+			FVector adjustedLoc = adjustedTrafo.GetLocation();
 
-			collisionBoxN->SetRelativeTransform(trafo);  // TODO: Add (50 50 50) to the location part
+			UE_LOG(LogTemp, Warning,
+				   TEXT("APop::AddGrabBoxes2Dim: this-pop=%p, popLoc:  X=%f  Y=%f  Z=%f, grabBoxNo=%d,  locAfter:  X=%f  Y=%f  Z=%f,  adjustedLoc:  X=%f  Y=%f  Z=%f"),
+				   this, popLoc.X, popLoc.Y, popLoc.Z, grabBoxNo, locAfter.X, locAfter.Y, locAfter.Z, adjustedLoc.X, adjustedLoc.Y, adjustedLoc.Z);
+
+			collisionBoxN->SetRelativeTransform(adjustedTrafo);  // TODO: Add (50 50 50) to the location part
 			//collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);		// Grabbable
 			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);		// Grabbable
 
@@ -889,6 +990,7 @@ void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 			collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);  // Maybe overlap just for the grab sphere is faster?
 
 			collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+			collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_PhysicsBody, ECollisionResponse::ECR_Block);
 
 			collisionBoxN->SetSimulatePhysics(false);
 			collisionBoxN->SetEnableGravity(true);
@@ -915,10 +1017,21 @@ void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 			// Moving the WeldTo call around to try to make the welding not break...
 			//collisionBoxN->WeldTo(mesh);
 
-			grabBoxes.Add(collisionBoxN);
+			//grabBoxes.Add(collisionBoxN);
+			AddToGrabBoxesArray(collisionBoxN);
 		}
 	}
 }
+
+void APop::AddToGrabBoxesArray(UBoxComponent* collisionBox) {
+
+	grabBoxes.Add(collisionBox);
+
+	UE_LOG(LogTemp, Warning, TEXT("APop::AddToGrabBoxes: After adding grabBox %p (%s), grabBoxes has %d elements"),
+		   collisionBox, *collisionBox->GetName(), grabBoxes.Num());
+
+}
+
 
 void APop::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
 {
@@ -1029,7 +1142,9 @@ void APop::Highlight(int sectionIx, int lightLevel) {
 		verify(mi != nullptr);
 	}
 
-	AvreduGameMode* theGameMode = (AvreduGameMode*)GetWorld()->GetAuthGameMode();
+	//AvreduGameMode* theGameMode = (AvreduGameMode*)GetWorld()->GetAuthGameMode();
+	AvreduGameMode* theGameMode = GetGameMode();
+
 	FLinearColor color = theGameMode->deHighlightColor;
 
 	switch (lightLevel) {

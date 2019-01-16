@@ -8,6 +8,7 @@
 
 class AThing;
 class APop;
+class AvreduGameMode;
 
 UCLASS()
 class VREDUGIT_API AGameplayManager : public AActor
@@ -25,6 +26,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	AvreduGameMode* GetGameMode();
 
 	UFUNCTION()
 		void CheckIfTestRun();
