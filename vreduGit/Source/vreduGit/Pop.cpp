@@ -1317,3 +1317,26 @@ void APop::LogComponentHierarchy(USceneComponent* rootComp) {
 	}
 
 }
+
+
+bool APop::HasWeldedCollider() {
+
+	if (grabBoxes.Num() > 0) {
+		UBoxComponent* firstGrabBox = grabBoxes[0];
+
+
+		UE_LOG(LogTemp, Warning,
+			TEXT("APop::HasWeldedCollider: this-pop=%p, name=%s, pop BodyInstance=%p, firstGrabBox=%p, grabBox WeldParent=%p"),
+			this,
+			*thingRef->name,
+			&mesh->BodyInstance,
+			//&mesh->BodyInstance,
+			firstGrabBox,
+			firstGrabBox->BodyInstance.WeldParent);
+		//return true;
+
+		return ((firstGrabBox != nullptr) && (firstGrabBox->BodyInstance.WeldParent == &mesh->BodyInstance));
+	}
+
+	return false;
+}

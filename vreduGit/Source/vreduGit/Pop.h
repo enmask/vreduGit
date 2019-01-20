@@ -116,6 +116,10 @@ public:
 
 	void LogComponentHierarchy(USceneComponent* rootComp);
 
+	UFUNCTION()
+		bool HasWeldedCollider();
+
+
 private:
 	void AddGrabBoxes(TArray<FTransform>& grabBoxLocations);
 	void AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim);

@@ -141,6 +141,9 @@ void APopManager::PickupThoseWhoWant() {
 		//pop->picked ? Drop(pop) : Pickup(pop);
 		//pop->picked ? DropAndAddChild(pop) : Pickup(pop);
 
+		if (!pop->HasWeldedCollider())
+			continue;
+
 		if (pop->picked) {
 			if (IsDropMode())
 				Drop(pop);

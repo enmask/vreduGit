@@ -314,18 +314,22 @@ void AMyRunebergVR_Pawn::SpawnAtom() {
 	//
 	///////////////
 	UE_LOG(LogTemp, Warning,
-		   TEXT("AMyRunebergVR_Pawn::SpawnAtom: will call Pickup to start in hand, p=%p, meshLoc:  X=%f  Y=%f  Z=%f,  grabLoc:  X=%f  Y=%f  Z=%f"),
+		   TEXT("AMyRunebergVR_Pawn::SpawnAtom: will NOT call Pickup to start in hand, p=%p, meshLoc:  X=%f  Y=%f  Z=%f,  grabLoc:  X=%f  Y=%f  Z=%f"),
 		   p,
 		   loc.X, loc.Y, loc.Z,
 		   loc.X, loc.Y, loc.Z);
 
+#if 0
 	thePopManager->Pickup(p);
+#else
+	theGameMode->AddWantsPicking(p);
+#endif
 
 	UBoxComponent* grabBox = p->grabBoxes[0];
 	FTransform grabBoxTrafo = grabBox->GetRelativeTransform();
 	FVector grabBoxLoc = grabBoxTrafo.GetLocation();
 	UE_LOG(LogTemp, Warning,
-		TEXT("AMyRunebergVR_Pawn::SpawnAtom: after call to Pickup, p=%p, meshLoc:  X=%f  Y=%f  Z=%f,  grabLoc:  X=%f  Y=%f  Z=%f"),
+		TEXT("AMyRunebergVR_Pawn::SpawnAtom: after NON-call to Pickup, p=%p, meshLoc:  X=%f  Y=%f  Z=%f,  grabLoc:  X=%f  Y=%f  Z=%f"),
 		p,
 		loc.X, loc.Y, loc.Z,
 		grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z);
