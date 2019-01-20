@@ -138,6 +138,10 @@ private:
 	void UpdateControllerModeColor();
 	UActorComponent* GetRightMotionController();
 
+	// Called when user picks up a pop
+	void SpawnGhostPop();
+
+
 	UPROPERTY(VisibleAnywhere)
 		int numTicks;
 
@@ -149,4 +153,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		APop* brightPop;
+
+	// The ghostPop is not a real pop, it's just a visual guide to
+	// indicate snap location for the picked pop
+	UPROPERTY(VisibleAnywhere)
+		APop* ghostPop;
 };

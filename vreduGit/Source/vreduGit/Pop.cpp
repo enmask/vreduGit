@@ -103,7 +103,7 @@ void APop::TestSetupCollisionBox() {
 	*/
 
 	// To be able to get mouse events
-	////box->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
 
 	/*CollisionMesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
@@ -409,7 +409,7 @@ void APop::Tick(float DeltaTime)
 	USceneComponent* rootSC = this->GetRootComponent();
 	bool simPhys3 = rootSC->IsSimulatingPhysics();
 
-	primComp->SetSimulatePhysics(true);
+	/////primComp->SetSimulatePhysics(true);
 
 	bool simPhys4 = rootSC->IsSimulatingPhysics();
 	bool simPhys5 = primComp->IsSimulatingPhysics();
@@ -435,10 +435,16 @@ void APop::Tick(float DeltaTime)
 	bool popGrav = primComp->IsGravityEnabled();
 
 #if 1
-/* */ ////
+
+	float massMesh = mesh->GetMass();
+	bool overrideMassMesh = mesh->GetBodyInstance()->bOverrideMass;
+		//ShapeStaticMeshComponent->GetBodyInstance()->bOverrideMass
+		
+	/* */ ////
 	UE_LOG(LogTemp, Warning,
-		   TEXT("APop::Tick: this-pop=%p, name: %s, 1.canEditSim=%s, 2.bSimulatePhysics: %s (simPhys2=%s, simPhys3=%s, simPhys4=%s, simPhys5=%s), 3.isCollEnabled=%s, 4.popCollChannelStr=%s, 5.popGrav=%s, response1=%s, response2=%s, response3=%s, response4=%s, response4_2=%s, loc: X=%f  Y=%f  Z=%f, loc2: X=%f  Y=%f  Z=%f"),
+		   TEXT("APop::Tick: this-pop=%p (root parent: %p), name: %s, 1.canEditSim=%s, 2.bSimulatePhysics: %s (simPhys2=%s, simPhys3=%s, simPhys4=%s, simPhys5=%s), 3.isCollEnabled=%s, 4.popCollChannelStr=%s, 5.popGrav=%s, response1=%s, response2=%s, response3=%s, response4=%s, response4_2=%s, loc: X=%f  Y=%f  Z=%f, loc2: X=%f  Y=%f  Z=%f, massMesh=%f, overrideMassMesh=%s"),
 		   this,
+		   GetRootComponent()->GetAttachParent(),
 		   *thingRef->name,
 		   canEdit ? TEXT("true") : TEXT("false"),
 		   simPhys ? TEXT("true") : TEXT("false"),
@@ -455,7 +461,9 @@ void APop::Tick(float DeltaTime)
 		   *ECollisionResponse2Str(response4),
 		   *ECollisionResponse2Str(response4_2),
 		   logLoc.X, logLoc.Y, logLoc.Z,
-		   logLoc2.X, logLoc2.Y, logLoc2.Z);
+		   logLoc2.X, logLoc2.Y, logLoc2.Z,
+		   massMesh,
+		   overrideMassMesh ? TEXT("true") : TEXT("false"));
 
 	/* */
 
@@ -474,9 +482,13 @@ void APop::Tick(float DeltaTime)
 		FString grabBoxCollChannelStr = ECollisionChannel2Str(grabBox->GetCollisionObjectType());
 		bool grabBoxGrav = primComp->IsGravityEnabled();
 		FVector grabBoxLoc = grabBox->GetRelativeTransform().GetLocation();
+
+		float massGrabBox = grabBox->GetMass();
+		bool overrideMassGrabBox = grabBox->GetBodyInstance()->bOverrideMass;
+
 #if 1 /* //// */
 		UE_LOG(LogTemp, Warning,
-			TEXT("APop::Tick: grabBox=%p, GetName()=%s, 1.grabBoxCanEdit=%s,  2.grabBoxSimPhys: %s,  3.grabBoxIsCollEnabled=%s, 4.CollChannel=%s,  5.grabBoxGrav=%s,  6.grabBoxLoc:  X=%f  Y=%f  Z=%f"),
+			TEXT("APop::Tick: grabBox=%p, GetName()=%s, 1.grabBoxCanEdit=%s,  2.grabBoxSimPhys: %s,  3.grabBoxIsCollEnabled=%s, 4.CollChannel=%s,  5.grabBoxGrav=%s,  6.grabBoxLoc:  X=%f  Y=%f  Z=%f,  massGrabBox=%f, overrideMassGrabBox=%s"),
 			this,
 			*grabBox->GetName(),
 			grabBoxCanEdit ? TEXT("true") : TEXT("false"),
@@ -484,7 +496,11 @@ void APop::Tick(float DeltaTime)
 			*grabBoxIsCollEnabledStr,
 			*grabBoxCollChannelStr,
 			grabBoxGrav ? TEXT("true") : TEXT("false"),
-			grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z);
+			grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z,
+			massGrabBox,
+			overrideMassGrabBox ? TEXT("true") : TEXT("false"));
+		
+
 #endif
 
 		// TEST: Now also try to ALTER settings!
@@ -528,7 +544,6 @@ void APop::Tick(float DeltaTime)
 
 	// TEST: Call WeldTo() now, when simulate physics is hopefully all done and ready
 	for (int i = 0; i < grabBoxes.Num(); ++i) {
-
 		UBoxComponent* grabBox = grabBoxes[i];
 
 		UE_LOG(LogTemp, Warning, TEXT("APop::Tick before WeldTo-if, this-pop=%p, IsSimulatingPhysics: %s, WeldPArent=%p"),
@@ -552,14 +567,14 @@ void APop::Tick(float DeltaTime)
 			FVector grabBoxWorldLoc2 = grabBoxWorldTrafo2.GetLocation();
 
 			FVector grabBoxLoc = grabBox->GetRelativeTransform().GetLocation();
-			/*
+			/* */
 			UE_LOG(LogTemp, Warning,
 				   TEXT("APop::Tick right before WeldTo: this-pop=%p,  meshLoc:  X=%f  Y=%f  Z=%f, grabBoxNo=%d (of %d),  grabBox=%p grabBox rel. loc:  X=%f  Y=%f  Z=%f,  WeldParent=%p,  grabBoxCompLoc:  X=%f  Y=%f  Z=%f,  grabBoxRelLoc:  X=%f  Y=%f  Z=%f,  grabBoxWorldLoc1:  X=%f  Y=%f  Z=%f,  grabBoxWorldLoc2:  X=%f  Y=%f  Z=%f"),
 				   this, meshLoc.X, meshLoc.Y, meshLoc.Z, i, grabBoxes.Num(), grabBox, grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z, grabBox->BodyInstance.WeldParent,
 				   grabBoxCompLoc.X, grabBoxCompLoc.Y, grabBoxCompLoc.Z, grabBoxRelLoc.X, grabBoxRelLoc.Y, grabBoxRelLoc.Z,
 				   grabBoxWorldLoc1.X, grabBoxWorldLoc1.Y, grabBoxWorldLoc1.Z,
 				   grabBoxWorldLoc2.X, grabBoxWorldLoc2.Y, grabBoxWorldLoc2.Z);
-			*/
+			/* */
 			AvreduGameMode* theGameMode = GetGameMode();
 
 			// HACK to reduce the adjustment
@@ -587,14 +602,14 @@ void APop::Tick(float DeltaTime)
 			FTransform grabBoxTrafoNew = grabBox->GetRelativeTransform();
 			FVector grabBoxLocNew = grabBoxTrafoNew.GetLocation();
 
-			/*
+			/* */
 			UE_LOG(LogTemp, Warning,
 				TEXT("APop::Tick right AFTER WeldTo: this-pop=%p, grabBoxNo=%d (of %d),  grabBox=%p,  ,  meshLocNew:  X=%f  Y=%f  Z=%f, grabBox rel. loc:  X=%f  Y=%f  Z=%f,  grabBoxLocNew:  X=%f  Y=%f  Z=%f,  WeldParent=%p"),
 				this, i, grabBoxes.Num(), grabBox, meshLocNew.X, meshLocNew.Y, meshLocNew.Z, grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z, grabBoxLocNew.X, grabBoxLocNew.Y, grabBoxLocNew.Z, grabBox->BodyInstance.WeldParent);
-			*/
+			/* */
 		}
 		else {
-			////UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: *false*, so will NOT WledTo yet!"), this);
+			UE_LOG(LogTemp, Warning, TEXT("APop::BeginPlay before WeldTo, this-pop=%p, IsSimulatingPhysics: *false*, so will NOT WeldTo yet!"), this);
 		}
 	}
 
@@ -992,6 +1007,9 @@ void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 			collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 			collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_PhysicsBody, ECollisionResponse::ECR_Block);
 
+			// Make clickable
+			collisionBoxN->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
 			collisionBoxN->SetSimulatePhysics(false);
 			collisionBoxN->SetEnableGravity(true);
 
@@ -1083,6 +1101,8 @@ void APop::CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent)
 
 void APop::CustomOnClicked(UPrimitiveComponent* clickedComponent, FKey inKey)
 {
+	UE_LOG(LogTemp, Warning, TEXT("APop::CustomOnClicked called, clickedComponent=%p"), clickedComponent);
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Pop Mouse Click"));

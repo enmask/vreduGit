@@ -25,6 +25,7 @@ void APopManager::BeginPlay()
 	numPops = 0;
 	pickedPop = nullptr;
 	brightPop = nullptr;
+	ghostPop = nullptr;
 
 	pickModeEnum = EPickModeEnum::M_Pick;
 	dropModeEnum = EDropModeEnum::M_Drop;
@@ -36,6 +37,14 @@ void APopManager::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("APopManager::Tick called"));
 
 	Super::Tick(DeltaTime);
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Tick: pickedPop=%p"),
+		   pickedPop);
+	if (pickedPop != nullptr) {
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APopManager::Tick: pickedPop is not null, so log pickedPop root parent=%p"),
+			   pickedPop->GetRootComponent()->GetAttachParent());
+	}
 
 	AvreduGameMode* theGameMode = GetGameMode();
 
@@ -174,13 +183,18 @@ void APopManager::DropChildToThoseWhoWant() {
 
 void APopManager::Pickup(APop* pop) {
 
-	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup called, pop=%p"), pop);
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup called, pop=%p, root parent=%p"),
+		   pop, pop->GetRootComponent()->GetAttachParent());
 
 	UActorComponent* motCon = GetRightMotionController();
 	pop->DisableComponentsSimulatePhysics();
 	pop->AttachToComponent(Cast<USceneComponent>(motCon),
 						   FAttachmentTransformRules::SnapToTargetIncludingScale,
 						   NAME_None);
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup: Directly after AttachToComponent, pop=%p, root parent=%p"),
+		pop, pop->GetRootComponent()->GetAttachParent());
+
 
 	// Move the picked pop forward a bit so that it doesn't get too close to camera
 	/*
@@ -221,7 +235,12 @@ void APopManager::Pickup(APop* pop) {
 
 	HighlightCloseTopChildren(pop);
 
-	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup end"), pop);
+	///SpawnGhostPop();
+
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup end:  pop=%p, root parent=%p"),
+		   pop, pop->GetRootComponent()->GetAttachParent());
+
+	//UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup end"), pop);
 }
 
 
@@ -385,6 +404,25 @@ APop* APopManager::Spawn(AThing* thing, FTransform transform, ESpawnActorCollisi
 
 	return newPop;
 }
+
+
+void APopManager::SpawnGhostPop() {
+
+	ghostPop = Clone(pickedPop, "Clone pop");
+
+
+
+}
+
+
+
+//(AThing* thing,
+//	FTransform transform,
+//	ESpawnActorCollisionHandlingMethod collisionHandling = ESpawnActorCollisionHandlingMethod::Undefined);
+
+
+
+
 
 //
 // Destroy a Pop

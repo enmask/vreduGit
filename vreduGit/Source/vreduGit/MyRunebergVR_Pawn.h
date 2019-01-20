@@ -62,6 +62,8 @@ public:
 	void TurnUpDownAtRate(float Rate);
 
 	void MoveForwardBackward(float AxisValue);
+	void MoveUpDown(float AxisValue);
+
 	//void MoveForwardKeyb();
 	//void MoveBackwardKeyb();
 

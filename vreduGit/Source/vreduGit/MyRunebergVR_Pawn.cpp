@@ -168,7 +168,8 @@ void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* Player
 	//UE_LOG(LogTemp, Warning, TEXT("MyRunebergVR_Pawn::SetupPlayerInputComponent: will bind action"));
 
 	// Works
-	PlayerInputComponent->BindAxis("MoveForward", this, &AMyRunebergVR_Pawn::MoveForwardBackward);
+	PlayerInputComponent->BindAxis("MoveForwardBackward", this, &AMyRunebergVR_Pawn::MoveForwardBackward);
+	PlayerInputComponent->BindAxis("MoveUpDown", this, &AMyRunebergVR_Pawn::MoveUpDown);
 
 	PlayerInputComponent->BindAxis("TurnSide", this, &AMyRunebergVR_Pawn::TurnSideAtRate);
 
@@ -203,6 +204,15 @@ void AMyRunebergVR_Pawn::MoveForwardBackward(float AxisValue) {
 
 	CurrentVelocity.X = pawnMeshForw.X * FMath::Clamp(AxisValue, -1.0f, 1.0f) * pawnSpeed;
 	CurrentVelocity.Y = pawnMeshForw.Y * FMath::Clamp(AxisValue, -1.0f, 1.0f) * pawnSpeed;
+}
+
+void AMyRunebergVR_Pawn::MoveUpDown(float AxisValue) {
+
+	FVector pawnMeshForw = PawnRootMesh->GetForwardVector();
+
+	float pawnUpDownSpeed = 300.0f;
+
+	CurrentVelocity.Z = FMath::Clamp(AxisValue, -1.0f, 1.0f) * pawnUpDownSpeed;
 }
 
 void AMyRunebergVR_Pawn::TurnSideAtRate(float Rate)
@@ -303,9 +313,22 @@ void AMyRunebergVR_Pawn::SpawnAtom() {
 	// Pickup the new pop, since it should start in hand
 	//
 	///////////////
-	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::SpawnAtom: will call Pickup to start in hand, p=%p"), p);
+	UE_LOG(LogTemp, Warning,
+		   TEXT("AMyRunebergVR_Pawn::SpawnAtom: will call Pickup to start in hand, p=%p, meshLoc:  X=%f  Y=%f  Z=%f,  grabLoc:  X=%f  Y=%f  Z=%f"),
+		   p,
+		   loc.X, loc.Y, loc.Z,
+		   loc.X, loc.Y, loc.Z);
 
 	thePopManager->Pickup(p);
+
+	UBoxComponent* grabBox = p->grabBoxes[0];
+	FTransform grabBoxTrafo = grabBox->GetRelativeTransform();
+	FVector grabBoxLoc = grabBoxTrafo.GetLocation();
+	UE_LOG(LogTemp, Warning,
+		TEXT("AMyRunebergVR_Pawn::SpawnAtom: after call to Pickup, p=%p, meshLoc:  X=%f  Y=%f  Z=%f,  grabLoc:  X=%f  Y=%f  Z=%f"),
+		p,
+		loc.X, loc.Y, loc.Z,
+		grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z);
 
 }
 
