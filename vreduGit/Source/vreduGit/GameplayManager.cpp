@@ -96,94 +96,6 @@ void AGameplayManager::Tick(float DeltaTime)
 	//
 	if (numTicks == 1) {
 
-
-
-#if 0
-		/* Just an array test, remove this soon! */
-
-		TArray<int> tstArray1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int i : tstArray1) {
-			tstArray1.Remove(i);
-		}
-
-		for (int ix = 0; ix < tstArray1.Num(); ++ix) {
-			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstArray1[%d]=%d"), ix, tstArray1[ix]);
-		}
-
-		TArray<int> tstArray2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int ix = 0; ix < tstArray2.Num(); ++ix) {
-			tstArray2.RemoveAt(ix);
-		}
-
-		for (int ix = 0; ix < tstArray2.Num(); ++ix)
-			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstArray2[%d]=%d"), ix, tstArray2[ix]);
-
-		TArray<int> tstArray3 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int ix = 0; ix < tstArray3.Num(); ++ix) {
-			tstArray3.RemoveAt(ix);
-		}
-
-		for (int ix = 0; ix < tstArray3.Num(); ++ix)
-			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstArray3[%d]=%d"), ix, tstArray3[ix]);
-
-
-		TArray<int> tstArray4 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int ix = tstArray4.Num()-1; ix >= 0; --ix) {
-			tstArray4.RemoveAt(ix);
-		}
-
-		for (int ix = 0; ix < tstArray4.Num(); ++ix)
-			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstArray4[%d]=%d"), ix, tstArray4[ix]);
-
-
-
-
-
-		TSet<int> tstSet1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int i : tstSet1) {
-			tstSet1.Remove(i);
-		}
-
-		for (int i : tstSet1)
-			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstSet1[something]=%d"), i);
-
-
-		TSet<int> tstSet2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int ix = 0; ix < tstSet2.Num(); ++ix) {
-			tstSet2.Remove(ix);
-		}
-
-		for (int i : tstSet2)
-			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstSet2[something]=%d"), i);
-
-		TSet<int> tstSet3 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int ix = 0; ix < tstSet3.Num(); ++ix) {
-			tstSet3.Remove(ix);
-		}
-
-		for (int i : tstSet3)
-			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstSet3[something]=%d"), i);
-
-
-		TSet<int> tstSet4 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int ix = tstSet4.Num() - 1; ix >= 0; --ix) {
-			tstSet4.Remove(ix);
-		}
-
-		for (int i : tstSet4)
-			UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::Tick: tstSet4[something]=%d"), i);
-
-
-
-
-
-#endif
-	/* Just an array test, remove this soon! */
-
-
-
-
-
 		// Create a test Pop
 		//AThing* AThingManager::SpawnThingAtom(FString name) {
 		///UWorld* const World = GetWorld();
@@ -334,6 +246,13 @@ void AGameplayManager::Tick(float DeltaTime)
 		TestLog(testPop1 ? testPop1->ToString() : "Error: testPop1 is null!");
 #endif
 	}
+
+	if (numTicks == theGameMode->numTicksAddChild + 20) {
+
+		SpawnRod("arod", 3, FVector(100.0, 100.0, 100.0));
+
+	}
+
 
 #if 0 /* Comment out all rim stuff, partly bc perfomance */
 
@@ -1618,6 +1537,86 @@ void AGameplayManager::Tick(float DeltaTime)
 #endif
 
 }
+
+
+
+
+APop* AGameplayManager::SpawnRod(FString name, int length, FVector loc) {
+
+	AvreduGameMode* theGameMode = GetGameMode();
+	AThingManager* theThingManager = theGameMode->theThingManager;
+	APopManager* thePopManager = theGameMode->thePopManager;
+	TArray <AThing*> rodThings;
+	TArray <APop*> rodPops;
+
+	for (int i = 0; i < length; ++i) {
+		rodThings.Add(theThingManager->SpawnThingAtom(name + "atom" + FString::FromInt(i)));
+
+		FVector locI = FVector(loc.X + 50 * i, loc.Y, loc.Z);
+		FTransform trafo(FQuat(0, 0, 0, 1), locI, FVector(1, 1, 1));
+		rodPops.Add(thePopManager->Spawn(rodThings[i], trafo));
+		if (i > 0)
+			thePopManager->AddChild(rodPops[0], rodPops[i]);
+	}
+
+	return rodPops[0];
+
+#if 0
+	AThing* atomSpoke1 = theThingManager->SpawnThingAtom("ATOMSPOKE1");
+	AThing* atomSpoke2 = theThingManager->SpawnThingAtom("ATOMSPOKE2");
+	AThing* atomSpoke3 = theThingManager->SpawnThingAtom("ATOMSPOKE3");
+	AThing* atomSpoke4 = theThingManager->SpawnThingAtom("ATOMSPOKE4");
+	AThing* atomSpoke5 = theThingManager->SpawnThingAtom("ATOMSPOKE5");
+	AThing* atomSpoke6 = theThingManager->SpawnThingAtom("ATOMSPOKE6");
+	AThing* atomSpoke7 = theThingManager->SpawnThingAtom("ATOMSPOKE7");
+	AThing* atomSpoke8 = theThingManager->SpawnThingAtom("ATOMSPOKE8");
+
+	AvreduGameMode* theGameMode = GetGameMode();
+
+	FTransform trafoX0_1Y0Z2(FQuat(0, 0, 0, 1), FVector(0, 0, theGameMode->spoke1Pos), FVector(1, 1, 1));
+	FTransform trafoX0_2Y0Z2(FQuat(0, 0, 0, 1), FVector(80, 0, theGameMode->spoke2Pos), FVector(1, 1, 1));
+	FTransform trafoX0_3Y0Z2(FQuat(0, 0, 0, 1), FVector(160, 0, theGameMode->spoke3Pos), FVector(1, 1, 1));
+	FTransform trafoX0_4Y0Z2(FQuat(0, 0, 0, 1), FVector(240, 0, theGameMode->spoke4Pos), FVector(1, 1, 1));
+	FTransform trafoX0_5Y0Z2(FQuat(0, 0, 0, 1), FVector(320, 0, theGameMode->spoke5Pos), FVector(1, 1, 1));
+	FTransform trafoX0_6Y0Z2(FQuat(0, 0, 0, 1), FVector(400, 0, theGameMode->spoke6Pos), FVector(1, 1, 1));
+	FTransform trafoX0_7Y0Z2(FQuat(0, 0, 0, 1), FVector(480, 0, theGameMode->spoke7Pos), FVector(1, 1, 1));
+	FTransform trafoX0_8Y0Z2(FQuat(0, 0, 0, 1), FVector(560, 0, theGameMode->spoke8Pos), FVector(1, 1, 1));
+
+	spokePop1 = thePopManager->Spawn(atomSpoke1, trafoX0_1Y0Z2);
+	spokePop2 = thePopManager->Spawn(atomSpoke2, trafoX0_2Y0Z2);
+	spokePop3 = thePopManager->Spawn(atomSpoke3, trafoX0_3Y0Z2);
+	spokePop4 = thePopManager->Spawn(atomSpoke4, trafoX0_4Y0Z2);
+	spokePop5 = thePopManager->Spawn(atomSpoke5, trafoX0_5Y0Z2);
+	spokePop6 = thePopManager->Spawn(atomSpoke6, trafoX0_6Y0Z2);
+	spokePop7 = thePopManager->Spawn(atomSpoke7, trafoX0_7Y0Z2);
+	spokePop8 = thePopManager->Spawn(atomSpoke8, trafoX0_8Y0Z2);
+
+	FTransform trafoX0Y0Z2_4(FQuat(0, 0, 0, 1), FVector(0, 0, 240), FVector(1, 1, 1));
+	FTransform trafoX1Y0Z2_3(FQuat(0, 0, 0, 1), FVector(100, 0, 230), FVector(1, 1, 1));
+	FTransform trafoX2Y0Z2_2(FQuat(0, 0, 0, 1), FVector(200, 0, 220), FVector(1, 1, 1));
+	FTransform trafoX3Y0Z2_1(FQuat(0, 0, 0, 1), FVector(300, 0, 210), FVector(1, 1, 1));
+	FTransform trafoX4Y0Z2(FQuat(0, 0, 0, 1), FVector(400, 0, 200), FVector(1, 1, 1));
+
+	AvreduGameMode* theGameMode = GetGameMode();
+
+	thePopManager->AddChild(spokePop1, spokePop2);
+	thePopManager->AddChild(spokePop1, spokePop3);
+	thePopManager->AddChild(spokePop1, spokePop4);
+	thePopManager->AddChild(spokePop1, spokePop5);
+	thePopManager->AddChild(spokePop1, spokePop6);
+	thePopManager->AddChild(spokePop1, spokePop7);
+	thePopManager->AddChild(spokePop1, spokePop8);
+#endif
+}
+
+
+
+
+
+
+
+
+
 
 AvreduGameMode* AGameplayManager::GetGameMode() {
 	UWorld* const theWorld = GetWorld();

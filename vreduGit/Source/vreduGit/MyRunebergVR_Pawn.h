@@ -72,10 +72,12 @@ public:
 	void MoveRControllerUpDown(float AxisValue);
 
 	void TogglePickDropMode();
+
 	//
-	// Let the user spawn atoms in hand
+	// Let the user spawn atoms
 	//
 	void SpawnAtom();
+	void SpawnRod();
 	void SpawnAtomInTheMiddleOfNowhere();
 	void SpawnAtomInTheMiddleOfNowhere2();
 

@@ -29,6 +29,8 @@ public:
 
 	AvreduGameMode* GetGameMode();
 
+	APop* SpawnRod(FString name, int length, FVector loc);
+
 	UFUNCTION()
 		void CheckIfTestRun();
 

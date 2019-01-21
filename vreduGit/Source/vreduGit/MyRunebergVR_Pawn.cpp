@@ -4,7 +4,7 @@
 #include "vreduGameMode.h"
 #include "Components/InputComponent.h"
 #include "Thing.h"    // Probably just temporary, Thing should be handled in ThingManager instead
-#include "vreduGameMode.h"
+//#include "vreduGameMode.h"
 #include "PopManager.h"
 #include "RunebergVR_Movement.h"
 
@@ -184,7 +184,7 @@ void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAction("TogglePickDropMode", IE_Pressed, this, &AMyRunebergVR_Pawn::TogglePickDropMode);
 
 	PlayerInputComponent->BindAction("SpawnAtom", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtom);
-
+	PlayerInputComponent->BindAction("SpawnRod", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnRod);
 	PlayerInputComponent->BindAction("Experimental1", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere);
 	PlayerInputComponent->BindAction("Experimental2", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere2);
 
@@ -314,9 +314,8 @@ void AMyRunebergVR_Pawn::SpawnAtom() {
 	//
 	///////////////
 	UE_LOG(LogTemp, Warning,
-		   TEXT("AMyRunebergVR_Pawn::SpawnAtom: will NOT call Pickup to start in hand, p=%p, meshLoc:  X=%f  Y=%f  Z=%f,  grabLoc:  X=%f  Y=%f  Z=%f"),
+		   TEXT("AMyRunebergVR_Pawn::SpawnAtom: will NOT call Pickup to start in hand, p=%p, meshLoc:  X=%f  Y=%f  Z=%f"),
 		   p,
-		   loc.X, loc.Y, loc.Z,
 		   loc.X, loc.Y, loc.Z);
 
 #if 0
@@ -336,6 +335,46 @@ void AMyRunebergVR_Pawn::SpawnAtom() {
 
 }
 
+
+
+
+void AMyRunebergVR_Pawn::SpawnRod() {
+	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::SpawnRod: called"));
+
+	// //APop* AGameplayManager::SpawnRod(FString name, int length, FVector loc) {
+
+	AvreduGameMode* theGameMode = GetGameMode();
+	AGameplayManager* theGameplayManager = theGameMode->theGameplayManager;
+	verify(theGameplayManager != nullptr);
+	FVector loc(4000.0f, 200.0f, 100.0f); // Don't care?
+
+	APop* p = theGameplayManager->SpawnRod("Rod", 7, loc);
+
+	//
+	// Pickup the new pop, since it should start in hand
+	//
+	///////////////
+	UE_LOG(LogTemp, Warning,
+		TEXT("AMyRunebergVR_Pawn::SpawnRod: will NOT call Pickup to start in hand, p=%p, meshLoc:  X=%f  Y=%f  Z=%f"),
+		p,
+		loc.X, loc.Y, loc.Z);
+
+#if 0
+	thePopManager->Pickup(p);
+#else
+	theGameMode->AddWantsPicking(p);
+#endif
+
+	UBoxComponent* grabBox = p->grabBoxes[0];
+	FTransform grabBoxTrafo = grabBox->GetRelativeTransform();
+	FVector grabBoxLoc = grabBoxTrafo.GetLocation();
+	UE_LOG(LogTemp, Warning,
+		   TEXT("AMyRunebergVR_Pawn::SpawnRod: after NON-call to Pickup, p=%p, meshLoc:  X=%f  Y=%f  Z=%f,  grabLoc:  X=%f  Y=%f  Z=%f"),
+		   p,
+		   loc.X, loc.Y, loc.Z,
+		   grabBoxLoc.X, grabBoxLoc.Y, grabBoxLoc.Z);
+
+}
 
 
 void AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere() {

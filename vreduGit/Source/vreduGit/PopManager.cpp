@@ -238,7 +238,7 @@ void APopManager::Pickup(APop* pop) {
 
 	HighlightCloseTopChildren(pop);
 
-	///SpawnGhostPop();
+	SpawnGhostPop();
 
 	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup end:  pop=%p, root parent=%p"),
 		   pop, pop->GetRootComponent()->GetAttachParent());
