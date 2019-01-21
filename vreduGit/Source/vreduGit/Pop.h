@@ -20,7 +20,7 @@ public:
 	// Sets default values for this actor's properties
 	APop();
 
-	void init(AThing* thing, FTransform trafo);
+	void init(AThing* thing, FTransform trafo, bool ghost);
 	void init2();
 
 protected:
@@ -77,6 +77,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 		bool picked;
+
+	UPROPERTY(VisibleAnywhere)
+		bool isGhost;
 
 	//
 	// API methods

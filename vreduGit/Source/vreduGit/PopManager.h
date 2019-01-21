@@ -61,6 +61,7 @@ public:
 	// Spawn a Pop in the world. Its shape is described by "thing"
 	APop* Spawn(AThing* thing,
 				FTransform transform,
+			    bool ghost,
 				ESpawnActorCollisionHandlingMethod collisionHandling = ESpawnActorCollisionHandlingMethod::Undefined);
 
 	// Destroy a Pop
@@ -83,7 +84,7 @@ public:
 
 	// Deep copy origPop and give the thing of the copy the name <cloneName>
 	// Return the copy
-	APop* Clone(APop* origPop, FString cloneName);
+	APop* Clone(APop* origPop, FString cloneName, bool ghost);
 
 	// Deep copy origPop and give the thing of the copy the name <cloneName>
 	// Return the copy, but also pick it up

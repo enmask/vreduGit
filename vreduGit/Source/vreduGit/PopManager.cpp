@@ -254,7 +254,7 @@ void APopManager::PickChild(APop* pop) {
 // Deep copy a Pop and all its Thing:s.
 // Return the clone Pop.
 // TODO: Shouldn't Clone() increase numPops? (Except in the shadow-pop case)
-APop* APopManager::Clone(APop* p, FString cloneName) {
+APop* APopManager::Clone(APop* p, FString cloneName, bool ghost) {
 
 	UWorld* const World = GetWorld();
 	AThingManager* theThingManager = ((AvreduGameMode*)World->GetAuthGameMode())->theThingManager;
@@ -273,7 +273,7 @@ APop* APopManager::Clone(APop* p, FString cloneName) {
 		cloneLoc.X, cloneLoc.Y, cloneLoc.Z);
 #endif
 
-	APop* clonePop = Spawn(cloneThing, cloneTrafo);
+	APop* clonePop = Spawn(cloneThing, cloneTrafo, ghost);
 	return clonePop;
 }
 
@@ -286,7 +286,7 @@ void APopManager::ClonePick(APop* origPop, FString cloneName) {
 		   TEXT("APopManager::Clone called, origPop=%p, cloneName=%s"),
 		   origPop, (cloneName != "") ? *cloneName : TEXT("<empty string>"));
 
-	APop* clonePop = Clone(origPop, cloneName);
+	APop* clonePop = Clone(origPop, cloneName, false);
 	Pickup(clonePop);
 }
 #endif
@@ -378,7 +378,10 @@ UActorComponent* APopManager::GetRightMotionController() {
 }
 
 
-APop* APopManager::Spawn(AThing* thing, FTransform transform, ESpawnActorCollisionHandlingMethod collisionHandling) {
+APop* APopManager::Spawn(AThing* thing,
+						 FTransform transform,
+						 bool ghost,
+					     ESpawnActorCollisionHandlingMethod collisionHandling) {
 
 	//
 	// Start spawning
@@ -392,7 +395,7 @@ APop* APopManager::Spawn(AThing* thing, FTransform transform, ESpawnActorCollisi
 	//
 	// Initialize the Pop
 	//
-	newPop->init(thing, transform);
+	newPop->init(thing, transform, false);
 
 	//
 	// Finish spawning
@@ -410,11 +413,7 @@ APop* APopManager::Spawn(AThing* thing, FTransform transform, ESpawnActorCollisi
 
 
 void APopManager::SpawnGhostPop() {
-
-	ghostPop = Clone(pickedPop, "Clone pop");
-
-
-
+	ghostPop = Clone(pickedPop, "Clone pop", true);
 }
 
 

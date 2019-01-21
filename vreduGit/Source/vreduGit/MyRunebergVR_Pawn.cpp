@@ -307,7 +307,7 @@ void AMyRunebergVR_Pawn::SpawnAtom() {
 	FTransform dummyTrafo(loc);
 
 	AThing* t = theThingManager->SpawnThingAtom("AN ATOM");
-	APop* p = thePopManager->Spawn(t, dummyTrafo);
+	APop* p = thePopManager->Spawn(t, dummyTrafo, false);
 
 	//
 	// Pickup the new pop, since it should start in hand
@@ -392,7 +392,7 @@ void AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere() {
 	FTransform dummyTrafo(loc);
 
 	AThing* t = theThingManager->SpawnThingAtom("AN ATOM IN THE MIDDLE OF NOWHERE");
-	APop* p = thePopManager->Spawn(t, dummyTrafo);
+	APop* p = thePopManager->Spawn(t, dummyTrafo, false);
 
 }
 
@@ -412,7 +412,7 @@ void AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere2() {
 
 	AThing* t = theThingManager->SpawnThingAtom("ANOTHER ATOM IN THE MIDDLE OF NOWHERE");
 	//APop* p = thePopManager->Spawn(t, dummyTrafo, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	APop* p = thePopManager->Spawn(t, dummyTrafo, ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding);
+	APop* p = thePopManager->Spawn(t, dummyTrafo, false, ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding);
 
 }
 

@@ -287,55 +287,42 @@ void APop::TestSetupMaterial() {
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Pop: Material Wire 8 failed"));
 	}
-
-
 }
 
 
-void APop::init(AThing* thing, FTransform trafo) {
+void APop::init(AThing* thing, FTransform trafo, bool ghost) {
 	//UE_LOG(LogTemp, Warning, TEXT("APop::init called, this=%p"), this);
 
 	thingRef = thing;
 	picked = false;
+	isGhost = ghost;
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::init() will now call BuildMesh"));
 
 	BuildMesh();
 	mesh->RegisterComponent();
 
-#if 1 /* Got code from old implementation */
 	//
 	// Setup the mesh as root
 	//
-	//mesh = CreateDefaultSubobject<URuntimeMeshComponent>(TEXT("Pop RMC root"));
-
-	/* Testing SM instead atm...
-	mesh = NewObject< URuntimeMeshComponent >(this, TEXT("Pop RMC root"));
-	*/
-	//mesh = NewObject< UStaticMeshComponent >(this, TEXT("Pop RMC root"));
-
-	
-	
 	RootComponent = mesh;
+
 	mesh->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
-	mesh->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);  // Try also PhysicsOnly
 
-	/* Commented out 190105 (want ignore for WorldDynamic) */
-	mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);  /// Was ECR_Block from 190102 to 190104
-	/* */
-
-	mesh->SetSimulatePhysics(true);
-
-
-	/*
-	mesh->SetLinearDamping(0.15);  // Not active, because Tick overwrites this value anyway with a speed-dependant value
-	mesh->SetAngularDamping(0.2);
-	*/
-#endif
-
-	mesh->SetEnableGravity(true);
-	this->GetRootPrimitiveComponent()->SetEnableGravity(true);
-	//mesh->
+	if (isGhost) {
+		mesh->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		mesh->SetSimulatePhysics(true);
+		mesh->SetEnableGravity(false);
+		this->GetRootPrimitiveComponent()->SetEnableGravity(false);
+	}
+	else {
+		mesh->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		mesh->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Block);
+		mesh->SetSimulatePhysics(true);
+		mesh->SetEnableGravity(true);
+		this->GetRootPrimitiveComponent()->SetEnableGravity(true);
+	}
 
 	if (IsRootComponentMovable()) {
 		UE_LOG(LogTemp, Warning, TEXT("APop::init, this=%p, IsRootComponentMovable TRUE"), this);

@@ -147,14 +147,14 @@ void AGameplayManager::Tick(float DeltaTime)
 		FTransform trafoX0_7Y0Z2(FQuat(0, 0, 0, 1), FVector(480, 0, theGameMode->spoke7Pos), FVector(1, 1, 1));
 		FTransform trafoX0_8Y0Z2(FQuat(0, 0, 0, 1), FVector(560, 0, theGameMode->spoke8Pos), FVector(1, 1, 1));
 
-		spokePop1 = thePopManager->Spawn(atomSpoke1, trafoX0_1Y0Z2);
-		spokePop2 = thePopManager->Spawn(atomSpoke2, trafoX0_2Y0Z2);
-		spokePop3 = thePopManager->Spawn(atomSpoke3, trafoX0_3Y0Z2);
-		spokePop4 = thePopManager->Spawn(atomSpoke4, trafoX0_4Y0Z2);
-		spokePop5 = thePopManager->Spawn(atomSpoke5, trafoX0_5Y0Z2);
-		spokePop6 = thePopManager->Spawn(atomSpoke6, trafoX0_6Y0Z2);
-		spokePop7 = thePopManager->Spawn(atomSpoke7, trafoX0_7Y0Z2);
-		spokePop8 = thePopManager->Spawn(atomSpoke8, trafoX0_8Y0Z2);
+		spokePop1 = thePopManager->Spawn(atomSpoke1, trafoX0_1Y0Z2, false);
+		spokePop2 = thePopManager->Spawn(atomSpoke2, trafoX0_2Y0Z2, false);
+		spokePop3 = thePopManager->Spawn(atomSpoke3, trafoX0_3Y0Z2, false);
+		spokePop4 = thePopManager->Spawn(atomSpoke4, trafoX0_4Y0Z2, false);
+		spokePop5 = thePopManager->Spawn(atomSpoke5, trafoX0_5Y0Z2, false);
+		spokePop6 = thePopManager->Spawn(atomSpoke6, trafoX0_6Y0Z2, false);
+		spokePop7 = thePopManager->Spawn(atomSpoke7, trafoX0_7Y0Z2, false);
+		spokePop8 = thePopManager->Spawn(atomSpoke8, trafoX0_8Y0Z2, false);
 
 #else
 	// Create a test Thing
@@ -1554,7 +1554,7 @@ APop* AGameplayManager::SpawnRod(FString name, int length, FVector loc) {
 
 		FVector locI = FVector(loc.X + 50 * i, loc.Y, loc.Z);
 		FTransform trafo(FQuat(0, 0, 0, 1), locI, FVector(1, 1, 1));
-		rodPops.Add(thePopManager->Spawn(rodThings[i], trafo));
+		rodPops.Add(thePopManager->Spawn(rodThings[i], trafo, false));
 		if (i > 0)
 			thePopManager->AddChild(rodPops[0], rodPops[i]);
 	}
@@ -1765,7 +1765,7 @@ void AGameplayManager::TestCase2() {
 	UE_LOG(LogTemp, Warning, TEXT("AGameplayManager::TestCase2: will call thePopManager->Spawn"));
 	UE_LOG(LogVredu, Warning, TEXT("AGameplayManager::TestCase2: will call thePopManager->Spawn"));
 
-	APop* testPop = thePopManager->Spawn(testThing, trafo);
+	APop* testPop = thePopManager->Spawn(testThing, trafo, false);
 
 	// Log the test Thing
 	TestLog(testThing ? testThing->ToString() : "Error: testThing is null!");
@@ -1794,11 +1794,11 @@ void AGameplayManager::TestCase3() {
 	FTransform trafoX3Y0Z2_1(FQuat(0, 0, 0, 1), FVector(300, 0, 210), FVector(1, 1, 1));
 	FTransform trafoX4Y0Z2(FQuat(0, 0, 0, 1), FVector(400, 0, 200), FVector(1, 1, 1));
 
-	APop* testPop1 = thePopManager->Spawn(testThing1, trafoX0Y0Z2_4);
-	APop* testPop2 = thePopManager->Spawn(testThing2, trafoX1Y0Z2_3);
-	APop* testPop3 = thePopManager->Spawn(testThing3, trafoX2Y0Z2_2);
-	APop* testPop4 = thePopManager->Spawn(testThing4, trafoX3Y0Z2_1);
-	APop* testPop5 = thePopManager->Spawn(testThing5, trafoX4Y0Z2);
+	APop* testPop1 = thePopManager->Spawn(testThing1, trafoX0Y0Z2_4, false);
+	APop* testPop2 = thePopManager->Spawn(testThing2, trafoX1Y0Z2_3, false);
+	APop* testPop3 = thePopManager->Spawn(testThing3, trafoX2Y0Z2_2, false);
+	APop* testPop4 = thePopManager->Spawn(testThing4, trafoX3Y0Z2_1, false);
+	APop* testPop5 = thePopManager->Spawn(testThing5, trafoX4Y0Z2, false);
 
 	//          1
 	//        2   5
