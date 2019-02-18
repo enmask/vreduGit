@@ -78,6 +78,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VR")
 		TArray< APop* > wantsPicking;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float settingDiceBaseX = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float settingDiceBaseY = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float settingDiceBaseZ = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VR")
+		float settingDiceRowDist = 300.0f;
+
 	//
 	// Setting for debugging of grabBox location error
 	//

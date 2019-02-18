@@ -101,7 +101,7 @@ public:
 
 	FString ToString();
 	
-	void BuildMesh();
+	void BuildMesh(bool ghost);
 
 	void TestSetupCollisionBox();
 	void TestSetupPhysics();
@@ -125,7 +125,7 @@ public:
 
 private:
 	void AddGrabBoxes(TArray<FTransform>& grabBoxLocations);
-	void AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim);
+	void AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim, bool ghost);
 
 	void AddToGrabBoxesArray(UBoxComponent* collisionBox);
 

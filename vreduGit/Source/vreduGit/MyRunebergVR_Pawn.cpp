@@ -188,6 +188,9 @@ void AMyRunebergVR_Pawn::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAction("Experimental1", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere);
 	PlayerInputComponent->BindAction("Experimental2", IE_Pressed, this, &AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere2);
 
+	PlayerInputComponent->BindAction("DiceRotX", IE_Pressed, this, &AMyRunebergVR_Pawn::DiceRotX);
+	PlayerInputComponent->BindAction("DiceRotY", IE_Pressed, this, &AMyRunebergVR_Pawn::DiceRotY);
+	PlayerInputComponent->BindAction("DiceRotZ", IE_Pressed, this, &AMyRunebergVR_Pawn::DiceRotZ);
 }
 
 
@@ -228,6 +231,14 @@ void AMyRunebergVR_Pawn::TurnSideAtRate(float Rate)
 	// HACK: Set pawn rotation to the same as view rotation
 	SetActorRotation(viewRot);
 
+	float yaw = viewRot.Yaw;
+	// Reinsert this when I want to have fine control over pawn yaw angle again..........
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan,
+	//								 FString::Printf(TEXT("Pawn rot: %f"), yaw));
+
+
+	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
+	//			FString::Printf(TEXT("Some variable values: x: %f, y: %f"), x, y));
 }
 
 void AMyRunebergVR_Pawn::TurnUpDownAtRate(float rate)
@@ -341,8 +352,6 @@ void AMyRunebergVR_Pawn::SpawnAtom() {
 void AMyRunebergVR_Pawn::SpawnRod() {
 	UE_LOG(LogTemp, Warning, TEXT("AMyRunebergVR_Pawn::SpawnRod: called"));
 
-	// //APop* AGameplayManager::SpawnRod(FString name, int length, FVector loc) {
-
 	AvreduGameMode* theGameMode = GetGameMode();
 	AGameplayManager* theGameplayManager = theGameMode->theGameplayManager;
 	verify(theGameplayManager != nullptr);
@@ -416,6 +425,27 @@ void AMyRunebergVR_Pawn::SpawnAtomInTheMiddleOfNowhere2() {
 
 }
 
+
+void AMyRunebergVR_Pawn::DiceRotX() {
+	AvreduGameMode* theGameMode = GetGameMode();
+	AGameplayManager* theGameplayManager = theGameMode->theGameplayManager;
+	FQuat quat(0.707107f, 0, 0, 0.707107f);
+	theGameplayManager->DiceRot(quat);
+}
+
+void AMyRunebergVR_Pawn::DiceRotY() {
+	AvreduGameMode* theGameMode = GetGameMode();
+	AGameplayManager* theGameplayManager = theGameMode->theGameplayManager;
+	FQuat quat(0, 0.707107f, 0, 0.707107f);
+	theGameplayManager->DiceRot(quat);
+}
+
+void AMyRunebergVR_Pawn::DiceRotZ() {
+	AvreduGameMode* theGameMode = GetGameMode();
+	AGameplayManager* theGameplayManager = theGameMode->theGameplayManager;
+	FQuat quat(0, 0, 0.707107f, 0.707107f);
+	theGameplayManager->DiceRot(quat);
+}
 
 void AMyRunebergVR_Pawn::UpdateControllerModeColor() {
 

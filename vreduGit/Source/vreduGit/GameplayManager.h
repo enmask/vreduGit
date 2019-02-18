@@ -29,7 +29,10 @@ public:
 
 	AvreduGameMode* GetGameMode();
 
-	APop* SpawnRod(FString name, int length, FVector loc);
+	APop* SpawnRod(FString name, int length, FVector loc, FVector step = FVector(50.0f, 0.0f, 0.0f));
+
+	UFUNCTION()
+	void DiceRot(FQuat quat);
 
 	UFUNCTION()
 		void CheckIfTestRun();
@@ -112,6 +115,29 @@ public:
 #endif
 
 private:
+
+	void LogSomeRotationExamples();
+	void LogOneRotationExample(float roll, float pitch, float yaw);
+
+	AThing* diceParentThing = 0;
+	AThing* midAtomLeftThing = 0;
+	AThing* midAtomRightThing = 0;
+
+	APop* diceParentPop = 0;
+	APop* topRodFar = 0;
+	APop* topRodMid = 0;
+	APop* topRodNear = 0;
+	APop* midRodFar = 0;
+	APop* midAtomLeft = 0;
+	APop* midAtomRight = 0;
+	APop* midRodNear = 0;
+	APop* botRodFar = 0;
+	APop* botRodMid = 0;
+	APop* botRodNear = 0;
+
+
+
+
 
 	APop* testPop1 = 0;
 	APop* testPop2 = 0;

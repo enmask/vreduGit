@@ -189,6 +189,10 @@ void APopManager::Pickup(APop* pop) {
 	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup called, pop=%p, root parent=%p"),
 		   pop, pop->GetRootComponent()->GetAttachParent());
 
+	FTransform popTrafoLog = pop->GetActorTransform();
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup start:  pop=%p, trafo=%s"),
+		   pop, *popTrafoLog.ToString());
+
 	UActorComponent* motCon = GetRightMotionController();
 	pop->DisableComponentsSimulatePhysics();
 	pop->AttachToComponent(Cast<USceneComponent>(motCon),
@@ -237,6 +241,11 @@ void APopManager::Pickup(APop* pop) {
 	pickedPop = pop;
 
 	HighlightCloseTopChildren(pop);
+
+
+	popTrafoLog = pop->GetActorTransform();
+	UE_LOG(LogTemp, Warning, TEXT("APopManager::Pickup before SpawnGhostPop:  pop=%p, trafo=%s"),
+		   pop, *popTrafoLog.ToString());
 
 	SpawnGhostPop();
 
@@ -395,7 +404,7 @@ APop* APopManager::Spawn(AThing* thing,
 	//
 	// Initialize the Pop
 	//
-	newPop->init(thing, transform, false);
+	newPop->init(thing, transform, ghost);
 
 	//
 	// Finish spawning
@@ -413,9 +422,178 @@ APop* APopManager::Spawn(AThing* thing,
 
 
 void APopManager::SpawnGhostPop() {
-	ghostPop = Clone(pickedPop, "Clone pop", true);
+	ghostPop = Clone(pickedPop, "Ghost pop", true);
+	PlaceGhostPop();
 }
 
+
+FTransform APopManager::PlaceGhostPop() {
+
+#if 0 /* Mockup 1 */
+	FVector loc(100.0, 200.0, 50.0);
+	//ghostPop->mesh->SetRelativeLocation(loc);
+	FRotator rot = FRotator(40.0, 20.0, 30.0);
+	FTransform trafo(rot);
+	trafo.SetLocation(loc);
+	ghostPop->mesh->SetRelativeTransform(trafo);
+#else /* Mockup 2 */
+	//TArray<APop*> closePops = GetClosePops(pickedPop, snapDistance);
+
+	FTransform pickedPopTrafo = pickedPop->GetActorTransform();
+
+	for (auto& grabBox : pickedPop->grabBoxes) {
+
+		//grabBox->BoxExtent
+		FVector boxExtScaled = grabBox->GetScaledBoxExtent();
+		FVector boxExtUnscaled = grabBox->GetUnscaledBoxExtent();
+
+		FTransform grabBoxTrafo = grabBox->GetRelativeTransform();
+		FBoxSphereBounds bounds = grabBox->CalcBounds(grabBoxTrafo);
+
+		//		CalcBounds(const FTransform & LocalToWorld)
+		FVector boundsOrigin(bounds.Origin);
+		FVector boxExtent(bounds.BoxExtent);
+		//FVector sideLoc(boundsOrigin - box
+		FVector side0Loc(boundsOrigin.X - boxExtent.X, boundsOrigin.Y, boundsOrigin.Z);
+		FVector side1Loc(boundsOrigin.X + boxExtent.X, boundsOrigin.Y, boundsOrigin.Z);
+		FVector side2Loc(boundsOrigin.X, boundsOrigin.Y - boxExtent.Y, boundsOrigin.Z);
+		FVector side3Loc(boundsOrigin.X, boundsOrigin.Y + boxExtent.Y, boundsOrigin.Z);
+		FVector side4Loc(boundsOrigin.X, boundsOrigin.Y, boundsOrigin.Z - boxExtent.Z);
+		FVector side5Loc(boundsOrigin.X, boundsOrigin.Y, boundsOrigin.Z + boxExtent.Z);
+
+		FTransform side0LocalTrafo(side0Loc);
+		FTransform side1LocalTrafo(side1Loc);
+		FTransform side2LocalTrafo(side2Loc);
+		FTransform side3LocalTrafo(side3Loc);
+		FTransform side4LocalTrafo(side4Loc);
+		FTransform side5LocalTrafo(side5Loc);
+
+		FTransform side0Trafo = side0LocalTrafo * pickedPopTrafo;
+		FTransform side1Trafo = side1LocalTrafo * pickedPopTrafo;
+		FTransform side2Trafo = side2LocalTrafo * pickedPopTrafo;
+		FTransform side3Trafo = side3LocalTrafo * pickedPopTrafo;
+		FTransform side4Trafo = side4LocalTrafo * pickedPopTrafo;
+		FTransform side5Trafo = side5LocalTrafo * pickedPopTrafo;
+
+		FVector normal0Local(-1.0, 0.0, 0.0);
+		FVector normal1Local(1.0, 0.0, 0.0);
+		FVector normal2Local(0.0, -1.0, 0.0);
+		FVector normal3Local(0.0, 1.0, 0.0);
+		FVector normal4Local(0.0, 0.0, -1.0);
+		FVector normal5Local(0.0, 0.0, 1.0);
+
+		FTransform normal0TrafoLocal(normal0Local);
+		FTransform normal0TrafoWorld = normal0TrafoLocal * pickedPopTrafo;
+		FVector normal0World = normal0TrafoWorld.GetLocation();
+		FQuat normal0WorldQuat = normal0TrafoWorld.GetRotation();
+		FVector normal0WorldVector = normal0WorldQuat.Vector();
+
+		// NEXT: Log normal0World and normal0WorldQuat above. Trying to
+		// convert a local normal to a world normal
+
+		// 32
+		// 
+
+
+		UE_LOG(LogTemp, Warning,
+			TEXT("APopManager::PlaceGhostPop: Iterating pickedPop grabBox with name %s,  boxExtScaled:  X=%f  Y=%f  Z=%f,  boxExtUnscaled:  X=%f  Y=%f  Z=%f,  bounds string repr.: %s,  side0Loc:  X=%f  Y=%f  Z=%f, side1Loc:  X=%f  Y=%f  Z=%f,  side2Loc:  X=%f  Y=%f  Z=%f,  side3Loc:  X=%f  Y=%f  Z=%f,  side4Loc:  X=%f  Y=%f  Z=%f,  side5Loc:  X=%f  Y=%f  Z=%f"),
+			*grabBox->GetName(),
+			boxExtScaled.X, boxExtScaled.Y, boxExtScaled.Z,
+			boxExtUnscaled.X, boxExtUnscaled.Y, boxExtUnscaled.Z,
+			*bounds.ToString(),
+			side0Loc.X, side0Loc.Y, side0Loc.Z,
+			side1Loc.X, side1Loc.Y, side1Loc.Z,
+			side2Loc.X, side2Loc.Y, side2Loc.Z,
+			side3Loc.X, side3Loc.Y, side3Loc.Z,
+			side4Loc.X, side4Loc.Y, side4Loc.Z,
+			side5Loc.X, side5Loc.Y, side5Loc.Z);
+
+#if 0 /* Crashes */
+		UE_LOG(LogTemp, Warning,
+			TEXT("APopManager::PlaceGhostPop:  side0Trafo: %s, side1Trafo: %s, side2Trafo: %s, side3Trafo: %s, side4Trafo: %s, side5Trafo: %s,  normal0TrafoLocal: %s,  normal0TrafoWorld: %s,  normal0World: %s,  normal0WorldQuat: %s,  normal0WorldVector: %s"),
+			*side0Trafo.ToHumanReadableString(),
+			*side1Trafo.ToHumanReadableString(),
+			*side2Trafo.ToHumanReadableString(),
+			*side3Trafo.ToHumanReadableString(),
+			*side4Trafo.ToHumanReadableString(),
+			*side5Trafo.ToHumanReadableString(),
+			*normal0TrafoLocal.ToString(),
+		    *normal0TrafoWorld.ToString(),
+			*normal0World.ToString(),
+		    *normal0WorldQuat.ToString(),
+		    *normal0WorldVector.ToString());
+#endif
+
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APopManager::PlaceGhostPop:  side0Trafo: %s"),
+			   *side0Trafo.ToHumanReadableString());
+
+		UE_LOG(LogTemp, Warning,
+			TEXT("APopManager::PlaceGhostPop:  side1Trafo: %s, side2Trafo: %s"),
+			*side1Trafo.ToHumanReadableString(),
+			*side2Trafo.ToHumanReadableString());
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APopManager::PlaceGhostPop:  side3Trafo: %s, side4Trafo: %s"),
+			   *side3Trafo.ToHumanReadableString(),
+			   *side4Trafo.ToHumanReadableString());
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APopManager::PlaceGhostPop:  side5Trafo: %s,  normal0TrafoLocal: %s"),
+			   *side5Trafo.ToHumanReadableString(),
+			   *normal0TrafoLocal.ToString());
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APopManager::PlaceGhostPop:  normal0TrafoWorld: %s,  normal0World: %s"),
+			   *normal0TrafoWorld.ToString(),
+			   *normal0World.ToString());
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APopManager::PlaceGhostPop:  normal0WorldQuat: %s,  normal0WorldVector: %s"),
+			   *normal0WorldQuat.ToString(),
+			   *normal0WorldVector.ToString());
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APopManager::PlaceGhostPop:  FVector GetAxisX(): %s,  GetAxisX(): %s,  GetAxisX(): %s"),
+			   *normal0WorldQuat.GetAxisX().ToString(), *normal0WorldQuat.GetAxisY().ToString(), *normal0WorldQuat.GetAxisZ().ToString());
+
+		UE_LOG(LogTemp, Warning,
+			   TEXT("APopManager::PlaceGhostPop:  FVector GetForwardVector(): %s,  GetRightVector(): %s"),
+			   *normal0WorldQuat.GetForwardVector().ToString(), *normal0WorldQuat.GetRightVector().ToString());
+
+
+
+		
+		//		for (auto& side : grabBox    ... *** HERE 190124 *** ...
+
+	}
+
+	FTransform retDummyTrafo;
+	return retDummyTrafo;
+
+#endif
+
+	// Pre-conditions: * every Thing stores its own bounds
+	//				   * every grabBox stores id of its subthing
+	// PlaceGhostPop
+		// Find all world pop:s closePops closer to pickedPop than snapDistance
+		// for (every grabBox in pickedPop):
+		  // for (every side in grabBox):
+			// ghostSide = FindInGhost(side)
+			// for (every pop in closePops closer to side than snapDistance):
+			  // for (every subThing in pop closer to side than snapDistance):
+				// for (every grabBox2 in subThing closer to side than snapDistance):
+				  // for (every side2 in grabBox closer to side than snapDistance AND rot-closer to side than snapAngle):
+				    // alignTrafo = AlignWith(ghostSide, side2)
+					// if (!Overlap(ghostPop)):
+					  // snapTargetTrafo = alignTrafo
+					  // return
+
+
+			// PlaceAtLocation()
+
+}
 
 
 //(AThing* thing,
@@ -517,7 +695,7 @@ void APopManager::AddChild(APop* parent, APop* toBeChild) {
 	UE_LOG(LogTemp, Warning, TEXT("APopManager::AddChild will now call BuildMesh"));
 
 	// Rebuild mesh to get the combined mesh
-	parent->BuildMesh();
+	parent->BuildMesh(false);
 }
 
 

@@ -142,6 +142,8 @@ private:
 	// Called when user picks up a pop
 	void SpawnGhostPop();
 
+	// Find a good place and move+orient the ghost pop there
+	FTransform PlaceGhostPop();
 
 	UPROPERTY(VisibleAnywhere)
 		int numTicks;

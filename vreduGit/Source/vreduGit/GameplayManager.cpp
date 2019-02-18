@@ -60,6 +60,8 @@ void AGameplayManager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	numTicks++;
 
+	LogSomeRotationExamples();
+
 	if (doRunATestCase) {
 	
 		if (!calledTestCase) {
@@ -251,7 +253,117 @@ void AGameplayManager::Tick(float DeltaTime)
 
 		SpawnRod("arod", 3, FVector(100.0, 100.0, 100.0));
 
+		float diceBaseX = theGameMode->settingDiceBaseX;
+		float diceBaseY = theGameMode->settingDiceBaseY;
+		float diceBaseZ = theGameMode->settingDiceBaseZ;
+		float diceRowDist = theGameMode->settingDiceRowDist;
+		//FVector dist = FVector(0.0, theGameMode->settingDiceRowDist, 0.0);
+		FVector dist = FVector(0.0, theGameMode->settingDiceRowDist, 0.0);
+
+
+		FTransform trafoDiceParent(FQuat(0, 0, 0, 1),
+								   FVector(diceBaseX,
+										   diceBaseY,
+										   diceBaseZ),
+								   FVector(1, 1, 1));
+		diceParentThing = theThingManager->SpawnThingAtom("DiceParent");
+		diceParentPop = thePopManager->Spawn(diceParentThing, trafoDiceParent, false);
+
+		// Spawn 8 3-rods and 2 atoms, plus a root atom. Then join them into a 3*3*3 cube
+
+		// 3 top rods
+		topRodFar = SpawnRod("toprodfar",
+							 4,
+							 FVector(diceBaseX + diceRowDist, diceBaseY - 2*diceRowDist, diceBaseZ + diceRowDist),
+							 dist);
+		topRodMid = SpawnRod("toprodmid",
+							 4,
+							 FVector(diceBaseX, diceBaseY - 2*diceRowDist, diceBaseZ + diceRowDist),
+							 dist);
+		topRodNear = SpawnRod("toprodnear",
+							 4,
+							 FVector(diceBaseX - diceRowDist, diceBaseY - 2*diceRowDist, diceBaseZ + diceRowDist),
+							 dist);
+
+		// Rod, atom, atom, rod for middle layer
+		midRodFar = SpawnRod("midrodfar",
+							 4,
+							 FVector(diceBaseX + diceRowDist, diceBaseY - 2*diceRowDist, diceBaseZ),
+							 dist);
+
+		FTransform trafoMidLeft(FQuat(0, 0, 0, 1),
+							    FVector(diceBaseX, diceBaseY - diceRowDist, diceBaseZ),
+								FVector(1, 1, 1));
+		midAtomLeftThing = theThingManager->SpawnThingAtom("MidAtomLeft");
+		midAtomLeft = thePopManager->Spawn(midAtomLeftThing, trafoMidLeft, false);
+
+		FTransform trafoMidRight(FQuat(0, 0, 0, 1),
+								 FVector(diceBaseX, diceBaseY + diceRowDist, diceBaseZ),
+								 FVector(1, 1, 1));
+		midAtomRightThing = theThingManager->SpawnThingAtom("MidAtomRight");
+		midAtomRight = thePopManager->Spawn(midAtomLeftThing, trafoMidRight, false);
+
+		midRodNear = SpawnRod("midrodnear",
+							  4,
+							  FVector(diceBaseX - diceRowDist, diceBaseY - 2 * diceRowDist, diceBaseZ),
+							  dist);
+
+		// 3 bottom rods
+		botRodFar = SpawnRod("botrodfar",
+							 4,
+							 FVector(diceBaseX + diceRowDist, diceBaseY - 2 * diceRowDist, diceBaseZ - diceRowDist),
+							 dist);
+		botRodMid = SpawnRod("botrodmid",
+							 4,
+							 FVector(diceBaseX, diceBaseY - 2 * diceRowDist, diceBaseZ - diceRowDist),
+							 dist);
+		botRodNear = SpawnRod("botrodnear",
+							  4,
+							  FVector(diceBaseX - diceRowDist, diceBaseY - 2 * diceRowDist, diceBaseZ - diceRowDist),
+							  dist);
+
 	}
+
+	
+	if (numTicks == theGameMode->numTicksAddChild + 21) {
+		thePopManager->AddChild(diceParentPop, topRodFar);
+		thePopManager->AddChild(diceParentPop, topRodMid);
+		thePopManager->AddChild(diceParentPop, topRodNear);
+		thePopManager->AddChild(diceParentPop, midRodFar);
+		thePopManager->AddChild(diceParentPop, midAtomLeft);
+		thePopManager->AddChild(diceParentPop, midAtomRight);
+		thePopManager->AddChild(diceParentPop, midRodNear);
+		thePopManager->AddChild(diceParentPop, botRodFar);
+		thePopManager->AddChild(diceParentPop, botRodMid);
+		thePopManager->AddChild(diceParentPop, botRodNear);
+		/*
+		thePopManager->AddChild(diceParentPop, midRodFar);
+		thePopManager->AddChild(diceParentPop, midAtomLeft);
+		thePopManager->AddChild(diceParentPop, midAtomRight);
+		thePopManager->AddChild(diceParentPop, midRodNear);
+		thePopManager->AddChild(diceParentPop, botRodFar);
+		thePopManager->AddChild(diceParentPop, botRodMid);
+		thePopManager->AddChild(diceParentPop, botRodNear);
+		*/
+	}
+
+	
+	
+	
+	/*
+		testThing2 = theThingManager->SpawnThingAtom("Thing 2");
+	
+		FTransform trafoX0Y0Z2_4(FQuat(0, 0, 0, 1), FVector(0, 0, 240), FVector(1, 1, 1));
+		FTransform trafoX1Y0Z2_3(FQuat(0, 0, 0, 1), FVector(100, 0, 230), FVector(1, 1, 1));
+		FTransform trafoX2Y0Z2_2(FQuat(0, 0, 0, 1), FVector(200, 0, 220), FVector(1, 1, 1));
+		FTransform trafoX3Y0Z2_1(FQuat(0, 0, 0, 1), FVector(300, 0, 210), FVector(1, 1, 1));
+		FTransform trafoX4Y0Z2(FQuat(0, 0, 0, 1), FVector(400, 0, 200), FVector(1, 1, 1));
+
+	testPop1 = thePopManager->Spawn(testThing1, trafoX0Y0Z2_4);
+	
+	*/
+		
+
 
 
 #if 0 /* Comment out all rim stuff, partly bc perfomance */
@@ -1539,9 +1651,154 @@ void AGameplayManager::Tick(float DeltaTime)
 }
 
 
+void AGameplayManager::DiceRot(FQuat quat) {
+
+	//FTransform
+
+	FTransform trafoBeforeRot = diceParentPop->GetActorTransform();
+	//FTransform trafoBeforeRot;
 
 
-APop* AGameplayManager::SpawnRod(FString name, int length, FVector loc) {
+	FTransform rotTrafo = FTransform(quat);
+	FRotator rotatorBeforeRot(trafoBeforeRot.Rotator());
+	FQuat quatBeforeRot(trafoBeforeRot.GetRotation());
+
+	FTransform trafoAfterRot = rotTrafo * trafoBeforeRot;
+
+	FRotator rotatorAfterRot(trafoAfterRot.Rotator());
+	FQuat quatAfterRot(trafoAfterRot.GetRotation());
+	UE_LOG(LogVredu, Warning,
+		   TEXT("AGameplayManager::DiceRot: trafoBeforeRot=%s  quatBeforeRot=%s  rotatorBeforeRot=%s  quat=%s  trafoAfterRot=%s  quatAfterRot=%s  rotatorAfterRot=%s"),
+		   *trafoBeforeRot.ToString(), *quatBeforeRot.ToString(), *rotatorBeforeRot.ToString(),
+		   *quat.ToString(),
+		   *trafoAfterRot.ToString(), *quatAfterRot.ToString(), *rotatorAfterRot.ToString());
+
+	diceParentPop->SetActorTransform(trafoAfterRot);
+}
+
+
+void AGameplayManager::LogSomeRotationExamples() {
+
+	//
+	// 1. All 4 orientations where the original top side (pos. Z) stays on top
+	//
+
+	// 1.0. Unaltered orientation. ['1' up], '2' near ('4' left, '3' right, i.e. right-handed dice)
+	LogOneRotationExample(0.0, 0.0, 0.0); // roll (applied last), pitch, yaw (applied first)
+
+	// 1.1. +90 yaw. ['1' up], '4' near
+	LogOneRotationExample(0.0, 0.0, 90.0);
+
+	// 1.2. +180 yaw. ['1' up], '5' near
+	LogOneRotationExample(0.0, 0.0, 180.0);
+
+	// 1.3. -90 yaw. ['1' up], '3' near
+	LogOneRotationExample(0.0, 0.0, -90.0);
+
+	//
+	// 2. All 4 orientations where the original top side points down (neg. Z)
+	//
+
+	// 2.1. +180 pitch. '6' up, '5' near ['1' down]
+	LogOneRotationExample(0.0, 180.0, 0.0); // roll (applied last), pitch, yaw (applied first)
+
+	// 2.2. +90 yaw, then +180 pitch. '6' up, '3' near ['1' down]
+	LogOneRotationExample(0.0, 180.0, 90.0);
+
+	// 2.3. +180 yaw, then +180 pitch. '6' up, '2' near ['1' down]
+	LogOneRotationExample(0.0, 180.0, 180.0);
+
+	// 2.4. -90 yaw, then +180 pitch. '6' up, '4' near ['1' down]
+	LogOneRotationExample(0.0, 180.0, -90.0);
+
+	//
+	// 3. All 4 orientations where the original top side points to the left (neg. Y)
+	//
+
+	// 3.1. -90 roll. '3' up. '2' near ['1' left]
+	LogOneRotationExample(-90.0, 0.0, 0.0);
+
+	// 3.2. +90 yaw, then -90 roll. '2' up, '4' near ['1' left]
+	LogOneRotationExample(-90.0, 0.0, 90.0);
+
+	// 3.3. +180 yaw, then -90 roll. '4' up, '5' near ['1' left]
+	LogOneRotationExample(-90.0, 0.0, 90.0);
+
+	// 3.4. -90 yaw, then -90 roll. '5' up, '3' near ['1' left]
+	LogOneRotationExample(-90.0, 0.0, -90.0);
+
+	//
+	// 4. All 4 orientations where the original top side points to the right (pos. Y)
+	//
+
+	// 4.1. +90 roll. '4' up. '2' near ['1' right]
+	LogOneRotationExample(90.0, 0.0, 0.0);
+
+	// 4.2. +90 yaw, then +90 roll. '5' up, '4' near ['1' right]
+	LogOneRotationExample(90.0, 0.0, 90.0);
+
+	// 4.3. +180 yaw, then +90 roll. '3' up, '5' near ['1' right]
+	LogOneRotationExample(90.0, 0.0, 180.0);
+
+	// 4.4. -90 yaw, then +90 roll. '2' up, '3' near ['1' left]
+	LogOneRotationExample(90.0, 0.0, -90.0);
+
+	//
+	// 5. All 4 orientations where the original top side points to the near (neg. X)
+	//
+#if 0
+	// 5.1. -90 pitch. '5' up ['1' near]
+	LogOneRotationExample(0.0, -90.0, 0.0);
+
+	// 5.2. +90 yaw, then -90 pitch. '3' up ['1' near]
+	LogOneRotationExample(0.0, -90.0, 90.0);
+
+	// 5.3. +180 yaw, then -90 pitch. '2' up ['1' near]
+	LogOneRotationExample(0.0, -90.0, 180.0);
+
+	// 5.4. -90 yaw, then -90 pitch. '4' up ['1' near]
+	LogOneRotationExample(0.0, -90.0, -90.0);
+
+	//
+	// 6. All 4 orientations where the original top side points to the far (pos. X)
+	//
+
+	// 6.1. +90 pitch. '2' up. '6' near ['1' far]
+	LogOneRotationExample(90.0, 0.0, 0.0);
+
+	// 6.2. +90 yaw, then +90 pitch. '4' up, '6' near ['1' far]
+	LogOneRotationExample(90.0, 0.0, 90.0);
+
+	// 6.3. +180 yaw, then +90 pitch. '5' up, '6' near ['1' far]
+	LogOneRotationExample(90.0, 0.0, 180.0);
+
+	// 6.4. -90 yaw, then +90 pitch. '3' up, '6' near ['1' far]
+	LogOneRotationExample(90.0, 0.0, -90.0);
+
+
+#endif
+
+}
+
+
+// roll, pitch, yaw
+void AGameplayManager::LogOneRotationExample(float roll, float pitch, float yaw) {
+
+	//float roll = 0.0;
+	//float pitch = 0.0;
+	//float yaw = 0.0;
+
+	FRotator rot(pitch, yaw, roll);
+	FQuat quat(rot);
+
+	UE_LOG(LogVredu, Warning,
+		TEXT("AGameplayManager::LogSomeRotationExamples: rot roll=%f pitch=%f yaw=%f   quat x=%f y=%f z=%f w=%f"),
+		rot.Roll, rot.Pitch, rot.Yaw, quat.X, quat.Y, quat.Z, quat.W);
+	
+}
+
+
+APop* AGameplayManager::SpawnRod(FString name, int length, FVector loc, FVector step) {
 
 	AvreduGameMode* theGameMode = GetGameMode();
 	AThingManager* theThingManager = theGameMode->theThingManager;
@@ -1552,7 +1809,7 @@ APop* AGameplayManager::SpawnRod(FString name, int length, FVector loc) {
 	for (int i = 0; i < length; ++i) {
 		rodThings.Add(theThingManager->SpawnThingAtom(name + "atom" + FString::FromInt(i)));
 
-		FVector locI = FVector(loc.X + 50 * i, loc.Y, loc.Z);
+		FVector locI = FVector(loc.X + step.X * i, loc.Y + step.Y * i, loc.Z + step.Z * i);
 		FTransform trafo(FQuat(0, 0, 0, 1), locI, FVector(1, 1, 1));
 		rodPops.Add(thePopManager->Spawn(rodThings[i], trafo, false));
 		if (i > 0)
@@ -1561,52 +1818,6 @@ APop* AGameplayManager::SpawnRod(FString name, int length, FVector loc) {
 
 	return rodPops[0];
 
-#if 0
-	AThing* atomSpoke1 = theThingManager->SpawnThingAtom("ATOMSPOKE1");
-	AThing* atomSpoke2 = theThingManager->SpawnThingAtom("ATOMSPOKE2");
-	AThing* atomSpoke3 = theThingManager->SpawnThingAtom("ATOMSPOKE3");
-	AThing* atomSpoke4 = theThingManager->SpawnThingAtom("ATOMSPOKE4");
-	AThing* atomSpoke5 = theThingManager->SpawnThingAtom("ATOMSPOKE5");
-	AThing* atomSpoke6 = theThingManager->SpawnThingAtom("ATOMSPOKE6");
-	AThing* atomSpoke7 = theThingManager->SpawnThingAtom("ATOMSPOKE7");
-	AThing* atomSpoke8 = theThingManager->SpawnThingAtom("ATOMSPOKE8");
-
-	AvreduGameMode* theGameMode = GetGameMode();
-
-	FTransform trafoX0_1Y0Z2(FQuat(0, 0, 0, 1), FVector(0, 0, theGameMode->spoke1Pos), FVector(1, 1, 1));
-	FTransform trafoX0_2Y0Z2(FQuat(0, 0, 0, 1), FVector(80, 0, theGameMode->spoke2Pos), FVector(1, 1, 1));
-	FTransform trafoX0_3Y0Z2(FQuat(0, 0, 0, 1), FVector(160, 0, theGameMode->spoke3Pos), FVector(1, 1, 1));
-	FTransform trafoX0_4Y0Z2(FQuat(0, 0, 0, 1), FVector(240, 0, theGameMode->spoke4Pos), FVector(1, 1, 1));
-	FTransform trafoX0_5Y0Z2(FQuat(0, 0, 0, 1), FVector(320, 0, theGameMode->spoke5Pos), FVector(1, 1, 1));
-	FTransform trafoX0_6Y0Z2(FQuat(0, 0, 0, 1), FVector(400, 0, theGameMode->spoke6Pos), FVector(1, 1, 1));
-	FTransform trafoX0_7Y0Z2(FQuat(0, 0, 0, 1), FVector(480, 0, theGameMode->spoke7Pos), FVector(1, 1, 1));
-	FTransform trafoX0_8Y0Z2(FQuat(0, 0, 0, 1), FVector(560, 0, theGameMode->spoke8Pos), FVector(1, 1, 1));
-
-	spokePop1 = thePopManager->Spawn(atomSpoke1, trafoX0_1Y0Z2);
-	spokePop2 = thePopManager->Spawn(atomSpoke2, trafoX0_2Y0Z2);
-	spokePop3 = thePopManager->Spawn(atomSpoke3, trafoX0_3Y0Z2);
-	spokePop4 = thePopManager->Spawn(atomSpoke4, trafoX0_4Y0Z2);
-	spokePop5 = thePopManager->Spawn(atomSpoke5, trafoX0_5Y0Z2);
-	spokePop6 = thePopManager->Spawn(atomSpoke6, trafoX0_6Y0Z2);
-	spokePop7 = thePopManager->Spawn(atomSpoke7, trafoX0_7Y0Z2);
-	spokePop8 = thePopManager->Spawn(atomSpoke8, trafoX0_8Y0Z2);
-
-	FTransform trafoX0Y0Z2_4(FQuat(0, 0, 0, 1), FVector(0, 0, 240), FVector(1, 1, 1));
-	FTransform trafoX1Y0Z2_3(FQuat(0, 0, 0, 1), FVector(100, 0, 230), FVector(1, 1, 1));
-	FTransform trafoX2Y0Z2_2(FQuat(0, 0, 0, 1), FVector(200, 0, 220), FVector(1, 1, 1));
-	FTransform trafoX3Y0Z2_1(FQuat(0, 0, 0, 1), FVector(300, 0, 210), FVector(1, 1, 1));
-	FTransform trafoX4Y0Z2(FQuat(0, 0, 0, 1), FVector(400, 0, 200), FVector(1, 1, 1));
-
-	AvreduGameMode* theGameMode = GetGameMode();
-
-	thePopManager->AddChild(spokePop1, spokePop2);
-	thePopManager->AddChild(spokePop1, spokePop3);
-	thePopManager->AddChild(spokePop1, spokePop4);
-	thePopManager->AddChild(spokePop1, spokePop5);
-	thePopManager->AddChild(spokePop1, spokePop6);
-	thePopManager->AddChild(spokePop1, spokePop7);
-	thePopManager->AddChild(spokePop1, spokePop8);
-#endif
 }
 
 

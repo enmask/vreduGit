@@ -157,7 +157,8 @@ private:
 public:
 
 	// Name
-	FString name;
+	UPROPERTY(EditAnywhere)
+		FString name;
 
 	// Add a sub-thing
 	void Add(AThing* subThing, FTransform subThingRelTrafo, FString subThingRole);

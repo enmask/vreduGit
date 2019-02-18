@@ -81,6 +81,10 @@ public:
 	void SpawnAtomInTheMiddleOfNowhere();
 	void SpawnAtomInTheMiddleOfNowhere2();
 
+	void DiceRotX();
+	void DiceRotY();
+	void DiceRotZ();
+
 	void UpdateControllerModeColor();
 	void UpdateControllerPickModeColor();
 	void UpdateControllerDropModeColor();

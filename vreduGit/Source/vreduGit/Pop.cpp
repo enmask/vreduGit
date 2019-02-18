@@ -299,7 +299,7 @@ void APop::init(AThing* thing, FTransform trafo, bool ghost) {
 
 	UE_LOG(LogTemp, Warning, TEXT("APop::init() will now call BuildMesh"));
 
-	BuildMesh();
+	BuildMesh(ghost);
 	mesh->RegisterComponent();
 
 	//
@@ -724,7 +724,7 @@ FString APop::ToString() {
 //
 // Build mesh section and also add collision grab boxes
 //
-void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
+void APop::BuildMesh(bool ghost) {
 
 	TArray<FVector> vertices;
 	TArray<int32> Triangles;
@@ -884,7 +884,7 @@ void APop::BuildMesh(/* thing, FTransform baseTrafo */) {
 	// AddGrabBoxes(collisionCubePositions);
 
 #if 1 /* TEST why no falling */
-	AddGrabBoxes2Dim(collisions2Dim);
+	AddGrabBoxes2Dim(collisions2Dim, ghost);
 #endif
 }
 
@@ -937,9 +937,10 @@ void APop::AddGrabBoxes(TArray<FTransform>& grabBoxLocations) {
 //
 // Setup the collision boxes for grabbing. Make them children of the root mesh.
 //
-void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
+void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim, bool ghost) {
 
-	UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes2Dim called, address %p, collisions2Dim.Num()==%d"), this, collisions2Dim.Num());
+	UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes2Dim called, address %p, collisions2Dim.Num()==%d, ghost=%s"),
+		   this, collisions2Dim.Num(), ghost ? TEXT("true") : TEXT("false"));
 
 	grabBoxes.Empty();
 
@@ -984,45 +985,35 @@ void APop::AddGrabBoxes2Dim(TArray<FTrafoArray>& collisions2Dim) {
 				   TEXT("APop::AddGrabBoxes2Dim: this-pop=%p, popLoc:  X=%f  Y=%f  Z=%f, grabBoxNo=%d,  locAfter:  X=%f  Y=%f  Z=%f,  adjustedLoc:  X=%f  Y=%f  Z=%f"),
 				   this, popLoc.X, popLoc.Y, popLoc.Z, grabBoxNo, locAfter.X, locAfter.Y, locAfter.Z, adjustedLoc.X, adjustedLoc.Y, adjustedLoc.Z);
 
-			collisionBoxN->SetRelativeTransform(adjustedTrafo);  // TODO: Add (50 50 50) to the location part
-			//collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);		// Grabbable
-			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);		// Grabbable
+			collisionBoxN->SetRelativeTransform(adjustedTrafo);
+			collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
 
-			collisionBoxN->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);	// Try also QueryOnly
-			collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);  // Maybe overlap just for the grab sphere is faster?
-
-			collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
-			collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_PhysicsBody, ECollisionResponse::ECR_Block);
-
+			if (ghost) {
+				collisionBoxN->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			}
+			else {
+				collisionBoxN->BodyInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				collisionBoxN->BodyInstance.SetResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+				collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+				collisionBoxN->BodyInstance.SetResponseToChannel(ECollisionChannel::ECC_PhysicsBody, ECollisionResponse::ECR_Block);
+			}
+				
 			// Make clickable
 			collisionBoxN->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-
 			collisionBoxN->SetSimulatePhysics(false);
 			collisionBoxN->SetEnableGravity(true);
 
-			//UE_LOG(LogTemp, Warning, TEXT("APop::AddGrabBoxes2Dim: Before setting to WorldDynamic: objType=%s"),
-			//	   *ECollision
-
-			//collisionBoxN->SetCollisionObjectType(ECollisionChannel::ECC_PhysicsBody);
 			collisionBoxN->SetMobility(EComponentMobility::Movable);  // New 190102
 			collisionBoxN->OnBeginCursorOver.AddDynamic(this, &APop::CustomOnBeginMouseOver);
 			collisionBoxN->OnEndCursorOver.AddDynamic(this, &APop::CustomOnEndMouseOver);
 			collisionBoxN->OnClicked.AddDynamic(this, &APop::CustomOnClicked);
-			/*	
-			collisionBoxN->SetCollisionProfileName(TEXT("GrabBox"));  // New 190102
-			*/
 
 			// 190105: Try to make grabBoxes collide with Floor
 			collisionBoxN->SetNotifyRigidBodyCollision(true);
 
-
-			//collisionBoxN->RegisterComponent();
 			FinishAndRegisterComponent(collisionBoxN);  // Trying this 190102
 
-			// Moving the WeldTo call around to try to make the welding not break...
-			//collisionBoxN->WeldTo(mesh);
-
-			//grabBoxes.Add(collisionBoxN);
 			AddToGrabBoxesArray(collisionBoxN);
 		}
 	}
